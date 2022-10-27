@@ -1,0 +1,17 @@
+<RCC>
+  <qresource prefix="/pic">
+    <file>images/translate.png</file>
+    <file>images/calibrate.png</file>
+    <file>images/last.png</file>
+    <file>images/close.png</file>
+    <file>images/continue.png</file>
+    <file>images/next.png</file>
+    <file>images/pause.png</file>
+    <file>images/settings.png</file>
+    <file>images/lock.png</file>
+    <file>images/lockopen.png</file>
+    <file>images/account.png</file>
+    <file>images/setoffdown.png</file>
+    <file>images/setoffup.png</file>
+  </qresource>
+</RCC>
