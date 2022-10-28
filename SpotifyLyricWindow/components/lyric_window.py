@@ -60,9 +60,9 @@ class LyricsWindow(LyricsWindowView):
     def _init_signal(self):
         self.account_button.clicked.connect(self.user_auth_event)
         self.calibrate_button.clicked.connect(self.calibration_event)
-        self.next_button.clicked.connect(self.spotify_auth.set_user_next)
-        self.last_button.clicked.connect(self.spotify_auth.set_user_previous)
-        self.pause_button.clicked.connect(self.spotify_auth.set_user_pause)
+        self.next_button.clicked.connect(self.next_song_event)
+        self.last_button.clicked.connect(self.set_user_previous_event)
+        self.pause_button.clicked.connect(self.set_user_pause_event)
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
         self.translate_button.clicked.connect(self.change_trans_event)
@@ -128,15 +128,22 @@ class LyricsWindow(LyricsWindowView):
 
     @thread_drive(None)
     @CatchError
-    def next_song_event(self, *_):
+    def set_user_next_event(self, *_):
         self.spotify_auth.set_user_next()
         self.calibration_event()
 
     @thread_drive(None)
     @CatchError
-    def set_user_previous(self, *_):
+    def set_user_previous_event(self, *_):
         self.spotify_auth.set_user_previous()
         self.calibration_event()
+
+    @thread_drive(None)
+    @CatchError
+    def set_user_pause_event(self, *_):
+        self.spotify_auth.set_user_pause()
+        self.calibration_event()
+
 
     @CatchError
     def change_trans_event(self, *_):
