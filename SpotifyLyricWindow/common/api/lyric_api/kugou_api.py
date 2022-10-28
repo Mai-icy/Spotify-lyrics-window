@@ -76,13 +76,6 @@ class KugouApi:
             album = album_json["data"].get("albumname", None)
             year = album_json["data"].get("publishtime", None)
 
-        pic_url = album_img.replace("/{size}/", "/")
-        if pic_url:
-            pic_data = requests.get(pic_url, timeout=10).content
-            pic_buffer = io.BytesIO(pic_data)
-        else:
-            pic_buffer = io.BytesIO()
-
         song_info = {
             "singer": song_json["author_name"],
             "songName": song_json["songName"],
@@ -90,8 +83,7 @@ class KugouApi:
             "year": year,  # 例 '2021-08-11 00:00:00'
             "trackNumber": None,  # 实在难搞w
             "duration": f'{duration // 60}:{duration % 60 // 10}{duration % 10}',
-            "genre": None,
-            "picBuffer": pic_buffer}
+            "genre": None}
         return SongInfo(**song_info)
 
     def get_lrc_info(self, md5: str) -> List[Dict[str, str]]:

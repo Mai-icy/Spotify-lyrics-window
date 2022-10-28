@@ -81,9 +81,7 @@ class SpotifyApi:
         song_json = requests.get(url, headers=self.get_token()).json()
         artists_list = [info["name"] for info in song_json["artists"]]
         duration = int(song_json["duration_ms"]) // 1000
-        pic_url = song_json["album"]["images"][-1]["url"]
-        pic_data = requests.get(pic_url, timeout=10).content
-        pic_buffer = io.BytesIO(pic_data)
+
         song_info = {
             "singer": ','.join(artists_list),
             "songName": song_json["name"],
@@ -91,8 +89,7 @@ class SpotifyApi:
             "year": song_json["album"]["release_date"][:4],
             "trackNumber": (song_json["track_number"], None),
             "duration": f'{duration // 60}:{duration % 60 // 10}{duration % 10}',
-            "genre": None,
-            "picBuffer": pic_buffer}
+            "genre": None}
         return SongInfo(**song_info)
 
 

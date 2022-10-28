@@ -9,8 +9,7 @@ SongInfo = collections.namedtuple("SongInfo",
                                    "year",
                                    "trackNumber",
                                    "duration",
-                                   "genre",
-                                   "picBuffer"])
+                                   "genre"])
 
 SongElseInfo = collections.namedtuple(
     "SongElseInfo", [

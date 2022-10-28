@@ -32,10 +32,6 @@ class CloudMusicWebApi:
         # todo genre 曲目风格在json中并未找到
         duration = song_json["duration"] // 1000
 
-        pic_url = song_json["album"]["picUrl"]
-        pic_data = requests.get(pic_url, timeout=10).content
-        pic_buffer = io.BytesIO(pic_data)
-
         song_info = {
             "singer": ','.join(artists_list),
             "songName": song_json["name"],
@@ -43,8 +39,7 @@ class CloudMusicWebApi:
             "year": str(time.localtime(song_json["album"]["publishTime"] // 1000).tm_year),
             "trackNumber": (song_json["no"], song_json["album"]["size"]),
             "duration": f'{duration // 60}:{duration % 60 // 10}{duration % 10}',
-            "genre": None,
-            "picBuffer": pic_buffer}
+            "genre": None}
         song_info = SongInfo(**song_info)
         return song_info
 
