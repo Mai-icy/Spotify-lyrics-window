@@ -19,3 +19,7 @@ class NoPermission(UserError):
 
 class NoActiveUser(UserError):
     """没有活跃用户"""
+
+
+class NoAuthError(UserError):
+    """未完成授权"""

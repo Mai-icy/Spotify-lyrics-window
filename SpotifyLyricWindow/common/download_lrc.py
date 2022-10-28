@@ -4,16 +4,17 @@ import requests
 
 from .api import *
 from .song_metadata.compare_metadata import compare_song_info
+from .path import LRC_PATH
 
 cloud_api = CloudMusicWebApi()
 kugou_api = KugouApi()
 spotify_api = SpotifyApi()
-LRC_PATH = "download\\lyrics\\"
 
 
 def download_lrc(track_name, track_id):
     """download lyric by the track_id. Kugou and Cloud Api were used."""
-    file_name = f"{LRC_PATH}{track_id}.mrc"
+    file_name = LRC_PATH / f"{track_id}.mrc"
+
     spotify_info = spotify_api.get_song_info(track_id)
     try:
         cloud_song_id = cloud_api.search_data(track_name)[0].idOrMd5
@@ -35,7 +36,7 @@ def download_lrc(track_name, track_id):
             lrc_info = kugou_api.get_lrc_info(kugou_song_md5)[0]
             lrc = kugou_api.get_lrc(lrc_info)
             if not lrc.empty():
-                lrc.save_to_mrc(file_name)
+                lrc.save_to_mrc(str(file_name))
                 return True
         except requests.RequestException:
             score_kugou = 0
@@ -44,7 +45,7 @@ def download_lrc(track_name, track_id):
         try:
             lrc = cloud_api.get_lrc(cloud_song_id)
             if not lrc.empty():
-                lrc.save_to_mrc(file_name)
+                lrc.save_to_mrc(str(file_name))
                 return True
         except requests.RequestException:
             pass

@@ -4,10 +4,10 @@ import threading
 import time
 import ctypes
 import inspect
-from pathlib import Path
 
 from common.lyric_type.lyric_decode import LrcFile, MrcFile, TransType
 from common.api import SpotifyUserApi
+from common.path import LRC_PATH, OFFSET_FILE_PATH
 
 
 class NotLyricFound(Exception):
@@ -15,9 +15,6 @@ class NotLyricFound(Exception):
 
 
 class LrcPlayer:
-    LRC_PATH = Path("download\\lyrics")
-    offset_file_path = LRC_PATH / "offset.json"
-
     def __init__(self, lyrics_window=None):
         self.lyrics_window = lyrics_window
         self.track_id = None
@@ -34,19 +31,17 @@ class LrcPlayer:
 
         self.thread_play_lrc = threading.Thread(target=self.__play_lrc_thread)
 
-    def _set_offset_file(self, track_id, offset):
-        with self.offset_file_path.open(encoding="utf-8") as f:
+    @staticmethod
+    def _set_offset_file(track_id, offset):
+        with OFFSET_FILE_PATH.open(encoding="utf-8") as f:
             data_json = json.load(f)
         data_json[track_id] = offset
-        with self.offset_file_path.open("w", encoding="utf-8") as f:
+        with OFFSET_FILE_PATH.open("w", encoding="utf-8") as f:
             f.write(json.dumps(data_json, indent=4, ensure_ascii=False))
 
-    def _get_offset_file(self, track_id):
-        if not self.offset_file_path.exists():
-            self.LRC_PATH.mkdir(parents=True)
-            with self.offset_file_path.open("w", encoding="utf-8") as f:
-                f.write(json.dumps({}, indent=4, ensure_ascii=False))
-        with self.offset_file_path.open(encoding="utf-8") as f:
+    @staticmethod
+    def _get_offset_file(track_id):
+        with OFFSET_FILE_PATH.open(encoding="utf-8") as f:
             data_json = json.load(f)
         return data_json.get(track_id, 0)
 
@@ -78,14 +73,15 @@ class LrcPlayer:
         """
         if self.no_lyric:
             return
-        lrc_path = self.LRC_PATH / (self.track_id + '.mrc')
+        lrc_path = LRC_PATH / (self.track_id + '.mrc')
         if lrc_path.exists():
             self.lrc_file = MrcFile(lrc_path)
         else:
             raise NotLyricFound("未找到歌词文件")
 
-    def is_lyric_exist(self, track_id) -> bool:
-        lrc_path = self.LRC_PATH / (track_id + '.mrc')
+    @staticmethod
+    def is_lyric_exist(track_id) -> bool:
+        lrc_path = LRC_PATH / (track_id + '.mrc')
         return lrc_path.exists()
 
     def restart_thread(self, position=0, *, timestamp=0) -> None:

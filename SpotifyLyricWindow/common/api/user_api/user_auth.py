@@ -8,10 +8,10 @@ import random
 import string
 import socket
 import re
-from pathlib import Path
 
 from ..get_client_id_secret import get_client_id_secret
-
+from common.path import TOKEN_PATH
+from ..api_error import NoAuthError
 
 CLIENT_ID, CLIENT_SECRET = get_client_id_secret()
 
@@ -19,7 +19,6 @@ CLIENT_ID, CLIENT_SECRET = get_client_id_secret()
 class SpotifyUserAuth:
     AUTH_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
     AUTH_TOKEN_URL = "https://accounts.spotify.com/api/token"
-    TOKEN_PATH = Path(r"resource\token")
 
     def __init__(self):
         self.token_info = None
@@ -30,8 +29,8 @@ class SpotifyUserAuth:
 
         auth = base64.b64encode((CLIENT_ID + ":" + CLIENT_SECRET).encode("ascii"))
         self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
-        if self.TOKEN_PATH.exists():
-            self.token_info = eval(self.TOKEN_PATH.read_text("utf-8"))
+        if TOKEN_PATH.exists():
+            self.token_info = eval(TOKEN_PATH.read_text("utf-8"))
 
     @staticmethod
     def _generate_random_state():
@@ -92,7 +91,7 @@ class SpotifyUserAuth:
 
     def get_user_access_token(self):
         if not self.auth_code:
-            raise NotImplementedError("请先引导用户完成验证")
+            raise NoAuthError("请先完成用户验证")
         form = {
             "code": self.auth_code,
             "redirect_uri": "http://localhost:8888/callback",
@@ -115,11 +114,11 @@ class SpotifyUserAuth:
         self.save_token()
 
     def save_token(self):
-        self.TOKEN_PATH.write_text(str(self.token_info), encoding="utf-8")
+        TOKEN_PATH.write_text(str(self.token_info), encoding="utf-8")
 
     def access_token(self):
         if not self.token_info:
-            raise NotImplementedError("请先引导用户完成验证")
+            raise NoAuthError("请先引导用户完成验证")
         if int(time.time()) < self.token_info["expires_at"]:
             return self.token_info['access_token']
         else:
