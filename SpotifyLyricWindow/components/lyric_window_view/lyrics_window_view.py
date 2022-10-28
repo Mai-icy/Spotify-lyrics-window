@@ -23,6 +23,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.set_default_window_shadow()
         self._init_font()
         self._init_roll()
+        self._is_play = False
 
         self.set_text(1, "开发阶段", 0)
         self.set_text(2, "各功能还在陆续更新", 0)
@@ -106,6 +107,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.calibrate_button.setHidden(flag)
         self.translate_button.setHidden(flag)
 
+    # 初始化扳机
     def _init_drag(self):
         self._clicked = False
         self._drag = False
@@ -126,12 +128,6 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def mouseReleaseEvent(self, QMouseEvent):
         self._init_drag()
 
-    # 事件过滤器,用于解决鼠标进入其它控件后还原为标准鼠标样式
-    # def eventFilter(self, obj, event):
-    #    if isinstance(event, QEnterEvent):
-    #        self.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-    #    return super(LyricsWindow, self).eventFilter(obj, event) 
-
     # 重写鼠标点击的事件
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
@@ -141,70 +137,68 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     # 重写鼠标移动的事件
     def mouseMoveEvent(self, QMouseEvent):
-        pos = QMouseEvent.pos()  # QMouseEvent.pos()获取相对位置
+        pos = QMouseEvent.pos() # QMouseEvent.pos()获取相对位置
         width = self.width()
         height = self.height()
 
-        # 右下
-        if width - 10 <= pos.x() <= width + 10 and height - 10 <= pos.y() <= height + 10:
-            self.text2_scrollarea.setCursor(Qt.SizeFDiagCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_right_down = True
-        # 左上
-        elif -10 <= pos.x() <= 10 and -10 <= pos.y() <= 10:
-            self.buttons_frame.setCursor(Qt.SizeFDiagCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_left_up = True
-        # 下
-        elif 10 <= pos.x() <= width - 10 and height - 10 <= pos.y() <= height + 10:
-            self.text2_scrollarea.setCursor(Qt.SizeVerCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_down = True
-        # 上
-        elif 10 <= pos.x() <= width - 10 and -10 <= pos.y() <= 10:
-            self.buttons_frame.setCursor(Qt.SizeVerCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_up = True
-        # 右
-        elif width - 10 <= pos.x() <= width + 10 and 10 <= pos.y() <= height - 10:
-            self.text1_scrollarea.setCursor(Qt.SizeHorCursor)
-            self.text2_scrollarea.setCursor(Qt.SizeHorCursor)
-            self.buttons_frame.setCursor(Qt.SizeHorCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_right = True
-        # 左
-        elif -10 <= pos.x() <= 10 and 10 <= pos.y() <= height - 10:
-            self.text1_scrollarea.setCursor(Qt.SizeHorCursor)
-            self.text2_scrollarea.setCursor(Qt.SizeHorCursor)
-            self.buttons_frame.setCursor(Qt.SizeHorCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_left = True
-        # 左下
-        elif -10 <= pos.x() <= 10 and height - 10 <= pos.y() <= height + 10:
-            self.text2_scrollarea.setCursor(Qt.SizeBDiagCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_left_down = True
-        # 右上
-        elif width - 10 <= pos.x() <= width + 10 and -10 <= pos.y() <= 10:
-            self.buttons_frame.setCursor(Qt.SizeBDiagCursor)
-            if self._clicked:
-                self._drag = True
-                self._drag_right_up = True
-        # 中间
-        # elif 10 <= pos.x() <= width - 10 and 10 <= pos.y() <= height - 10:
-        else:
-            self.text1_scrollarea.setCursor(Qt.SizeAllCursor)
-            self.text2_scrollarea.setCursor(Qt.SizeAllCursor)
-            self.buttons_frame.setCursor(Qt.ArrowCursor)
-            if self._clicked and not self._drag:
-                self.move(QMouseEvent.globalPos() - self.move_DragPosition)
+        if not self._drag:
+
+            # 右下
+            if width - 10 <= pos.x() <= width + 10 and height - 10 <= pos.y() <= height + 10:
+                self.set_all_cursor(Qt.SizeFDiagCursor)
+                if self._clicked:                
+                    self._drag = True
+                    self._drag_right_down = True
+            # 左上
+            elif -10 <= pos.x() <= 10 and -10 <= pos.y() <= 10:
+                self.set_all_cursor(Qt.SizeFDiagCursor)
+                if self._clicked:
+                    self._drag = True
+                    self._drag_left_up = True
+            # 下
+            elif 10 <= pos.x() <= width - 10 and height - 10 <= pos.y() <= height + 10:
+                self.set_all_cursor(Qt.SizeVerCursor)
+                if self._clicked:
+                    self._drag = True
+                    self._drag_down = True
+            # 上
+            elif 10 <= pos.x() <= width - 10 and -10 <= pos.y() <= 10:
+                self.set_all_cursor(Qt.SizeVerCursor)
+                if self._clicked:
+                    self._drag = True
+                    self._drag_up = True
+            # 右
+            elif width - 10 <= pos.x() <= width + 10 and 10 <= pos.y() <= height - 10:
+                self.set_all_cursor(Qt.SizeHorCursor)
+                if self._clicked:                
+                    self._drag = True
+                    self._drag_right = True
+            # 左
+            elif -10 <= pos.x() <= 10 and 10 <= pos.y() <= height - 10:
+                self.set_all_cursor(Qt.SizeHorCursor)
+                if self._clicked:
+                    self._drag = True
+                    self._drag_left = True
+            # 左下
+            elif -10 <= pos.x() <= 10 and height - 10 <= pos.y() <= height + 10:
+                self.set_all_cursor(Qt.SizeBDiagCursor)
+                if self._clicked:
+                    self._drag = True
+                    self._drag_left_down = True
+            # 右上
+            elif width -10 <= pos.x() <= width + 10 and -10 <= pos.y() <= 10:
+                self.set_all_cursor(Qt.SizeBDiagCursor)
+                if self._clicked:
+                    self._drag = True
+                    self._drag_right_up = True
+            # 中间
+            #elif 10 <= pos.x() <= width - 10 and 10 <= pos.y() <= height - 10:
+            else:
+                self.set_all_cursor(Qt.SizeAllCursor)
+                if self._clicked and not self._drag:
+                    self.move(QMouseEvent.globalPos() - self.move_DragPosition)
+
+
 
         # 右下
         if self._drag_right_down:
@@ -212,12 +206,12 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         # 左上
         elif self._drag_left_up:
             if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                    or (self.height() == self.maximumHeight() and pos.y() < 0)):
-                self.setGeometry(
-                    self.geometry().x(),
-                    self.geometry().y() + pos.y(),
-                    self.width(),
-                    self.height() - pos.y())
+                or (self.height() == self.maximumHeight() and pos.y() < 0)):
+                    self.setGeometry(
+                        self.geometry().x(),
+                        self.geometry().y() + pos.y(),
+                        self.width(),
+                        self.height() - pos.y())
             if not (self.width() == self.minimumWidth() and pos.x() > 0):
                 self.setGeometry(
                     self.geometry().x() + pos.x(),
@@ -226,11 +220,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                     self.height())
         # 下
         elif self._drag_down:
-            self.resize(self.width(), pos.y())
+             self.resize(self.width(), pos.y())
         # 上
         elif self._drag_up:
             if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                    or (self.height() == self.maximumHeight() and pos.y() < 0)):
+                or (self.height() == self.maximumHeight() and pos.y() < 0)):
                 self.setGeometry(
                     self.geometry().x(),
                     self.geometry().y() + pos.y(),
@@ -258,12 +252,13 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         # 右上
         elif self._drag_right_up:
             if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                    or (self.height() == self.maximumHeight() and pos.y() < 0)):
+                or (self.height() == self.maximumHeight() and pos.y() < 0)):
                 self.setGeometry(
                     self.geometry().x(),
                     self.geometry().y() + pos.y(),
                     pos.x(),
                     self.height() - pos.y())
+
 
         # 更改字体大小        
         self._init_font()
@@ -273,6 +268,14 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.text2_scrollarea.resize_label(self.get_text_width(self.text2_scrollarea.text))
 
         QMouseEvent.accept()
+
+    # 设置光标
+    def set_all_cursor(self, cursor):
+        #self.setCursor(cursor)
+        #self.background_frame.setCursor(cursor)
+        self.buttons_frame.setCursor(cursor)
+        self.text1_scrollarea.setCursor(cursor)
+        self.text2_scrollarea.setCursor(cursor)
 
     # region 歌词滚动
     # 歌词滚动设置初始化
@@ -316,25 +319,18 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.text1_scrollarea.update_index(self.begin_index, self.move_step)
         self.text2_scrollarea.update_index(self.begin_index, self.move_step)
 
-    def pause_scroll(self):
-        if self.timer.isActive():
-            self.timer.stop()
+    def set_play(self, flag):
+        if flag:
+            if not self._is_play:
+                self._is_play = True
 
-    def continue_scroll(self):
-        if not self.timer.isActive():
-            self.timer.start()
+
+        else:
+            if self._is_play:
+                self._is_play = False
+
+
 
     def show(self) -> None:
         self.setGeometry(500, 900, self.width(), self.height())
         super(LyricsWindowView, self).show()
-
-
-if __name__ == "__main__":
-    # 适配2k等高分辨率屏幕,低分辨率屏幕可以缺省
-    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-    app = QApplication(sys.argv)
-    myWin = LyricsWindowView()
-    myWin.set_text(1, 'test', 1)
-    myWin.set_text(2, 'test', 1)
-    myWin.show()
-    sys.exit(app.exec_())
