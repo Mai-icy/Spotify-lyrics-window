@@ -1,6 +1,6 @@
 /SpotifyLyricWindow/resource/client_id_secret.json
 /SpotifyLyricWindow/resource/token
 /SpotifyLyricWindow/download/
-/SpotifyLyricWindow/.idea/
-/.vs/
+*/.idea/
+*/.vs/
 */__pycache__
