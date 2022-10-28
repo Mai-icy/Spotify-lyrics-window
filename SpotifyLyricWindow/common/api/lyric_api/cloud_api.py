@@ -1,14 +1,15 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import re
 import io
-
-import requests
+import re
 import time
 from typing import List
+
+import requests
+
+from common.api.api_error import NoneResultError
 from common.lyric_type.lyric_decode import LrcFile, TransType
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
-from common.api.api_error import NoneResultError
 
 
 class CloudMusicWebApi:

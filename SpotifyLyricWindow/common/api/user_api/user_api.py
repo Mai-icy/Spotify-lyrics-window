@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import time
+from collections import namedtuple
 
 import requests
-from collections import namedtuple
-from .user_auth import SpotifyUserAuth
-from ..api_error import *
+
+from common.api.api_error import *
+from common.api.user_api.user_auth import SpotifyUserAuth
 
 UserCurrentPlaying = namedtuple("UserCurrentPlaying", ["progress_ms", "artist", "track_name", "is_playing", "track_id",
                                                        "duration", "timestamp"])

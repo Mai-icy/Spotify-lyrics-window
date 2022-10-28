@@ -1,12 +1,13 @@
-# coding : utf-8
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
+import ctypes
+import inspect
 import json
 import threading
 import time
-import ctypes
-import inspect
 
-from common.lyric_type.lyric_decode import LrcFile, MrcFile, TransType
 from common.api import SpotifyUserApi
+from common.lyric_type.lyric_decode import LrcFile, MrcFile, TransType
 from common.path import LRC_PATH, OFFSET_FILE_PATH
 
 

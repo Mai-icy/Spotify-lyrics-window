@@ -2,9 +2,9 @@
 # -*- coding:utf-8 -*-
 import requests
 
-from .api import *
-from .song_metadata.compare_metadata import compare_song_info
-from .path import LRC_PATH
+from common.api import *
+from common.song_metadata.compare_metadata import compare_song_info
+from common.path import LRC_PATH
 
 cloud_api = CloudMusicWebApi()
 kugou_api = KugouApi()

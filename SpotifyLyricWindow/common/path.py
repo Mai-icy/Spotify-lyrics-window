@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from pathlib import Path
 import json
+from pathlib import Path
 
 TOKEN_PATH = Path(r"resource/token")
 LRC_PATH = Path(r"download/lyrics")

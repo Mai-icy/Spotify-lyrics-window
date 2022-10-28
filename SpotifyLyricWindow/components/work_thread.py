@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from PyQt5.QtCore import QThread, pyqtSignal
 from functools import wraps, partial
 from types import MethodType
+
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
 def thread_drive(done_emit_func):

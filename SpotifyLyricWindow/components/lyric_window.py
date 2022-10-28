@@ -8,9 +8,7 @@ import sys
 from functools import wraps
 from types import MethodType
 import webbrowser
-import typing
 
-from PyQt5.QtGui import *
 from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -91,7 +89,7 @@ class LyricsWindow(LyricsWindowView):
         if not self.lrc_player.is_lyric_exist(user_current.track_id):
             user_current = self._download_lyric(user_current)
         else:
-            user_current = self._refresh_player_track()
+            user_current = self._refresh_player_track(user_current)
 
         print("开始播放歌词")
         ava_trans = self.lrc_player.lrc_file.available_trans()
@@ -143,7 +141,6 @@ class LyricsWindow(LyricsWindowView):
     def set_user_pause_event(self, *_):
         self.spotify_auth.set_user_pause()
         self.calibration_event()
-
 
     @CatchError
     def change_trans_event(self, *_):

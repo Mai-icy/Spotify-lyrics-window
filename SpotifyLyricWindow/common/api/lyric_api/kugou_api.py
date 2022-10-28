@@ -1,14 +1,15 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import re
-import io
-
 import base64
+import io
+import re
 from typing import List, Dict
+
 import requests
+
+from common.api.api_error import NoneResultError
 from common.lyric_type.lyric_decode import KrcFile
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
-from common.api.api_error import NoneResultError
 
 header = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:7.0a1) Gecko/20110623 Firefox/7.0a1 Fennec/7.0a1'}
 

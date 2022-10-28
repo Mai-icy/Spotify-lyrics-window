@@ -1,16 +1,14 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import re
+import base64
 import io
+import re
 import time
 
-import base64
 import requests
+
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
-
-
-from ..get_client_id_secret import get_client_id_secret
-
+from common.api.get_client_id_secret import get_client_id_secret
 
 CLIENT_ID, CLIENT_SECRET = get_client_id_secret()
 

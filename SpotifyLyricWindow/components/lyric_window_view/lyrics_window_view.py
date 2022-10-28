@@ -1,12 +1,12 @@
-# region imports
-import sys
-import time
+#!/usr/bin/python
+# -*- coding:utf-8 -*-
 from math import ceil
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+
 from components.lyric_window_view.raw_ui.LyricsWindow import Ui_LyricsWindow
 from components.lyric_window_view.text_scroll_area import TextScrollArea
 

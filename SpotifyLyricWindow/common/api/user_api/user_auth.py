@@ -1,17 +1,17 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import base64
+import random
+import re
+import socket
+import string
 import time
 
 import requests
-import base64
-import random
-import string
-import socket
-import re
 
-from ..get_client_id_secret import get_client_id_secret
 from common.path import TOKEN_PATH
-from ..api_error import NoAuthError
+from common.api.api_error import NoAuthError
+from common.api.get_client_id_secret import get_client_id_secret
 
 CLIENT_ID, CLIENT_SECRET = get_client_id_secret()
 

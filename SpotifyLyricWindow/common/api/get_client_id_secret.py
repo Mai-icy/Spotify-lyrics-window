@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import json
-from ..path import CLIENT_ID_SECRET_PATH
+from common.path import CLIENT_ID_SECRET_PATH
 
 
 def get_client_id_secret():

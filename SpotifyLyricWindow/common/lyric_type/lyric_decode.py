@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import codecs
-from enum import Enum
-import zlib
-import json
 import base64
+import codecs
+import json
 import re
+import zlib
+from enum import Enum
 
 
 class TransType(Enum):
