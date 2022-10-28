@@ -60,7 +60,7 @@ class LyricsWindow(LyricsWindowView):
     def _init_signal(self):
         self.account_button.clicked.connect(self.user_auth_event)
         self.calibrate_button.clicked.connect(self.calibration_event)
-        self.next_button.clicked.connect(self.next_song_event)
+        self.next_button.clicked.connect(self.set_user_next_event)
         self.last_button.clicked.connect(self.set_user_previous_event)
         self.pause_button.clicked.connect(self.set_user_pause_event)
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
