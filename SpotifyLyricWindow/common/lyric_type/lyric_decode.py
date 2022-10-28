@@ -252,7 +252,10 @@ class KrcFile(LrcFile):
         """
         Get the text of lyric.
         """
-        decoded_content = self.__decode(content)
+        try:
+            decoded_content = self.__decode(content)
+        except zlib.error:
+            decoded_content = content.decode("utf-8")
         super(KrcFile, self).load_content(decoded_content, lrc_type)
 
         file_data = decoded_content.splitlines()
