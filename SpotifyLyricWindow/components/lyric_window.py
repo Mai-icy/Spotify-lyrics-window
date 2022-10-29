@@ -79,8 +79,7 @@ class LyricsWindow(LyricsWindowView):
     @thread_drive(None)
     @CatchError
     def calibration_event(self, *_, use_timestamp=False):
-        self.calibrate_button.setEnabled(False)
-
+        # self.calibrate_button.setEnabled(False)
         self.set_text(1, "calibrating！", 0)
         self.set_text(2, " (o゜▽゜)o!", 0)
         user_current = self.spotify_auth.get_current_playing()
@@ -104,8 +103,7 @@ class LyricsWindow(LyricsWindowView):
             self.lrc_player.restart_thread(0, timestamp=user_current.timestamp)
         else:
             self.lrc_player.restart_thread(user_current.progress_ms)
-
-        self.calibrate_button.setEnabled(True)
+        # self.calibrate_button.setEnabled(True)
 
     def _refresh_player_track(self, user_current=None, *, no_lyric=False):
         if not user_current:
@@ -134,32 +132,32 @@ class LyricsWindow(LyricsWindowView):
     @thread_drive(None)
     @CatchError
     def set_user_next_event(self, *_):
-        self.next_button.setEnabled(False)
+        # self.next_button.setEnabled(False)
 
         self.spotify_auth.set_user_next()
         self.calibration_event()
 
-        self.next_button.setEnabled(True)
+        # self.next_button.setEnabled(True)
 
     @thread_drive(None)
     @CatchError
     def set_user_previous_event(self, *_):
-        self.last_button.setEnabled(False)
+        # self.last_button.setEnabled(False)
 
         self.spotify_auth.set_user_previous()
         self.calibration_event()
 
-        self.last_button.setEnabled(True)
+        # self.last_button.setEnabled(True)
 
     @thread_drive(None)
     @CatchError
     def set_user_pause_event(self, *_):
-        self.pause_button.setEnabled(False)
+        # self.pause_button.setEnabled(False)
 
         self.spotify_auth.set_user_pause()
         self.calibration_event()
 
-        self.pause_button.setEnabled(True)
+        # self.pause_button.setEnabled(True)
 
     @CatchError
     def change_trans_event(self, *_):
