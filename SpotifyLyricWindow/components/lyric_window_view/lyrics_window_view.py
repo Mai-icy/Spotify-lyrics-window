@@ -24,6 +24,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._init_font()
         self._init_roll()
         self._is_play = False
+        self._is_locked = False
 
         self.set_text(1, "开发阶段", 0)
         self.set_text(2, "各功能还在陆续更新", 0)
@@ -120,12 +121,9 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._drag_right_up = False
         self._drag_right_down = False
 
-    # 关闭歌词窗口
-    def on_close_button_clicked(self):
-        self.close()
-
     # 鼠标释放后，扳机复位
     def mouseReleaseEvent(self, QMouseEvent):
+
         self._init_drag()
 
     # 重写鼠标点击的事件
@@ -318,18 +316,29 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def update_index(self):
         self.text1_scrollarea.update_index(self.begin_index, self.move_step)
         self.text2_scrollarea.update_index(self.begin_index, self.move_step)
+    # endregion
 
+    # 设置播放状态
     def set_play(self, flag):
         if flag:
             if not self._is_play:
                 self._is_play = True
-
-
+                self.pause_button.setIcon(QtGui.QIcon(u":/pic/images/pause.png"))
+                if not self.timer.isActive():
+                    self.timer.start()
         else:
             if self._is_play:
                 self._is_play = False
+                self.pause_button.setIcon(QtGui.QIcon(u":/pic/images/continue.png"))
+                if self.timer.isActive():
+                    self.timer.stop()
 
+    def on_pause_button_clicked(self):
+        pass
 
+    # 关闭歌词窗口
+    def on_close_button_clicked(self):
+        self.close()
 
     def show(self) -> None:
         self.setGeometry(500, 900, self.width(), self.height())
