@@ -129,6 +129,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._drag_left_down = False
         self._drag_right_up = False
         self._drag_right_down = False
+        self._is_move = False
 
     # 鼠标释放后，扳机复位
     def mouseReleaseEvent(self, QMouseEvent):
@@ -150,53 +151,52 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         height = self.height()
 
         if not self._drag:
-
             # 右下
             if width - 10 <= pos.x() <= width + 10 and height - 10 <= pos.y() <= height + 10:
                 self.set_all_cursor(Qt.SizeFDiagCursor)
-                if self._clicked:                
+                if self._clicked and not self._is_move:                
                     self._drag = True
                     self._drag_right_down = True
             # 左上
             elif -10 <= pos.x() <= 10 and -10 <= pos.y() <= 10:
                 self.set_all_cursor(Qt.SizeFDiagCursor)
-                if self._clicked:
+                if self._clicked and not self._is_move:
                     self._drag = True
                     self._drag_left_up = True
             # 下
             elif 10 <= pos.x() <= width - 10 and height - 10 <= pos.y() <= height + 10:
                 self.set_all_cursor(Qt.SizeVerCursor)
-                if self._clicked:
+                if self._clicked and not self._is_move:
                     self._drag = True
                     self._drag_down = True
             # 上
             elif 10 <= pos.x() <= width - 10 and -10 <= pos.y() <= 10:
                 self.set_all_cursor(Qt.SizeVerCursor)
-                if self._clicked:
+                if self._clicked and not self._is_move:
                     self._drag = True
                     self._drag_up = True
             # 右
             elif width - 10 <= pos.x() <= width + 10 and 10 <= pos.y() <= height - 10:
                 self.set_all_cursor(Qt.SizeHorCursor)
-                if self._clicked:                
+                if self._clicked and not self._is_move:                
                     self._drag = True
                     self._drag_right = True
             # 左
             elif -10 <= pos.x() <= 10 and 10 <= pos.y() <= height - 10:
                 self.set_all_cursor(Qt.SizeHorCursor)
-                if self._clicked:
+                if self._clicked and not self._is_move:
                     self._drag = True
                     self._drag_left = True
             # 左下
             elif -10 <= pos.x() <= 10 and height - 10 <= pos.y() <= height + 10:
                 self.set_all_cursor(Qt.SizeBDiagCursor)
-                if self._clicked:
+                if self._clicked and not self._is_move:
                     self._drag = True
                     self._drag_left_down = True
             # 右上
             elif width -10 <= pos.x() <= width + 10 and -10 <= pos.y() <= 10:
                 self.set_all_cursor(Qt.SizeBDiagCursor)
-                if self._clicked:
+                if self._clicked and not self._is_move:
                     self._drag = True
                     self._drag_right_up = True
             # 中间
@@ -207,68 +207,69 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                 else:
                     self.set_all_cursor(Qt.SizeAllCursor)
                 if self._clicked and not self._drag:
+                    self._is_move = True
                     self.move(QMouseEvent.globalPos() - self.move_DragPosition)
 
 
-
-        # 右下
-        if self._drag_right_down:
-            self.resize(pos.x(), pos.y())
-        # 左上
-        elif self._drag_left_up:
-            if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                or (self.height() == self.maximumHeight() and pos.y() < 0)):
+        if not self._is_move:
+            # 右下
+            if self._drag_right_down:
+                self.resize(pos.x(), pos.y())
+            # 左上
+            elif self._drag_left_up:
+                if not ((self.height() == self.minimumHeight() and pos.y() > 0)
+                    or (self.height() == self.maximumHeight() and pos.y() < 0)):
+                        self.setGeometry(
+                            self.geometry().x(),
+                            self.geometry().y() + pos.y(),
+                            self.width(),
+                            self.height() - pos.y())
+                if not (self.width() == self.minimumWidth() and pos.x() > 0):
+                    self.setGeometry(
+                        self.geometry().x() + pos.x(),
+                        self.geometry().y(),
+                        self.width() - pos.x(),
+                        self.height())
+            # 下
+            elif self._drag_down:
+                 self.resize(self.width(), pos.y())
+            # 上
+            elif self._drag_up:
+                if not ((self.height() == self.minimumHeight() and pos.y() > 0)
+                    or (self.height() == self.maximumHeight() and pos.y() < 0)):
                     self.setGeometry(
                         self.geometry().x(),
                         self.geometry().y() + pos.y(),
                         self.width(),
                         self.height() - pos.y())
-            if not (self.width() == self.minimumWidth() and pos.x() > 0):
-                self.setGeometry(
-                    self.geometry().x() + pos.x(),
-                    self.geometry().y(),
-                    self.width() - pos.x(),
-                    self.height())
-        # 下
-        elif self._drag_down:
-             self.resize(self.width(), pos.y())
-        # 上
-        elif self._drag_up:
-            if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                or (self.height() == self.maximumHeight() and pos.y() < 0)):
-                self.setGeometry(
-                    self.geometry().x(),
-                    self.geometry().y() + pos.y(),
-                    self.width(),
-                    self.height() - pos.y())
-        # 右
-        elif self._drag_right:
-            self.resize(pos.x(), self.height())
-        # 左
-        elif self._drag_left:
-            if not (self.width() == self.minimumWidth() and pos.x() > 0):
-                self.setGeometry(
-                    self.geometry().x() + pos.x(),
-                    self.geometry().y(),
-                    self.width() - pos.x(),
-                    self.height())
-        # 左下
-        elif self._drag_left_down:
-            if not (self.width() == self.minimumWidth() and pos.x() > 0):
-                self.setGeometry(
-                    self.geometry().x() + pos.x(),
-                    self.geometry().y(),
-                    self.width() - pos.x(),
-                    pos.y())
-        # 右上
-        elif self._drag_right_up:
-            if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                or (self.height() == self.maximumHeight() and pos.y() < 0)):
-                self.setGeometry(
-                    self.geometry().x(),
-                    self.geometry().y() + pos.y(),
-                    pos.x(),
-                    self.height() - pos.y())
+            # 右
+            elif self._drag_right:
+                self.resize(pos.x(), self.height())
+            # 左
+            elif self._drag_left:
+                if not (self.width() == self.minimumWidth() and pos.x() > 0):
+                    self.setGeometry(
+                        self.geometry().x() + pos.x(),
+                        self.geometry().y(),
+                        self.width() - pos.x(),
+                        self.height())
+            # 左下
+            elif self._drag_left_down:
+                if not (self.width() == self.minimumWidth() and pos.x() > 0):
+                    self.setGeometry(
+                        self.geometry().x() + pos.x(),
+                        self.geometry().y(),
+                        self.width() - pos.x(),
+                        pos.y())
+            # 右上
+            elif self._drag_right_up:
+                if not ((self.height() == self.minimumHeight() and pos.y() > 0)
+                    or (self.height() == self.maximumHeight() and pos.y() < 0)):
+                    self.setGeometry(
+                        self.geometry().x(),
+                        self.geometry().y() + pos.y(),
+                        pos.x(),
+                        self.height() - pos.y())
 
 
         # 更改字体大小        
