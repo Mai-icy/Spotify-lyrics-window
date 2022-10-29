@@ -149,11 +149,11 @@ class LrcPlayer:
         #     print(self.lrc_file.trans_romaji_dict[time_stamp])
 
         if self.lyrics_window:
-            self.lyrics_window.set_text(1, self.lrc_file.trans_non_dict[time_stamp], roll_time)
+            self.lyrics_window.text_show_signal.emit(1, self.lrc_file.trans_non_dict[time_stamp], roll_time)
             if self.trans_mode == TransType.CHINESE:
-                self.lyrics_window.set_text(2, self.lrc_file.trans_chinese_dict[time_stamp], roll_time)
+                self.lyrics_window.text_show_signal.emit(2, self.lrc_file.trans_chinese_dict[time_stamp], roll_time)
             elif self.trans_mode == TransType.ROMAJI:
-                self.lyrics_window.set_text(2, self.lrc_file.trans_romaji_dict[time_stamp], roll_time)
+                self.lyrics_window.text_show_signal.emit(2, self.lrc_file.trans_romaji_dict[time_stamp], roll_time)
 
 
 class LyricThread(threading.Thread):

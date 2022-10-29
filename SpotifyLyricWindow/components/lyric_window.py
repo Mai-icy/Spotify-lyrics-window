@@ -46,6 +46,7 @@ class CatchError:
 class LyricsWindow(LyricsWindowView):
     error_msg_show_signal = pyqtSignal(object)
     song_done_calibration_signal = pyqtSignal(object)
+    text_show_signal = pyqtSignal(int, str, int)
 
     def __init__(self, parent=None):
         super(LyricsWindow, self).__init__(parent)
@@ -64,6 +65,8 @@ class LyricsWindow(LyricsWindowView):
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
         self.translate_button.clicked.connect(self.change_trans_event)
+
+        self.text_show_signal.connect(self.set_text)
 
         self.error_msg_show_signal.connect(self.error_msg_show_event)
         self.song_done_calibration_signal.connect(lambda: self.calibration_event(use_timestamp=True))
