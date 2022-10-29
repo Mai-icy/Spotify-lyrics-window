@@ -24,13 +24,14 @@ class LrcPlayer:
 
         self.no_lyric = True
 
+        self.order = 0
         self.offset = 0
         self.duration = 0
 
         self.trans_mode = TransType.NON
         self.is_pause = False
 
-        self.thread_play_lrc = threading.Thread(target=self.__play_lrc_thread)
+        self.thread_play_lrc = LyricThread(self)
 
     @staticmethod
     def _set_offset_file(track_id, offset):
@@ -92,11 +93,13 @@ class LrcPlayer:
         """
         # self._reload_lrc_data()
         if self.thread_play_lrc.is_alive():
-            stop_thread(self.thread_play_lrc)
+            self.thread_play_lrc.terminate()
+            self.thread_play_lrc.join()
+
+        self.thread_play_lrc = LyricThread(self)
         if position:
-            self.thread_play_lrc = threading.Thread(target=self.__play_lrc_thread, args=(position,))
-        else:
-            self.thread_play_lrc = threading.Thread(target=self.__play_lrc_thread)
+            self.thread_play_lrc.set_position(position)
+
         if timestamp:
             # 自动切歌的时候 progress_ms 不准确，timestamp准确
             self.timer_value = timestamp
@@ -129,66 +132,7 @@ class LrcPlayer:
         # self.restart_thread()
         return True
 
-    def __play_lrc_thread(self, position=None) -> None:
-        time.sleep(0.1)
-        if position:
-            position = position
-        else:
-            position = self.get_time()
-
-        if not self.no_lyric:
-            self.order = self.lrc_file.get_order_position(position)
-            if self.order == -1:
-                return
-            if self.order == 0:
-                self.__show_content(self.lrc_file.get_time(1) - self.get_time())
-                self.order += 1  # 第一句的时间需要被忽略
-            else:
-                time_stamp = self.lrc_file.get_time(self.order + 1)
-                if time_stamp == -2:
-                    self.__show_content(0)
-                self.__show_content(time_stamp - self.get_time())
-
-            while True:
-                sleep_time = self.lrc_file.get_time(self.order + 1) - self.get_time()
-                if sleep_time > 100:
-                    time.sleep(sleep_time / 1000)
-
-                if self.is_pause:
-                    while self.is_pause:  # 当被暂停，让线程停滞
-                        time.sleep(0.1)
-                    continue  # todo 小bug 如果暂停和开始都存在于time.sleep时间 只会影响到下一句
-                elif self.lrc_file.get_time(self.order) - self.get_time() > 0 and self.order > 2:
-                    # 分别排除了self.order被作为下标为负数的情况 和 歌词文件时间标注重复问题
-                    print("時間異常")
-                    time.sleep(0.1)
-                    self.__play_lrc_thread()
-                    return
-                self.order += 1
-
-                time_stamp = self.lrc_file.get_time(self.order + 1)
-                if time_stamp == -2:
-                    self.__show_content(0)
-                    break
-                else:
-                    roll_time = self.lrc_file.get_time(self.order + 1) - self.get_time()
-                    self.__show_content(roll_time)
-
-        while True:
-            time.sleep(1)
-            if self.get_time() - self.offset > self.duration and self.duration:
-
-                while self.is_pause:
-                    time.sleep(0.3)
-
-                time.sleep(0.6)
-                print(self.duration, self.get_time())
-                self.lyrics_window.song_done_calibration_signal.emit("")
-
-                # 依据 timestamp 为准
-                return
-
-    def __show_content(self, roll_time: int) -> None:
+    def show_content(self, roll_time: int) -> None:
         order = self.order
         time_stamp = self.lrc_file.get_time(order)
         if time_stamp == -2:
@@ -212,24 +156,85 @@ class LrcPlayer:
                 self.lyrics_window.set_text(2, self.lrc_file.trans_romaji_dict[time_stamp], roll_time)
 
 
-def _async_raise(tid, exctype):
-    """raises the exception, performs cleanup if needed"""
-    tid = ctypes.c_long(tid)
-    if not inspect.isclass(exctype):
-        exctype = type(exctype)
-    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(
-        tid, ctypes.py_object(exctype))
-    if res == 0:
-        raise ValueError("invalid thread id")
-    elif res != 1:
-        # """if it returns a number greater than one, you're in trouble,
-        # and you should call it again with exc=NULL to revert the effect"""
-        ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
-        raise SystemError("PyThreadState_SetAsyncExc failed")
+class LyricThread(threading.Thread):
 
+    def __init__(self, player):
+        super(LyricThread, self).__init__(target=self.__play_lrc_thread)
+        self.stop = threading.Event()
+        self.player = player
+        self.position = 0
+        self.is_running = True
 
-def stop_thread(thread):
-    _async_raise(thread.ident, SystemExit)
+    def set_position(self, position):
+        self.position = position
+
+    def __play_lrc_thread(self) -> None:
+        if not self.is_running:
+            return
+
+        self.stop.wait(0.1)
+        if self.position:
+            position = self.position
+        else:
+            position = self.player.get_time()
+
+        if not self.player.no_lyric:
+            self.player.order = self.player.lrc_file.get_order_position(position)
+            if self.player.order == -1:
+                return
+            if self.player.order == 0:
+                self.player.show_content(self.player.lrc_file.get_time(1) - self.player.get_time())
+                self.player.order += 1  # 第一句的时间需要被忽略
+            else:
+                time_stamp = self.player.lrc_file.get_time(self.player.order + 1)
+                if time_stamp == -2:
+                    self.player.show_content(0)
+                self.player.show_content(time_stamp - self.player.get_time())
+
+            while True:
+                sleep_time = self.player.lrc_file.get_time(self.player.order + 1) - self.player.get_time()
+                if sleep_time > 100:
+                    self.stop.wait(sleep_time / 1000)
+
+                if self.player.is_pause:
+                    while self.player.is_pause:  # 当被暂停，让线程停滞
+                        self.stop.wait(0.1)
+                    continue  # todo 小bug 如果暂停和开始都存在于self.stop.wait时间 只会影响到下一句
+                elif self.player.lrc_file.get_time(self.player.order) - self.player.get_time() > 0 and \
+                        self.player.order > 2:
+                    # 分别排除了self.order被作为下标为负数的情况 和 歌词文件时间标注重复问题
+                    # print("時間異常")
+                    self.stop.wait(0.1)
+                    self.__play_lrc_thread()
+                    return
+                self.player.order += 1
+
+                if not self.is_running:
+                    return
+                time_stamp = self.player.lrc_file.get_time(self.player.order + 1)
+                if time_stamp == -2:
+                    self.player.show_content(0)
+                    break
+                else:
+                    roll_time = self.player.lrc_file.get_time(self.player.order + 1) - self.player.get_time()
+                    self.player.show_content(roll_time)
+
+        while True:
+            self.stop.wait(1)
+            if self.player.get_time() - self.player.offset > self.player.duration and self.player.duration:
+
+                while self.player.is_pause:
+                    self.stop.wait(0.3)
+
+                self.stop.wait(0.6)
+                print(self.player.duration, self.player.get_time())
+                self.player.lyrics_window.song_done_calibration_signal.emit("")
+                # 依据 timestamp 为准
+                return
+
+    def terminate(self):
+        self.is_running = False
+        self.stop.set()
 
 
 if __name__ == '__main__':
