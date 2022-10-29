@@ -191,13 +191,13 @@ class LyricThread(threading.Thread):
                     self.player.show_content(0)
                 self.player.show_content(time_stamp - self.player.get_time())
 
-            while True:
+            while self.is_running:
                 sleep_time = self.player.lrc_file.get_time(self.player.order + 1) - self.player.get_time()
                 if sleep_time > 100:
                     self.stop.wait(sleep_time / 1000)
 
-                if self.player.is_pause:
-                    while self.player.is_pause:  # 当被暂停，让线程停滞
+                if self.player.is_pause and self.is_running:
+                    while self.player.is_pause and self.is_running:  # 当被暂停，让线程停滞
                         self.stop.wait(0.1)
                     continue  # todo 小bug 如果暂停和开始都存在于self.stop.wait时间 只会影响到下一句
                 elif self.player.lrc_file.get_time(self.player.order) - self.player.get_time() > 0 and \
@@ -219,11 +219,11 @@ class LyricThread(threading.Thread):
                     roll_time = self.player.lrc_file.get_time(self.player.order + 1) - self.player.get_time()
                     self.player.show_content(roll_time)
 
-        while True:
+        while self.is_running:
             self.stop.wait(1)
             if self.player.get_time() - self.player.offset > self.player.duration and self.player.duration:
 
-                while self.player.is_pause:
+                while self.player.is_pause and self.is_running:
                     self.stop.wait(0.3)
 
                 self.stop.wait(0.6)
