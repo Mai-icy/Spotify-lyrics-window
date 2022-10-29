@@ -25,6 +25,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._init_roll()
         self._is_play = False
         self._is_locked = False
+        self.lock_button.clicked.connect(self.pause_button_clicked)
 
         self.set_text(1, "开发阶段", 0)
         self.set_text(2, "各功能还在陆续更新", 0)
@@ -74,25 +75,33 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     # 定义鼠标移入事件,显示按钮,设置半透明背景
     def enterEvent(self, event):
-        self.setStyleSheet("*\n"
-                           "{\n"
-                           "border:none;\n"
-                           "}"
-                           "#background_frame\n"
-                           "{\n"
-                           "    background-color: rgba(0,0,0,0.2);\n"
-                           "}")
-        self.set_button_hide(False)
-        event.accept()
+        if not self._is_locked:
+            self.set_transparent(False)
+            event.accept()
 
     # 定义鼠标移出事件,隐藏按钮,设置背景透明
     def leaveEvent(self, event):
-        self.setStyleSheet("*\n"
-                           "{\n"
-                           "border:none;\n"
-                           "}")
-        self.set_button_hide(True)
-        event.accept()
+        if not self._is_locked:
+            self.set_transparent(True)
+            event.accept()
+
+    # 设置窗口透明
+    def set_transparent(self, flag):
+        self.set_button_hide(flag)
+        if flag:
+            self.setStyleSheet("*\n"
+                    "{\n"
+                    "border:none;\n"
+                    "}")
+        else:
+            self.setStyleSheet("*\n"
+                    "{\n"
+                    "border:none;\n"
+                    "}"
+                    "#background_frame\n"
+                    "{\n"
+                    "    background-color: rgba(0,0,0,0.2);\n"
+                    "}")
 
     # 隐藏按钮
     def set_button_hide(self, flag):
@@ -128,10 +137,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     # 重写鼠标点击的事件
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self._clicked = True
-            self.move_DragPosition = event.globalPos() - self.pos()
-            event.accept()
+        if not self._is_locked:
+            if event.button() == Qt.LeftButton:
+                self._clicked = True
+                self.move_DragPosition = event.globalPos() - self.pos()
+                event.accept()
 
     # 重写鼠标移动的事件
     def mouseMoveEvent(self, QMouseEvent):
@@ -192,7 +202,10 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             # 中间
             #elif 10 <= pos.x() <= width - 10 and 10 <= pos.y() <= height - 10:
             else:
-                self.set_all_cursor(Qt.SizeAllCursor)
+                if self._is_locked:
+                    self.set_all_cursor(Qt.ArrowCursor)
+                else:
+                    self.set_all_cursor(Qt.SizeAllCursor)
                 if self._clicked and not self._drag:
                     self.move(QMouseEvent.globalPos() - self.move_DragPosition)
 
@@ -333,8 +346,18 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                 if self.timer.isActive():
                     self.timer.stop()
 
-    def on_pause_button_clicked(self):
-        pass
+    # 锁定歌词窗口
+    def pause_button_clicked(self):
+        if self._is_locked:
+            self._is_locked = False
+            self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lock.png"))
+            self.set_transparent(False)
+        else:
+            self._is_locked = True
+            self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lockopen.png"))
+            self.set_transparent(True)
+            self.lock_button.setHidden(False)
+            self.calibrate_button.setHidden(False)
 
     # 关闭歌词窗口
     def on_close_button_clicked(self):
