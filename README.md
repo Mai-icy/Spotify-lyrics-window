@@ -27,7 +27,11 @@ You may encounter the following problems:
 ## 💿How to use
 
 1. Get your own spotify client id and client secret.
-2. Run the program for the first time, the```client_id_secret.json```  will be generated.
+2. Run the program for the first time, the```resource/client_id_secret.json```  will be generated.
 3. put your client_id and client_secret in it.
 4. run again, and click the authorization button and complete the authorization
 5. enjoy it! 😋
+
+## 🎼 example
+
+![1](https://github.com/Mai-icy/Spotify-lyrics-window/blob/main/image-folder/gif_example1.gif)
