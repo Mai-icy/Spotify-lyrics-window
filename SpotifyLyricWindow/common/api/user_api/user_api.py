@@ -66,6 +66,13 @@ class SpotifyUserApi:
         if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
             raise NoPermission("Premium required!")
 
+    def set_user_resume(self):
+        url = self.USER_PLAYER_URL + "play"
+        param = {"device_id": self._get_user_devices()}
+        res_json = requests.put(url, headers=self._get_auth_header(), params=param).json()
+        if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
+            raise NoPermission("Premium required!")
+
     def set_user_next(self):
         url = self.USER_PLAYER_URL + "next"
         param = {"device_id": self._get_user_devices()}
@@ -79,6 +86,14 @@ class SpotifyUserApi:
         url = self.USER_PLAYER_URL + "previous"
         param = {"device_id": self._get_user_devices()}
         res_json = requests.post(url, headers=self._get_auth_header(), params=param).json()
+        if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
+            raise NoPermission("Premium required!")
+
+    def seek_to_position(self, position_ms):
+        url = self.USER_PLAYER_URL + "seek"
+        param = {"device_id": self._get_user_devices(),
+                 "position_ms": position_ms}
+        res_json = requests.put(url, headers=self._get_auth_header(), params=param).json()
         if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
             raise NoPermission("Premium required!")
 

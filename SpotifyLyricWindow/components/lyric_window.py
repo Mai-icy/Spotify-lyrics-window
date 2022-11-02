@@ -56,12 +56,14 @@ class LyricsWindow(LyricsWindowView):
 
         self.user_trans = TransType.NON
 
+        self.calibration_event()
+
     def _init_signal(self):
         self.account_button.clicked.connect(self.user_auth_event)
         self.calibrate_button.clicked.connect(self.calibration_event)
         self.next_button.clicked.connect(self.set_user_next_event)
         self.last_button.clicked.connect(self.set_user_previous_event)
-        self.pause_button.clicked.connect(self.set_user_pause_event)
+        self.pause_button.clicked.connect(self.pause_resume_button_event)
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
         self.translate_button.clicked.connect(self.change_trans_event)
@@ -83,6 +85,7 @@ class LyricsWindow(LyricsWindowView):
         self.set_text(1, "calibrating！", 0)
         self.set_text(2, " (o゜▽゜)o!", 0)
         user_current = self.spotify_auth.get_current_playing()
+        self.set_play(user_current.is_playing)
         if user_current.track_name == "ad":
             self.set_text(1, "Advertising！", 0)
             self.set_text(2, "o(_ _)ozzZZ", 0)
@@ -148,6 +151,19 @@ class LyricsWindow(LyricsWindowView):
         self.calibration_event()
 
         # self.last_button.setEnabled(True)
+
+    @thread_drive(None)
+    @CatchError
+    def pause_resume_button_event(self, *_):
+        current_user = self.spotify_auth.get_current_playing()
+        if current_user.is_playing:
+            # self.spotify_auth.set_user_pause()
+            self.calibration_event()
+            self.set_play(False)
+        else:
+            # self.spotify_auth.set_user_resume()
+            self.calibration_event()
+            self.set_play(True)
 
     @thread_drive(None)
     @CatchError
