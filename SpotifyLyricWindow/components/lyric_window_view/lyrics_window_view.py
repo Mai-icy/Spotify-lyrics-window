@@ -26,6 +26,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._is_play = False
         self._is_locked = False
         self.lock_button.clicked.connect(self.pause_button_clicked)
+        
 
         self.set_text(1, "开发阶段", 0)
         self.set_text(2, "各功能还在陆续更新", 0)
@@ -81,6 +82,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     # 定义鼠标移出事件,隐藏按钮,设置背景透明
     def leaveEvent(self, event):
+        self._time_count_out = 0
         if not self._is_locked:
             self.set_transparent(True)
             event.accept()
@@ -146,6 +148,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     # 重写鼠标移动的事件
     def mouseMoveEvent(self, QMouseEvent):
+        self._time_count_in = 0
         pos = QMouseEvent.pos() # QMouseEvent.pos()获取相对位置
         width = self.width()
         height = self.height()
@@ -297,6 +300,10 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.roll_time = 0
         self.roll_time_rate = 0.7
         self.begin_index = 0
+
+        self._time_count_in = 0
+        self._time_count_out = 0
+
         self.timer = QTimer()
         self.timer.setInterval(self.time_step)
         self.timer.timeout.connect(self.update_index)
@@ -330,6 +337,17 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def update_index(self):
         self.text1_scrollarea.update_index(self.begin_index, self.move_step)
         self.text2_scrollarea.update_index(self.begin_index, self.move_step)
+        self._time_count_in += 1
+        self._time_count_out += 1
+        if self._is_locked:
+            if self._time_count_in * self.time_step >= 500:
+                self.lock_button.setHidden(True)
+                self.calibrate_button.setHidden(True)
+            elif self._time_count_out * self.time_step >= 1000:
+                self.lock_button.setHidden(False)
+                self.calibrate_button.setHidden(False)
+
+
     # endregion
 
     # 设置播放状态
