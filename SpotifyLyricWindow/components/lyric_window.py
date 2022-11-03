@@ -16,7 +16,7 @@ from PyQt5.QtCore import *
 from components.work_thread import thread_drive
 
 from common.api.user_api import SpotifyUserApi, UserCurrentPlaying
-from common.api.api_error import UserError
+from common.api.api_error import UserError, NoPermission
 from common.player.lyric_player import LrcPlayer, TransType
 from common.download_lrc import download_lrc
 
@@ -56,6 +56,9 @@ class LyricsWindow(LyricsWindowView):
 
         self.user_trans = TransType.NON
 
+        self.delay_timer = QTimer()
+        self.delay_timer.setSingleShot(True)
+
         self.calibration_event()
 
     def _init_signal(self):
@@ -77,6 +80,9 @@ class LyricsWindow(LyricsWindowView):
         self.lrc_player.is_pause = True
         self.set_text(1, str(error), 0)
         self.set_text(2, "Σっ°Д°;)っ!", 0)
+        if isinstance(error, NoPermission):
+            self.delay_timer.start(2000)
+            self.delay_timer.timeout.connect(self.calibration_event)
 
     @thread_drive(None)
     @CatchError
@@ -157,23 +163,13 @@ class LyricsWindow(LyricsWindowView):
     def pause_resume_button_event(self, *_):
         current_user = self.spotify_auth.get_current_playing()
         if current_user.is_playing:
-            # self.spotify_auth.set_user_pause()
+            self.spotify_auth.set_user_pause()
             self.calibration_event()
             self.set_play(False)
         else:
-            # self.spotify_auth.set_user_resume()
+            self.spotify_auth.set_user_resume()
             self.calibration_event()
             self.set_play(True)
-
-    @thread_drive(None)
-    @CatchError
-    def set_user_pause_event(self, *_):
-        # self.pause_button.setEnabled(False)
-
-        self.spotify_auth.set_user_pause()
-        self.calibration_event()
-
-        # self.pause_button.setEnabled(True)
 
     @CatchError
     def change_trans_event(self, *_):

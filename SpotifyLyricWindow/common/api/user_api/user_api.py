@@ -26,8 +26,7 @@ class SpotifyUserApi:
         return auth_header
 
     def get_current_playing(self):
-        url = self.USER_PLAYER_URL + "currently-playing"
-        res = requests.get(url, headers=self._get_auth_header())
+        res = self._player_http("get", "currently-playing")
         if res.status_code == 204:
             raise NoActiveUser("no user active")
         res_json = res.json()
@@ -52,50 +51,35 @@ class SpotifyUserApi:
         return UserCurrentPlaying(progress_ms, artist, track_name, is_playing, track_id, duration, timestamp)
 
     def _get_user_devices(self):
-        url = self.USER_PLAYER_URL + "devices"
-        res_json = requests.get(url, headers=self._get_auth_header()).json()
+        res_json = self._player_http("get", "devices").json()
         if len(res_json['devices']):
             return res_json['devices'][0]['id']
         else:
             raise NoDevicesError("No device available!")
 
     def set_user_pause(self):
-        url = self.USER_PLAYER_URL + "pause"
-        param = {"device_id": self._get_user_devices()}
-        res_json = requests.put(url, headers=self._get_auth_header(), params=param).json()
-        if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
-            raise NoPermission("Premium required!")
+        return self._player_http("put", "pause", device_id=self._get_user_devices()).json()
 
     def set_user_resume(self):
-        url = self.USER_PLAYER_URL + "play"
-        param = {"device_id": self._get_user_devices()}
-        res_json = requests.put(url, headers=self._get_auth_header(), params=param).json()
-        if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
-            raise NoPermission("Premium required!")
+        return self._player_http("put", "play", device_id=self._get_user_devices()).json()
 
     def set_user_next(self):
-        url = self.USER_PLAYER_URL + "next"
-        param = {"device_id": self._get_user_devices()}
+        return self._player_http("post", "next", device_id=self._get_user_devices()).json()
 
-        res = requests.post(url, headers=self._get_auth_header(), params=param)
+    def set_user_previous(self):
+        return self._player_http("post", "previous", device_id=self._get_user_devices()).json()
+
+    def seek_to_position(self, position_ms):
+        return self._player_http("put", "seek", device_id=self._get_user_devices(), position_ms=position_ms).json()
+
+    def _player_http(self, method, url_suffix, **kwargs):
+        url = self.USER_PLAYER_URL + url_suffix
+        func = getattr(requests, method)
+        res = func(url, headers=self._get_auth_header(), params=kwargs)
         res_json = res.json()
         if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
             raise NoPermission("Premium required!")
-
-    def set_user_previous(self):
-        url = self.USER_PLAYER_URL + "previous"
-        param = {"device_id": self._get_user_devices()}
-        res_json = requests.post(url, headers=self._get_auth_header(), params=param).json()
-        if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
-            raise NoPermission("Premium required!")
-
-    def seek_to_position(self, position_ms):
-        url = self.USER_PLAYER_URL + "seek"
-        param = {"device_id": self._get_user_devices(),
-                 "position_ms": position_ms}
-        res_json = requests.put(url, headers=self._get_auth_header(), params=param).json()
-        if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
-            raise NoPermission("Premium required!")
+        return res
 
 
 if __name__ == "__main__":
