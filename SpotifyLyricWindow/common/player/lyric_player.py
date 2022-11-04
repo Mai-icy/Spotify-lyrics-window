@@ -27,6 +27,7 @@ class LrcPlayer:
         self.order = 0
         self.offset = 0
         self.duration = 0
+        self.api_offset = self._get_offset_file("api_offset")
 
         self.trans_mode = TransType.NON
         self.is_pause = False
@@ -47,9 +48,12 @@ class LrcPlayer:
             data_json = json.load(f)
         return data_json.get(track_id, 0)
 
-    def set_track(self, track_id, duration, *, no_lyric=False) -> None:
+    def set_track(self, track_id, duration, *, no_lyric=False):
+        """change the current lrc. the duration is used to auto next song"""
         if self.track_id and self.offset:
             self._set_offset_file(self.track_id, self.offset)
+        if self.api_offset:
+            self._set_offset_file("api_offset", self.api_offset)
 
         self.track_id = track_id
         self.offset = self._get_offset_file(track_id)
@@ -68,6 +72,10 @@ class LrcPlayer:
     def modify_offset(self, modify_value):
         self.offset += modify_value
 
+    def modify_api_offset(self, modify_value):
+        """the 'progress_ms' of web api is inaccurate. use api_offset to make up for it"""
+        self.api_offset += modify_value
+
     def _reload_lrc_data(self) -> None:
         """
         Make the in-class data correspond to the lyrics file data.
@@ -82,7 +90,7 @@ class LrcPlayer:
             raise NotLyricFound("未找到歌词文件")
 
     @staticmethod
-    def is_lyric_exist(track_id) -> bool:
+    def is_lyric_exist(track_id: str) -> bool:
         lrc_path = LRC_PATH / (track_id + '.mrc')
         return lrc_path.exists()
 
@@ -102,7 +110,7 @@ class LrcPlayer:
 
         if timestamp:
             # 自动切歌的时候 progress_ms 不准确，timestamp准确
-            self.timer_value = timestamp
+            self.timer_value = int(time.time() * 1000) - position - self.api_offset
         else:
             self.timer_value = int(time.time() * 1000) - position
         self.thread_play_lrc.start()
@@ -133,6 +141,9 @@ class LrcPlayer:
         return True
 
     def show_content(self, roll_time: int) -> None:
+        """
+        output function, use 'print' to debug
+        """
         order = self.order
         time_stamp = self.lrc_file.get_time(order)
         if time_stamp == -2:
