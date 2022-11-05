@@ -94,7 +94,7 @@ class LrcPlayer:
         lrc_path = LRC_PATH / (track_id + '.mrc')
         return lrc_path.exists()
 
-    def restart_thread(self, position=0, *, timestamp=0) -> None:
+    def restart_thread(self, position=0, *, api_offset=0) -> None:
         """
         Restart the thread that outputs the lyrics
         :return: None
@@ -108,9 +108,13 @@ class LrcPlayer:
         if position:
             self.thread_play_lrc.set_position(position)
 
-        if timestamp:
+        if api_offset:
             # 自动切歌的时候 progress_ms 不准确，timestamp准确
-            self.timer_value = int(time.time() * 1000) - position - self.api_offset
+            saved_api_offset = self._get_offset_file("api_offset")
+            if saved_api_offset:
+                self.timer_value = int(time.time() * 1000) - position - saved_api_offset
+            else:
+                self.timer_value = int(time.time() * 1000) - position - api_offset * 2
         else:
             self.timer_value = int(time.time() * 1000) - position
         self.thread_play_lrc.start()

@@ -9,7 +9,7 @@ from common.api.api_error import *
 from common.api.user_api.user_auth import SpotifyUserAuth
 
 UserCurrentPlaying = namedtuple("UserCurrentPlaying", ["progress_ms", "artist", "track_name", "is_playing", "track_id",
-                                                       "duration", "timestamp"])
+                                                       "duration", "api_offset"])
 
 
 class SpotifyUserApi:
@@ -26,7 +26,11 @@ class SpotifyUserApi:
         return auth_header
 
     def get_current_playing(self):
+        start_time = int(time.time() * 1000)
         res = self._player_http("get", "currently-playing")
+        end_time = int(time.time() * 1000)
+        offset = end_time - start_time
+
         if res.status_code == 204:
             raise NoActiveUser("no user active")
         res_json = res.json()
@@ -34,7 +38,7 @@ class SpotifyUserApi:
         is_playing = res_json["is_playing"]
         timestamp = res_json["timestamp"]
         if res_json['currently_playing_type'] == "ad":
-            return UserCurrentPlaying(progress_ms, None, "ad", is_playing, None, None, timestamp)
+            return UserCurrentPlaying(progress_ms, None, "ad", is_playing, None, None, offset)
         artist = ", ".join(art["name"] for art in res_json["item"]["artists"])
         if res_json['item'] is None:
             # 用户还在加载歌曲时，item为None
@@ -48,7 +52,7 @@ class SpotifyUserApi:
         print(progress_ms)
         print(f"播放状态{is_playing}")
         print(track_id)
-        return UserCurrentPlaying(progress_ms, artist, track_name, is_playing, track_id, duration, timestamp)
+        return UserCurrentPlaying(progress_ms, artist, track_name, is_playing, track_id, duration, offset)
 
     def _get_user_devices(self):
         res_json = self._player_http("get", "devices").json()

@@ -74,7 +74,7 @@ class LyricsWindow(LyricsWindowView):
         self.text_show_signal.connect(self.set_text)
 
         self.error_msg_show_signal.connect(self.error_msg_show_event)
-        self.song_done_calibration_signal.connect(lambda: self.calibration_event(use_timestamp=True))
+        self.song_done_calibration_signal.connect(lambda: self.calibration_event(use_api_offset=True))
 
     def error_msg_show_event(self, error):
         self.lrc_player.is_pause = True
@@ -86,7 +86,7 @@ class LyricsWindow(LyricsWindowView):
 
     @thread_drive(None)
     @CatchError
-    def calibration_event(self, *_, use_timestamp=False):
+    def calibration_event(self, *_, use_api_offset=False):
         # self.calibrate_button.setEnabled(False)
         self.set_text(1, "calibrating！", 0)
         self.set_text(2, " (o゜▽゜)o!", 0)
@@ -108,8 +108,8 @@ class LyricsWindow(LyricsWindowView):
         ava_trans = self.lrc_player.lrc_file.available_trans()
         self.lrc_player.is_pause = not user_current.is_playing
         self.lrc_player.set_trans_mode(self.user_trans if self.user_trans in ava_trans else TransType.NON)
-        if use_timestamp:
-            self.lrc_player.restart_thread(0, timestamp=user_current.timestamp)
+        if use_api_offset:
+            self.lrc_player.restart_thread(user_current.progress_ms, api_offset=user_current.api_offset)
         else:
             self.lrc_player.restart_thread(user_current.progress_ms)
         # self.calibrate_button.setEnabled(True)
