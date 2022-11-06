@@ -141,7 +141,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def set_rolling(self, flag):
         if flag and not self.timer.isActive():
             self.timer.start()
-        elif self.timer.isActive():
+        elif not flag and self.timer.isActive():
             self.timer.stop()
 
     def set_text(self, rows, text, roll_time):
