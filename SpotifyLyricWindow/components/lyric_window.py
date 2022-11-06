@@ -62,6 +62,8 @@ class LyricsWindow(LyricsWindowView):
         self.calibration_event()
 
     def _init_signal(self):
+        super(LyricsWindow, self)._init_signal()
+        
         self.account_button.clicked.connect(self.user_auth_button_event)
         self.calibrate_button.clicked.connect(self.calibration_event)
         self.next_button.clicked.connect(self.set_user_next_event)
@@ -115,7 +117,10 @@ class LyricsWindow(LyricsWindowView):
         self.set_text(1, "calibrating！", 0)
         self.set_text(2, " (o゜▽゜)o!", 0)
         user_current = self.spotify_auth.get_current_playing()
-        self.set_play(user_current.is_playing)
+
+        self.set_pause_button_icon(user_current.is_playing)
+        self.set_rolling(user_current.is_playing)
+
         if user_current.track_name == "ad":
             self.set_text(1, "Advertising！", 0)
             self.set_text(2, "o(_ _)ozzZZ", 0)
@@ -165,11 +170,13 @@ class LyricsWindow(LyricsWindowView):
         if current_user.is_playing:
             self.spotify_auth.set_user_pause()
             self.calibration_event()
-            self.set_play(False)
+            self.set_pause_button_icon(False)
+            self.set_rolling(False)
         else:
             self.spotify_auth.set_user_resume()
             self.calibration_event()
-            self.set_play(True)
+            self.set_pause_button_icon(True)
+            self.set_rolling(True)
 
     @CatchError
     def change_trans_button_event(self, *_):
