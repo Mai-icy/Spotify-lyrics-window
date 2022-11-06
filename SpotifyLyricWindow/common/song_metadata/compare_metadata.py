@@ -19,6 +19,7 @@ def compare_song_info(song_info_1: SongInfo, song_info_2: SongInfo) -> int:
     duration_1 = __parse_duration(song_info_1.duration)
     duration_2 = __parse_duration(song_info_2.duration)
     score_list = []
+    # 时长比较
     if duration_1 and duration_2:
         if abs(duration_1 - duration_2) <= 1:
             score_list.append(100)
@@ -26,8 +27,11 @@ def compare_song_info(song_info_1: SongInfo, song_info_2: SongInfo) -> int:
             score_list.append(80)
         else:
             score_list.append(0)
+    # 歌手比较
     singer_score = fuzz.partial_ratio(song_info_1.singer, song_info_2.singer)
+    # 曲名比较
     name_score = fuzz.partial_ratio(song_info_1.songName, song_info_2.songName)
+
     score_list.extend([singer_score, name_score])
     if song_info_1.album and song_info_2.album:
         album_score = fuzz.partial_ratio(song_info_1.album, song_info_2.album)

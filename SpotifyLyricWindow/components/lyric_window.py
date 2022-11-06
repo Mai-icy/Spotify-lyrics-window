@@ -62,14 +62,14 @@ class LyricsWindow(LyricsWindowView):
         self.calibration_event()
 
     def _init_signal(self):
-        self.account_button.clicked.connect(self.user_auth_event)
+        self.account_button.clicked.connect(self.user_auth_button_event)
         self.calibrate_button.clicked.connect(self.calibration_event)
         self.next_button.clicked.connect(self.set_user_next_event)
         self.last_button.clicked.connect(self.set_user_previous_event)
         self.pause_button.clicked.connect(self.pause_resume_button_event)
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
-        self.translate_button.clicked.connect(self.change_trans_event)
+        self.translate_button.clicked.connect(self.change_trans_button_event)
 
         self.text_show_signal.connect(self.set_text)
 
@@ -83,6 +83,30 @@ class LyricsWindow(LyricsWindowView):
         if isinstance(error, NoPermission):
             self.delay_timer.start(2000)
             self.delay_timer.timeout.connect(self.calibration_event)
+
+    def _refresh_player_track(self, user_current=None, *, no_lyric=False):
+        if not user_current:
+            user_current = self.spotify_auth.get_current_playing()
+        pos, track_id = user_current.progress_ms, user_current.track_id
+        duration = user_current.duration if user_current.duration else 10 * 1000
+        self.lrc_player.set_track(track_id, duration, no_lyric=no_lyric)
+        return user_current
+
+    def _download_lyric(self, user_current: UserCurrentPlaying) -> UserCurrentPlaying:
+        self.set_text(1, "searching for lyric!", 0)
+        self.set_text(2, f"(〃'▽'〃)", 0)
+        try:
+            if not download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id):
+                self.set_text(1, f"{user_current.track_name} - {user_current.artist}", 0)
+                self.set_text(2, f"no lyric found", 0)
+                return self._refresh_player_track(no_lyric=True)
+        except requests.RequestException:
+            # TODO 归并错误
+            print("TOTOTOTOTOTOTOTO DOOOOO ITTTTTTTTTTTTTT!!!!!!")
+            self.set_text(1, f"{user_current.track_name} - {user_current.artist}", 0)
+            self.set_text(2, f"no lyric found", 0)
+            return self._refresh_player_track(no_lyric=True)
+        return self._refresh_player_track()
 
     @thread_drive(None)
     @CatchError
@@ -113,30 +137,6 @@ class LyricsWindow(LyricsWindowView):
         else:
             self.lrc_player.restart_thread(user_current.progress_ms)
         # self.calibrate_button.setEnabled(True)
-
-    def _refresh_player_track(self, user_current=None, *, no_lyric=False):
-        if not user_current:
-            user_current = self.spotify_auth.get_current_playing()
-        pos, track_id = user_current.progress_ms, user_current.track_id
-        duration = user_current.duration if user_current.duration else 10 * 1000
-        self.lrc_player.set_track(track_id, duration, no_lyric=no_lyric)
-        return user_current
-
-    def _download_lyric(self, user_current: UserCurrentPlaying) -> UserCurrentPlaying:
-        self.set_text(1, "searching for lyric!", 0)
-        self.set_text(2, f"(〃'▽'〃)", 0)
-        try:
-            if not download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id):
-                self.set_text(1, f"{user_current.track_name} - {user_current.artist}", 0)
-                self.set_text(2, f"no lyric found", 0)
-                return self._refresh_player_track(no_lyric=True)
-        except requests.RequestException:
-            # TODO 归并错误
-            print("TOTOTOTOTOTOTOTO DOOOOO ITTTTTTTTTTTTTT!!!!!!")
-            self.set_text(1, f"{user_current.track_name} - {user_current.artist}", 0)
-            self.set_text(2, f"no lyric found", 0)
-            return self._refresh_player_track(no_lyric=True)
-        return self._refresh_player_track()
 
     @thread_drive(None)
     @CatchError
@@ -172,7 +172,7 @@ class LyricsWindow(LyricsWindowView):
             self.set_play(True)
 
     @CatchError
-    def change_trans_event(self, *_):
+    def change_trans_button_event(self, *_):
         ava_trans = self.lrc_player.lrc_file.available_trans()
         if len(ava_trans) > 1:
             index_ = (ava_trans.index(self.lrc_player.trans_mode) + 1) % len(ava_trans)
@@ -181,7 +181,7 @@ class LyricsWindow(LyricsWindowView):
 
     @thread_drive(None)
     @CatchError
-    def user_auth_event(self, *_):
+    def user_auth_button_event(self, *_):
         self.lrc_player.is_pause = True
 
         self.set_text(1, "正在获取授权链接", 0)

@@ -11,6 +11,7 @@ OFFSET_FILE_PATH = LRC_PATH / "offset.json"
 
 
 def path_check():
+    """check the path, if not exists, create it"""
     if not LRC_PATH.exists():
         LRC_PATH.mkdir(parents=True)
     if not CLIENT_ID_SECRET_PATH.exists():

@@ -11,9 +11,11 @@ kugou_api = KugouApi()
 spotify_api = SpotifyApi()
 
 
-def download_lrc(track_name, track_id):
+def download_lrc(track_name: str, track_id: str) -> bool:
     """download lyric by the track_id. Kugou and Cloud Api were used."""
     file_name = LRC_PATH / f"{track_id}.mrc"
+
+    min_score = 74  # 最低相似度评分
 
     spotify_info = spotify_api.get_song_info(track_id)
     try:
@@ -31,7 +33,7 @@ def download_lrc(track_name, track_id):
     score_kugou = compare_song_info(kugou_song_info, spotify_info)
     # print(score_cloud, score_kugou)
 
-    if score_kugou >= score_cloud and score_kugou > 74:
+    if score_kugou >= score_cloud and score_kugou > min_score:
         try:
             lrc_info = kugou_api.get_lrc_info(kugou_song_md5)[0]
             lrc = kugou_api.get_lrc(lrc_info)
@@ -41,7 +43,7 @@ def download_lrc(track_name, track_id):
         except requests.RequestException:
             score_kugou = 0
 
-    if score_cloud >= score_kugou and score_cloud > 74:
+    if score_cloud >= score_kugou and score_cloud > min_score:
         try:
             lrc = cloud_api.get_lrc(cloud_song_id)
             if not lrc.empty():
