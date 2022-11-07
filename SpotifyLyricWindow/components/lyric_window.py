@@ -113,6 +113,7 @@ class LyricsWindow(LyricsWindowView):
     @thread_drive(None)
     @CatchError
     def calibration_event(self, *_, use_api_offset=False):
+        self.lrc_player.is_pause = True
         # self.calibrate_button.setEnabled(False)
         self.set_text(1, "calibrating！", 0)
         self.set_text(2, " (o゜▽゜)o!", 0)

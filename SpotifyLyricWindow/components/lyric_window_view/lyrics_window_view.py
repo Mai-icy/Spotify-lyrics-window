@@ -12,6 +12,8 @@ from components.lyric_window_view.text_scroll_area import TextScrollArea
 
 
 class LyricsWindowView(QWidget, Ui_LyricsWindow):
+    set_timer_status_signal = pyqtSignal(bool)
+
     def __init__(self, parent=None):
         super(LyricsWindowView, self).__init__(parent)
         self.setupUi(self)
@@ -82,6 +84,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def _init_signal(self):
         self.close_button.clicked.connect(self.close)
         self.lock_button.clicked.connect(self.lock_event)
+        self.set_timer_status_signal.connect(lambda flag: self.timer.start() if flag else self.timer.stop())
 
     def _init_window_lock_flag(self):
         self._is_locked = False
@@ -139,10 +142,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.pause_button.setIcon(QtGui.QIcon(u":/pic/images/continue.png"))
 
     def set_rolling(self, flag):
-        if flag and not self.timer.isActive():
-            self.timer.start()
-        elif not flag and self.timer.isActive():
-            self.timer.stop()
+        if (flag and not self.timer.isActive()) or (not flag and self.timer.isActive()):
+            self.set_timer_status_signal.emit(flag)
 
     def set_text(self, rows, text, roll_time):
         width = self._get_text_width(text)
