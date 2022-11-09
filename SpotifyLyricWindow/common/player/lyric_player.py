@@ -21,7 +21,6 @@ class LrcPlayer:
         self.lyrics_window = lyrics_window
         self.track_id = None
         self.timer_value = int(time.time() * 1000)
-        self.next_timer_value = 0
 
         self.lrc_file = LrcFile()
 
@@ -38,7 +37,7 @@ class LrcPlayer:
         self.thread_play_lrc = LyricThread(self)
         self.thread_check_title = WindowsSpotifyTitleThread(self)
 
-        self.is_title_changed = False
+        self.title_changed_timestamp = 0
 
     @staticmethod
     def _set_offset_file(track_id: str, offset: int):
@@ -116,7 +115,9 @@ class LrcPlayer:
         return True
 
     def start_check(self):
-        self.is_title_changed = False
+        self.thread_check_title.terminate()
+
+        self.title_changed_timestamp = 0
         self.thread_check_title = WindowsSpotifyTitleThread(self)
         self.thread_check_title.start()
 
@@ -144,9 +145,9 @@ class LrcPlayer:
         if api_offset:
             # 自动切歌的时候 progress_ms 不准确，timestamp准确
             saved_api_offset = self._get_offset_file("api_offset")
-            if self.is_title_changed:
-                self.is_title_changed = False
-                self.timer_value = self.next_timer_value
+            if self.title_changed_timestamp:
+                self.timer_value = self.title_changed_timestamp
+                self.title_changed_timestamp = 0
                 self.thread_play_lrc.start()
                 return
             if saved_api_offset:
@@ -248,7 +249,7 @@ class LyricThread(threading.Thread):
         is_title_thread = False
         while self.is_running:
             self.stop.wait(1)
-            if self.player.get_time() - self.player.offset > self.player.duration - 2000 and self.player.duration and \
+            if self.player.get_time() - self.player.offset > self.player.duration - 3000 and self.player.duration and \
                     not is_title_thread:
                 self.player.start_check()
                 is_title_thread = True
@@ -259,10 +260,10 @@ class LyricThread(threading.Thread):
                     self.stop.wait(0.3)
 
                 self.stop.wait(0.6)
-                print(self.player.duration, self.player.get_time())
                 self.player.lyrics_window.song_done_calibration_signal.emit("")
                 # 依据 timestamp 为准
                 return
+            print(self.player.duration, self.player.get_time())
 
     def terminate(self):
         self.is_running = False
@@ -286,11 +287,10 @@ class WindowsSpotifyTitleThread(threading.Thread):
             self.stop.wait(0.2)
             title = get_pid_title(spotify_pid)
             if title != ori_title:
-                self.player.is_title_changed = True
-                self.player.next_timer_value = int(time.time() * 1000) + 600
+                self.player.title_changed_timestamp = int(time.time() * 1000) + 800
                 return
             if times == 40:
-                self.player.is_title_changed = False
+                self.player.title_changed_timestamp = 0
                 return
             times += 1
 
