@@ -2,10 +2,11 @@
 # -*- coding:utf-8 -*-
 import json
 from pathlib import Path
+BASE_PATH = Path(__file__).parent.parent
 
-TOKEN_PATH = Path(r"resource/token")
-LRC_PATH = Path(r"download/lyrics")
-CLIENT_ID_SECRET_PATH = Path(r"resource/client_id_secret.json")
+TOKEN_PATH = BASE_PATH / Path(r"resource/token")
+LRC_PATH = BASE_PATH / Path(r"download/lyrics")
+CLIENT_ID_SECRET_PATH = BASE_PATH / Path(r"resource/client_id_secret.json")
 
 OFFSET_FILE_PATH = LRC_PATH / "offset.json"
 
