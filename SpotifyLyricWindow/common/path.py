@@ -9,6 +9,7 @@ LRC_PATH = BASE_PATH / Path(r"download/lyrics")
 CLIENT_ID_SECRET_PATH = BASE_PATH / Path(r"resource/client_id_secret.json")
 
 OFFSET_FILE_PATH = LRC_PATH / "offset.json"
+NOT_FOUND_LRC_FILE_PATH = LRC_PATH / "not_found_lyric.json"
 
 
 def path_check():
@@ -18,9 +19,10 @@ def path_check():
     if not CLIENT_ID_SECRET_PATH.exists():
         with CLIENT_ID_SECRET_PATH.open("w", encoding="utf-8") as f:
             f.write(json.dumps({"client_id": "", "client_secret": ""}, indent=4, ensure_ascii=False))
-    if not OFFSET_FILE_PATH.exists():
-        with OFFSET_FILE_PATH.open("w", encoding="utf-8") as f:
-            f.write(json.dumps({}, indent=4, ensure_ascii=False))
+    for path in (OFFSET_FILE_PATH, NOT_FOUND_LRC_FILE_PATH):
+        if not path.exists():
+            with OFFSET_FILE_PATH.open("w", encoding="utf-8") as f:
+                f.write(json.dumps({}, indent=4, ensure_ascii=False))
 
 
 path_check()

@@ -7,8 +7,8 @@ import threading
 import time
 
 from common.api import SpotifyUserApi
-from common.lyric_type.lyric_decode import LrcFile, MrcFile, TransType
-from common.path import LRC_PATH, OFFSET_FILE_PATH
+from common.lyric_type.lyric_decode import LrcFile, MrcFile, KrcFile, TransType
+from common.path import LRC_PATH, OFFSET_FILE_PATH, NOT_FOUND_LRC_FILE_PATH
 from common.get_windows_title import get_spotify_pid, get_pid_title
 
 
@@ -56,6 +56,23 @@ class LrcPlayer:
         return data_json.get(track_id, 0)
 
     @staticmethod
+    def set_not_found_file(track_id: str, track_title: str):
+        with NOT_FOUND_LRC_FILE_PATH.open(encoding="utf-8") as f:
+            data_json = json.load(f)
+        if not track_title:
+            data_json[track_id].pop()
+        else:
+            data_json[track_id] = {"track_title": track_title, "last_time": int(time.time())}
+        with NOT_FOUND_LRC_FILE_PATH.open("w", encoding="utf-8") as f:
+            f.write(json.dumps(data_json, indent=4, ensure_ascii=False))
+
+    @staticmethod
+    def get_not_found_file(track_id: str) -> dict:
+        with NOT_FOUND_LRC_FILE_PATH.open(encoding="utf-8") as f:
+            data_json = json.load(f)
+        return data_json.get(track_id, None)
+
+    @staticmethod
     def is_lyric_exist(track_id: str) -> bool:
         lrc_path = LRC_PATH / (track_id + '.mrc')
         return lrc_path.exists()
@@ -64,9 +81,15 @@ class LrcPlayer:
         """Make the in-class data correspond to the lyrics file data."""
         if self.no_lyric:
             return
-        lrc_path = LRC_PATH / (self.track_id + '.mrc')
-        if lrc_path.exists():
-            self.lrc_file = MrcFile(lrc_path)
+        for file in LRC_PATH.iterdir():
+            if file.name.startswith(self.track_id):
+                if file.suffix == ".mrc":
+                    self.lrc_file = MrcFile(file)
+                elif file.suffix == ".lrc":
+                    self.lrc_file = LrcFile(file)
+                elif file.suffix == ".krc":
+                    self.lrc_file = KrcFile(file)
+                break
         else:
             raise NotLyricFound("未找到歌词文件")
 

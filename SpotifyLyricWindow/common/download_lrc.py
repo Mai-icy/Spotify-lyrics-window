@@ -11,11 +11,11 @@ kugou_api = KugouApi()
 spotify_api = SpotifyApi()
 
 
-def download_lrc(track_name: str, track_id: str) -> bool:
+def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
     """download lyric by the track_id. Kugou and Cloud Api were used."""
     file_name = LRC_PATH / f"{track_id}.mrc"
 
-    min_score = 74  # 最低相似度评分
+    # min_score = 74  # 最低相似度评分
 
     spotify_info = spotify_api.get_song_info(track_id)
     try:
