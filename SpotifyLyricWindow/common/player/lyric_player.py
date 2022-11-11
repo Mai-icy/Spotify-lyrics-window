@@ -60,7 +60,7 @@ class LrcPlayer:
         with NOT_FOUND_LRC_FILE_PATH.open(encoding="utf-8") as f:
             data_json = json.load(f)
         if not track_title:
-            data_json[track_id].pop()
+            data_json.pop(track_id)
         else:
             data_json[track_id] = {"track_title": track_title, "last_time": int(time.time())}
         with NOT_FOUND_LRC_FILE_PATH.open("w", encoding="utf-8") as f:
