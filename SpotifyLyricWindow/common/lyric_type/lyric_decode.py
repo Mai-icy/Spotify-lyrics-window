@@ -64,6 +64,9 @@ class LrcFile:
                     moment = int(moment_text_list[0]) * 60000 + \
                              int(moment_text_list[1]) * 1000 + int(moment_text_list[2])
                     context = line[end + 1:]
+                while moment in target_dict.keys():
+                    moment += 10
+                    print(moment)
                 target_dict[moment] = context
         # 同步
         if self.trans_non_dict.keys():
