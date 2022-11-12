@@ -19,9 +19,9 @@ def path_check():
     if not CLIENT_ID_SECRET_PATH.exists():
         with CLIENT_ID_SECRET_PATH.open("w", encoding="utf-8") as f:
             f.write(json.dumps({"client_id": "", "client_secret": ""}, indent=4, ensure_ascii=False))
-    for path in (OFFSET_FILE_PATH, NOT_FOUND_LRC_FILE_PATH):
-        if not path.exists():
-            with OFFSET_FILE_PATH.open("w", encoding="utf-8") as f:
+    for path_ in (OFFSET_FILE_PATH, NOT_FOUND_LRC_FILE_PATH):
+        if not path_.exists():
+            with path_.open("w", encoding="utf-8") as f:
                 f.write(json.dumps({}, indent=4, ensure_ascii=False))
 
 
