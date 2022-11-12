@@ -39,6 +39,8 @@ class LrcPlayer:
 
         self.title_changed_timestamp = 0
 
+        self.is_ad = False
+
     @staticmethod
     def _set_offset_file(track_id: str, offset: int):
         """save the offset to offset.json"""
@@ -137,11 +139,13 @@ class LrcPlayer:
         # self.restart_thread()
         return True
 
-    def start_check(self):
+    def start_check(self, *, times=40):
         self.thread_check_title.terminate()
 
         self.title_changed_timestamp = 0
         self.thread_check_title = WindowsSpotifyTitleThread(self)
+
+        self.thread_check_title.set_times(times)
         self.thread_check_title.start()
 
     def get_time(self) -> int:
@@ -154,9 +158,11 @@ class LrcPlayer:
         """the 'progress_ms' of web api is inaccurate. use api_offset to make up for it"""
         self.api_offset += modify_value
 
-    def restart_thread(self, position=0, *, api_offset=0):
+    def restart_thread(self, position=0, *, api_offset=0, is_ad=False):
         """Restart the thread that outputs the lyrics"""
         # self._reload_lrc_data()
+        self.is_ad = is_ad
+
         if self.thread_play_lrc.is_alive():
             self.thread_play_lrc.terminate()
             self.thread_play_lrc.join()
@@ -208,7 +214,7 @@ class LrcPlayer:
 
 class LyricThread(threading.Thread):
 
-    def __init__(self, player):
+    def __init__(self, player: LrcPlayer):
         super(LyricThread, self).__init__(target=self.__play_lrc_thread)
         self.stop = threading.Event()
         self.player = player
@@ -270,6 +276,10 @@ class LyricThread(threading.Thread):
                     self.player.show_content(roll_time)
 
         is_title_thread = False
+        if self.player.is_ad:
+            self.player.start_check(times=80)
+            is_title_thread = True
+
         while self.is_running:
             self.stop.wait(1)
             if self.player.get_time() - self.player.offset > self.player.duration - 3000 and self.player.duration and \
@@ -299,6 +309,10 @@ class WindowsSpotifyTitleThread(threading.Thread):
         self.player = player
         self.stop = threading.Event()
         self.is_running = True
+        self.max_times = 40
+
+    def set_times(self, times):
+        self.max_times = times
 
     def check_title_changed_func(self):
         times = 0

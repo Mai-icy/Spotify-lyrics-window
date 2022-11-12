@@ -138,6 +138,7 @@ class LyricsWindow(LyricsWindowView):
         if user_current.track_name == "ad":
             self.set_text(1, "Advertising！", 0)
             self.set_text(2, "o(_ _)ozzZZ", 0)
+            self.lrc_player.is_pause = False
             self._refresh_player_track(user_current, no_lyric=True)
             self.lrc_player.restart_thread(0)
             return

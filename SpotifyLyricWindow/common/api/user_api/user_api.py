@@ -30,9 +30,6 @@ class SpotifyUserApi:
         res = self._player_http("get", "currently-playing")
         end_time = int(time.time() * 1000)
         offset = end_time - start_time
-
-        if res.status_code == 204:
-            raise NoActiveUser("no user active")
         res_json = res.json()
         progress_ms = res_json["progress_ms"]
         is_playing = res_json["is_playing"]
@@ -80,6 +77,8 @@ class SpotifyUserApi:
         url = self.USER_PLAYER_URL + url_suffix
         func = getattr(requests, method)
         res = func(url, headers=self._get_auth_header(), params=kwargs)
+        if res.status_code == 204:
+            raise NoActiveUser("no user active")
         res_json = res.json()
         if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
             raise NoPermission("Premium required!")
