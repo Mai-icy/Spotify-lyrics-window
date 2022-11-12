@@ -49,8 +49,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
 
-        self.above_scrollArea.set_label_stylesheet("color:rgb(86, 152, 195)")
-        self.below_scrollArea.set_label_stylesheet("color:rgb(86, 152, 195)")
+        self.set_label_rgb()
 
     def _init_font(self):
         self.font = QtGui.QFont()
@@ -105,6 +104,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.timer.setInterval(self.time_step)
         self.timer.timeout.connect(self.update_index_timer_event)
         self.timer.start()
+
+    def set_label_rgb(self, r=86, g=152, b=195):
+        stylesheet = f"color:rgb({r}, {g}, {b})"
+        self.above_scrollArea.set_label_stylesheet(stylesheet)
+        self.below_scrollArea.set_label_stylesheet(stylesheet)
 
     def set_transparent(self, flag):
         self.set_button_hide(flag)
