@@ -40,7 +40,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.background_frame.setGraphicsEffect(effect_shadow)
 
     def _init_main_window(self):
-        self.setWindowFlags(Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         self.above_scrollArea = TextScrollArea(self.lyrics_frame1)
@@ -54,7 +54,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def _init_font(self):
         self.font = QtGui.QFont()
         self.font.setFamily("微软雅黑")
-        self.font.setPixelSize(int((self.height() - 30) / 2.7))
+        self.font.setPixelSize(int((self.height() - 30) / 3))
         self.above_scrollArea.set_font(self.font)
         self.below_scrollArea.set_font(self.font)
 
@@ -154,6 +154,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.roll_time = roll_time
         if rows == 1:
             self.above_scrollArea.set_text(text, width)
+            self.update()
         if rows == 2:
             self.below_scrollArea.set_text(text, width)
 

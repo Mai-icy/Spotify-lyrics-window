@@ -72,8 +72,6 @@ class TextScrollArea(QScrollArea):
             self.text_index += 1
             if self.text_index > begin_index:
                 self._scrollbar.setValue((self.text_index - begin_index) * move_step)
-            if self.text_index == 1:
-                self.repaint()
 
     def resize_label(self, new_text_width):
         self.text_width = new_text_width
