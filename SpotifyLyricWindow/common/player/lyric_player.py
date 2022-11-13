@@ -276,7 +276,7 @@ class LyricThread(threading.Thread):
                     self.player.show_content(roll_time)
 
         is_title_thread = False
-        if self.player.is_ad:
+        if self.player.is_ad and not self.player.title_changed_timestamp:
             self.player.start_check(times=80)
             is_title_thread = True
 
