@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 from math import ceil
+from system_hotkey import SystemHotkey
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
@@ -29,6 +30,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._init_window_drag_flag()
         self._init_mouse_track()
         self._init_roll()
+        self._init_hotkey()
 
         self.set_button_hide(True)
 
@@ -105,6 +107,24 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.timer.timeout.connect(self.update_index_timer_event)
         self.timer.start()
 
+    def _init_hotkey(self):
+        self.hotkey_dic = {
+            self.calibrate_button.objectName() : [lambda x: self.calibrate_button.clicked.emit(), ["alt", "r"]],
+            self.lock_button.objectName() : [lambda x: self.lock_button.clicked.emit(), ["alt", "l"]],
+            self.close_button.objectName() : [lambda x: self.close_button.clicked.emit(), ["alt", "x"]],
+            self.translate_button.objectName() : [lambda x: self.translate_button.clicked.emit(), ["alt", "a"]]
+            }
+        self.hotkey = SystemHotkey()
+        for value in self.hotkey_dic.values():
+            self.hotkey.register(value[1], callback=value[0])
+
+    def set_hotkey(self, button: QPushButton, hotkeys: list):
+        if button.objectName() in self.hotkey_dic:
+            self.hotkey.unregister(self.hotkey_dic[button.objectName()][1])
+        fun = lambda : button.clicked.emit()
+        self.hotkey_dic[button.objectName()] = [fun, hotkeys]
+        self.hotkey.register(hotkeys, callback=fun)
+            
     def set_label_rgb(self, r=86, g=152, b=195):
         stylesheet = f"color:rgb({r}, {g}, {b})"
         self.above_scrollArea.set_label_stylesheet(stylesheet)
