@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/pic">
+    <file>images/LyricsIcon.png</file>
     <file>images/translate.png</file>
     <file>images/calibrate.png</file>
     <file>images/last.png</file>

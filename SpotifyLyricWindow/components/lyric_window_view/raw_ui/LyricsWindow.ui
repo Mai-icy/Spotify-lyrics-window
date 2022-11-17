@@ -29,7 +29,11 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>Form</string>
+   <string>Lyrics</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="source.qrc">
+    <normaloff>:/pic/images/LyricsIcon.png</normaloff>:/pic/images/LyricsIcon.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">*
@@ -248,7 +252,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/calibrate.png</normaloff>:/pic/images/calibrate.png</iconset>
               </property>
              </widget>
@@ -321,7 +325,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/account.png</normaloff>:/pic/images/account.png</iconset>
               </property>
              </widget>
@@ -394,7 +398,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/last.png</normaloff>:/pic/images/last.png</iconset>
               </property>
              </widget>
@@ -467,7 +471,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/continue.png</normaloff>:/pic/images/continue.png</iconset>
               </property>
              </widget>
@@ -540,7 +544,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/next.png</normaloff>:/pic/images/next.png</iconset>
               </property>
              </widget>
@@ -613,7 +617,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/settings.png</normaloff>:/pic/images/settings.png</iconset>
               </property>
              </widget>
@@ -686,7 +690,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/lock.png</normaloff>:/pic/images/lock.png</iconset>
               </property>
              </widget>
@@ -759,7 +763,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/translate.png</normaloff>:/pic/images/translate.png</iconset>
               </property>
              </widget>
@@ -832,7 +836,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/setoffdown.png</normaloff>:/pic/images/setoffdown.png</iconset>
               </property>
              </widget>
@@ -905,7 +909,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/setoffup.png</normaloff>:/pic/images/setoffup.png</iconset>
               </property>
              </widget>
@@ -978,7 +982,7 @@ border:none;
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="../ui_type/source.qrc">
+               <iconset resource="source.qrc">
                 <normaloff>:/pic/images/close.png</normaloff>:/pic/images/close.png</iconset>
               </property>
              </widget>
@@ -1008,7 +1012,7 @@ border:none;
   </layout>
  </widget>
  <resources>
-  <include location="../ui_type/source.qrc"/>
+  <include location="source.qrc"/>
  </resources>
  <connections/>
 </ui>

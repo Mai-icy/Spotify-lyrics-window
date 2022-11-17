@@ -382,3 +382,41 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.set_transparent(True)
             self.lock_button.setHidden(False)
             self.calibrate_button.setHidden(False)
+
+
+class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
+    def __init__(self, MainWindow, parent=None):
+        super(LyricsTrayIcon, self).__init__(parent)
+        self.main_window = MainWindow
+        self.createMenu()
+        self.activated.connect(self.clicked)
+
+    def createMenu(self):
+        self.menu = QtWidgets.QMenu()
+        self.showAction = QtWidgets.QAction("Show(&S)", self, triggered=self.show)
+        self.settingsAction = QtWidgets.QAction("Settings(&P)", self, triggered=self.show_settings)
+        self.quitAction = QtWidgets.QAction("Quit(&X)", self, triggered=self.quit)
+
+        self.menu.addAction(self.showAction)
+        self.menu.addAction(self.settingsAction)
+        self.menu.addSeparator()
+        self.menu.addAction(self.quitAction)
+        self.setContextMenu(self.menu)
+
+        self.setIcon(QtGui.QIcon(u":/pic/images/LyricsIcon.png"))
+        self.icon = self.MessageIcon()
+
+    def clicked(self, reason):
+        "1 right click, 2 double left click，3 left click，4 middle click"
+        if reason == 2:
+            self.show()
+
+    def show(self):
+        super(LyricsTrayIcon, self).show()
+        self.main_window.show()
+
+    def show_settings(self):
+        pass
+
+    def quit(self):
+        QtWidgets.qApp.quit()

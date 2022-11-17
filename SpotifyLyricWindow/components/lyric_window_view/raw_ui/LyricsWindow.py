@@ -18,13 +18,16 @@ class Ui_LyricsWindow(object):
         LyricsWindow.setMinimumSize(QSize(552, 106))
         LyricsWindow.setMaximumSize(QSize(1920, 308))
         font = QFont()
-        font.setFamily(u"\u5fae\u8f6f\u96c5\u9ed1")  # 微软雅黑
+        font.setFamily(u"\u5fae\u8f6f\u96c5\u9ed1")
         font.setPointSize(20)
         LyricsWindow.setFont(font)
+        icon = QIcon()
+        icon.addFile(u":/pic/images/LyricsIcon.png", QSize(), QIcon.Normal, QIcon.Off)
+        LyricsWindow.setWindowIcon(icon)
         LyricsWindow.setStyleSheet(u"*\n"
-                                   "{\n"
-                                   "border:none;\n"
-                                   "}")
+"{\n"
+"border:none;\n"
+"}")
         self.main_gridLayout = QGridLayout(LyricsWindow)
         self.main_gridLayout.setSpacing(0)
         self.main_gridLayout.setObjectName(u"main_gridLayout")
@@ -93,11 +96,12 @@ class Ui_LyricsWindow(object):
         font1.setFamily(u"\u5fae\u8f6f\u96c5\u9ed1")
         self.calibrate_button.setFont(font1)
         self.calibrate_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon = QIcon()
-        icon.addFile(u":/pic/images/calibrate.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.calibrate_button.setIcon(icon)
+        icon1 = QIcon()
+        icon1.addFile(u":/pic/images/calibrate.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.calibrate_button.setIcon(icon1)
 
         self.calibrate_gridLayout.addWidget(self.calibrate_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.calibrate_frame)
 
@@ -117,11 +121,12 @@ class Ui_LyricsWindow(object):
         self.account_button.setMaximumSize(QSize(20, 20))
         self.account_button.setFont(font1)
         self.account_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon1 = QIcon()
-        icon1.addFile(u":/pic/images/account.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.account_button.setIcon(icon1)
+        icon2 = QIcon()
+        icon2.addFile(u":/pic/images/account.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.account_button.setIcon(icon2)
 
         self.account_gridLayout.addWidget(self.account_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.account_frame)
 
@@ -141,11 +146,12 @@ class Ui_LyricsWindow(object):
         self.last_button.setMaximumSize(QSize(20, 20))
         self.last_button.setFont(font1)
         self.last_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon2 = QIcon()
-        icon2.addFile(u":/pic/images/last.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.last_button.setIcon(icon2)
+        icon3 = QIcon()
+        icon3.addFile(u":/pic/images/last.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.last_button.setIcon(icon3)
 
         self.last_gridLayout.addWidget(self.last_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.last_frame)
 
@@ -165,11 +171,12 @@ class Ui_LyricsWindow(object):
         self.pause_button.setMaximumSize(QSize(20, 20))
         self.pause_button.setFont(font1)
         self.pause_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon3 = QIcon()
-        icon3.addFile(u":/pic/images/continue.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.pause_button.setIcon(icon3)
+        icon4 = QIcon()
+        icon4.addFile(u":/pic/images/continue.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.pause_button.setIcon(icon4)
 
         self.pause_gridLayout.addWidget(self.pause_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.pause_frame)
 
@@ -189,11 +196,12 @@ class Ui_LyricsWindow(object):
         self.next_button.setMaximumSize(QSize(20, 20))
         self.next_button.setFont(font1)
         self.next_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon4 = QIcon()
-        icon4.addFile(u":/pic/images/next.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.next_button.setIcon(icon4)
+        icon5 = QIcon()
+        icon5.addFile(u":/pic/images/next.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.next_button.setIcon(icon5)
 
         self.next_gridLayout.addWidget(self.next_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.next_frame)
 
@@ -213,11 +221,12 @@ class Ui_LyricsWindow(object):
         self.settings_button.setMaximumSize(QSize(20, 20))
         self.settings_button.setFont(font1)
         self.settings_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon5 = QIcon()
-        icon5.addFile(u":/pic/images/settings.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.settings_button.setIcon(icon5)
+        icon6 = QIcon()
+        icon6.addFile(u":/pic/images/settings.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.settings_button.setIcon(icon6)
 
         self.settings_gridLayout.addWidget(self.settings_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.settings_frame)
 
@@ -237,11 +246,12 @@ class Ui_LyricsWindow(object):
         self.lock_button.setMaximumSize(QSize(20, 20))
         self.lock_button.setFont(font1)
         self.lock_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon6 = QIcon()
-        icon6.addFile(u":/pic/images/lock.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.lock_button.setIcon(icon6)
+        icon7 = QIcon()
+        icon7.addFile(u":/pic/images/lock.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.lock_button.setIcon(icon7)
 
         self.lock_gridLayout.addWidget(self.lock_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.lock_frame)
 
@@ -261,11 +271,12 @@ class Ui_LyricsWindow(object):
         self.translate_button.setMaximumSize(QSize(20, 20))
         self.translate_button.setFont(font1)
         self.translate_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon7 = QIcon()
-        icon7.addFile(u":/pic/images/translate.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.translate_button.setIcon(icon7)
+        icon8 = QIcon()
+        icon8.addFile(u":/pic/images/translate.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.translate_button.setIcon(icon8)
 
         self.translate_gridLayout.addWidget(self.translate_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.translate_frame)
 
@@ -285,11 +296,12 @@ class Ui_LyricsWindow(object):
         self.offsetdown_button.setMaximumSize(QSize(20, 20))
         self.offsetdown_button.setFont(font1)
         self.offsetdown_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon8 = QIcon()
-        icon8.addFile(u":/pic/images/setoffdown.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.offsetdown_button.setIcon(icon8)
+        icon9 = QIcon()
+        icon9.addFile(u":/pic/images/setoffdown.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.offsetdown_button.setIcon(icon9)
 
         self.offsetdown_gridLayout.addWidget(self.offsetdown_button, 0, 1, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.offsetdown_frame)
 
@@ -309,11 +321,12 @@ class Ui_LyricsWindow(object):
         self.offsetup_button.setMaximumSize(QSize(20, 20))
         self.offsetup_button.setFont(font1)
         self.offsetup_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon9 = QIcon()
-        icon9.addFile(u":/pic/images/setoffup.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.offsetup_button.setIcon(icon9)
+        icon10 = QIcon()
+        icon10.addFile(u":/pic/images/setoffup.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.offsetup_button.setIcon(icon10)
 
         self.offsetup_gridLayout.addWidget(self.offsetup_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.offsetup_frame)
 
@@ -333,11 +346,12 @@ class Ui_LyricsWindow(object):
         self.close_button.setMaximumSize(QSize(20, 20))
         self.close_button.setFont(font1)
         self.close_button.setCursor(QCursor(Qt.PointingHandCursor))
-        icon10 = QIcon()
-        icon10.addFile(u":/pic/images/close.png", QSize(), QIcon.Normal, QIcon.Off)
-        self.close_button.setIcon(icon10)
+        icon11 = QIcon()
+        icon11.addFile(u":/pic/images/close.png", QSize(), QIcon.Normal, QIcon.Off)
+        self.close_button.setIcon(icon11)
 
         self.close_gridLayout.addWidget(self.close_button, 0, 0, 1, 1)
+
 
         self.buttons_horizontalLayout.addWidget(self.close_frame)
 
@@ -345,64 +359,62 @@ class Ui_LyricsWindow(object):
 
         self.buttons_horizontalLayout.addItem(self.horizontalSpacer_right)
 
+
         self.background_gridLayout.addWidget(self.buttons_frame, 0, 0, 1, 1)
 
+
         self.main_gridLayout.addWidget(self.background_frame, 0, 0, 1, 1)
+
 
         self.retranslateUi(LyricsWindow)
 
         QMetaObject.connectSlotsByName(LyricsWindow)
-
     # setupUi
 
     def retranslateUi(self, LyricsWindow):
-        LyricsWindow.setWindowTitle(QCoreApplication.translate("LyricsWindow", u"Form", None))
-        # if QT_CONFIG(tooltip)
+        LyricsWindow.setWindowTitle(QCoreApplication.translate("LyricsWindow", u"Lyrics", None))
+#if QT_CONFIG(tooltip)
         self.calibrate_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u6821\u51c6\u6b4c\u8bcd", None))
-        # endif // QT_CONFIG(tooltip)
+#endif // QT_CONFIG(tooltip)
         self.calibrate_button.setText("")
-        # if QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
         self.account_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u7528\u6237\u6388\u6743", None))
-        # endif // QT_CONFIG(tooltip)
+#endif // QT_CONFIG(tooltip)
         self.account_button.setText("")
-        # if QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
         self.last_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u4e0a\u4e00\u9996", None))
-        # endif // QT_CONFIG(tooltip)
+#endif // QT_CONFIG(tooltip)
         self.last_button.setText("")
-        # if QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
         self.pause_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u64ad\u653e/\u6682\u505c", None))
-        # endif // QT_CONFIG(tooltip)
+#endif // QT_CONFIG(tooltip)
         self.pause_button.setText("")
-        # if QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
         self.next_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u4e0b\u4e00\u9996", None))
-        # endif // QT_CONFIG(tooltip)
+#endif // QT_CONFIG(tooltip)
         self.next_button.setText("")
-        # if QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
         self.settings_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u8bbe\u7f6e", None))
-        # endif // QT_CONFIG(tooltip)
+#endif // QT_CONFIG(tooltip)
         self.settings_button.setText("")
-        # if QT_CONFIG(tooltip)
-        self.lock_button.setToolTip(
-            QCoreApplication.translate("LyricsWindow", u"\u9501\u5b9a\u684c\u9762\u6b4c\u8bcd", None))
-        # endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.lock_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u9501\u5b9a\u684c\u9762\u6b4c\u8bcd", None))
+#endif // QT_CONFIG(tooltip)
         self.lock_button.setText("")
-        # if QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
         self.translate_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u5207\u6362\u6b4c\u8bcd", None))
-        # endif // QT_CONFIG(tooltip)
+#endif // QT_CONFIG(tooltip)
         self.translate_button.setText("")
-        # if QT_CONFIG(tooltip)
-        self.offsetdown_button.setToolTip(
-            QCoreApplication.translate("LyricsWindow", u"\u6b4c\u8bcd\u540e\u90000.5s", None))
-        # endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.offsetdown_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u6b4c\u8bcd\u540e\u90000.5s", None))
+#endif // QT_CONFIG(tooltip)
         self.offsetdown_button.setText("")
-        # if QT_CONFIG(tooltip)
-        self.offsetup_button.setToolTip(
-            QCoreApplication.translate("LyricsWindow", u"\u6b4c\u8bcd\u524d\u8fdb0.5s", None))
-        # endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.offsetup_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u6b4c\u8bcd\u524d\u8fdb0.5s", None))
+#endif // QT_CONFIG(tooltip)
         self.offsetup_button.setText("")
-        # if QT_CONFIG(tooltip)
-        self.close_button.setToolTip(
-            QCoreApplication.translate("LyricsWindow", u"\u5173\u95ed\u684c\u9762\u6b4c\u8bcd", None))
-        # endif // QT_CONFIG(tooltip)
+#if QT_CONFIG(tooltip)
+        self.close_button.setToolTip(QCoreApplication.translate("LyricsWindow", u"\u5173\u95ed\u684c\u9762\u6b4c\u8bcd", None))
+#endif // QT_CONFIG(tooltip)
         self.close_button.setText("")
     # retranslateUi
