@@ -10,6 +10,7 @@ from PyQt5.QtWidgets import *
 
 from components.lyric_window_view.raw_ui.LyricsWindow import Ui_LyricsWindow
 from components.lyric_window_view.text_scroll_area import TextScrollArea
+from components.lyric_window_view.lyric_tray_icon import LyricsTrayIcon
 
 
 class LyricsWindowView(QWidget, Ui_LyricsWindow):
@@ -19,6 +20,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         super(LyricsWindowView, self).__init__(parent)
         self.setupUi(self)
         self.installEventFilter(self)  # 初始化事件过滤器
+        self.tray_icon = LyricsTrayIcon(self)
 
         # 界面相关
         self._init_window_shadow()
@@ -83,7 +85,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.buttons_frame.setMouseTracking(True)
 
     def _init_signal(self):
-        self.close_button.clicked.connect(self.close)
+        self.close_button.clicked.connect(self.hide)
         self.lock_button.clicked.connect(self.lock_event)
         self.set_timer_status_signal.connect(lambda flag: self.timer.start() if flag else self.timer.stop())
 
@@ -108,23 +110,27 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.timer.start()
 
     def _init_hotkey(self):
-        self.hotkey_dic = {
-            self.calibrate_button.objectName() : [lambda x: self.calibrate_button.clicked.emit(), ["alt", "r"]],
-            self.lock_button.objectName() : [lambda x: self.lock_button.clicked.emit(), ["alt", "l"]],
-            self.close_button.objectName() : [lambda x: self.close_button.clicked.emit(), ["alt", "x"]],
-            self.translate_button.objectName() : [lambda x: self.translate_button.clicked.emit(), ["alt", "a"]]
-            }
         self.hotkey = SystemHotkey()
-        for value in self.hotkey_dic.values():
-            self.hotkey.register(value[1], callback=value[0])
 
-    def set_hotkey(self, button: QPushButton, hotkeys: list):
-        if button.objectName() in self.hotkey_dic:
-            self.hotkey.unregister(self.hotkey_dic[button.objectName()][1])
-        fun = lambda : button.clicked.emit()
-        self.hotkey_dic[button.objectName()] = [fun, hotkeys]
-        self.hotkey.register(hotkeys, callback=fun)
-            
+        self.hotkey_dic = {
+            self.calibrate_button.objectName(): ("alt", "r"),
+            self.lock_button.objectName(): ("alt", "l"),
+            self.close_button.objectName(): ("alt", "x"),
+            self.translate_button.objectName(): ("alt", "a")
+        }
+
+        for button_name, hot_key in self.hotkey_dic.items():
+            self.hotkey.register(hot_key, callback=self.get_emit_func(button_name))
+
+    def set_hotkey(self, button_name, hotkeys: tuple):
+        old_hotkey = self.hotkey_dic.get(button_name)
+        self.hotkey_dic[button_name] = hotkeys
+        if old_hotkey:
+            self.hotkey.unregister(old_hotkey)
+
+        if hotkeys:
+            self.hotkey.register(hotkeys, callback=self.get_emit_func(button_name))
+
     def set_label_rgb(self, r=86, g=152, b=195):
         stylesheet = f"color:rgb({r}, {g}, {b})"
         self.above_scrollArea.set_label_stylesheet(stylesheet)
@@ -356,6 +362,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def show(self) -> None:
         self.setGeometry(500, 900, self.width(), self.height())
+        self.tray_icon.show()
         super(LyricsWindowView, self).show()
 
     def update_index_timer_event(self):
@@ -383,40 +390,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.lock_button.setHidden(False)
             self.calibrate_button.setHidden(False)
 
+    def get_emit_func(self, button_name_):
+        def emit_func(_):
+            getattr(self, button_name_).clicked.emit()
 
-class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
-    def __init__(self, MainWindow, parent=None):
-        super(LyricsTrayIcon, self).__init__(parent)
-        self.main_window = MainWindow
-        self.createMenu()
-        self.activated.connect(self.clicked)
-
-    def createMenu(self):
-        self.menu = QtWidgets.QMenu()
-        self.showAction = QtWidgets.QAction("Show(&S)", self, triggered=self.show)
-        self.settingsAction = QtWidgets.QAction("Settings(&P)", self, triggered=self.show_settings)
-        self.quitAction = QtWidgets.QAction("Quit(&X)", self, triggered=self.quit)
-
-        self.menu.addAction(self.showAction)
-        self.menu.addAction(self.settingsAction)
-        self.menu.addSeparator()
-        self.menu.addAction(self.quitAction)
-        self.setContextMenu(self.menu)
-
-        self.setIcon(QtGui.QIcon(u":/pic/images/LyricsIcon.png"))
-        self.icon = self.MessageIcon()
-
-    def clicked(self, reason):
-        "1 right click, 2 double left click，3 left click，4 middle click"
-        if reason == 2:
-            self.show()
-
-    def show(self):
-        super(LyricsTrayIcon, self).show()
-        self.main_window.show()
-
-    def show_settings(self):
-        pass
-
-    def quit(self):
-        QtWidgets.qApp.quit()
+        return emit_func
