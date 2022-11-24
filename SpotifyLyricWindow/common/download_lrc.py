@@ -17,15 +17,15 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
 
     # min_score = 74  # 最低相似度评分
 
-    spotify_info = spotify_api.get_song_info(track_id)
+    spotify_info = spotify_api.search_song_info(track_id)
     try:
-        cloud_song_id = cloud_api.search_data(track_name)[0].idOrMd5
-        cloud_song_info = cloud_api.get_song_info(cloud_song_id)
+        cloud_song_id = cloud_api.search_song_id(track_name)[0].idOrMd5
+        cloud_song_info = cloud_api.search_song_info(cloud_song_id)
     except NoneResultError:
         cloud_song_info = cloud_song_id = None
     try:
-        kugou_song_md5 = kugou_api.search_hash(track_name)[0].idOrMd5
-        kugou_song_info = kugou_api.get_song_info(kugou_song_md5)
+        kugou_song_md5 = kugou_api.search_song_id(track_name)[0].idOrMd5
+        kugou_song_info = kugou_api.search_song_info(kugou_song_md5)
     except NoneResultError:
         kugou_song_info = kugou_song_md5 = None
 
@@ -35,17 +35,15 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
 
     if score_kugou >= score_cloud and score_kugou > min_score:
         try:
-            lrc_info = kugou_api.get_lrc_info(kugou_song_md5)[0]
-            lrc = kugou_api.get_lrc(lrc_info)
-            if not lrc.empty():
-                lrc.save_to_mrc(str(file_name))
-                return True
-        except requests.RequestException:
+            lrc = kugou_api.fetch_song_lyric(kugou_song_md5)
+            if lrc.empty():
+                raise NoneResultError
+        except (requests.RequestException, NoneResultError):
             score_kugou = 0
 
     if score_cloud >= score_kugou and score_cloud > min_score:
         try:
-            lrc = cloud_api.get_lrc(cloud_song_id)
+            lrc = cloud_api.fetch_song_lyric(cloud_song_id)
             if not lrc.empty():
                 lrc.save_to_mrc(str(file_name))
                 return True

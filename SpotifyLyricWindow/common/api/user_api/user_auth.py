@@ -20,17 +20,31 @@ class SpotifyUserAuth:
     AUTH_AUTHORIZE_URL = "https://accounts.spotify.com/authorize"
     AUTH_TOKEN_URL = "https://accounts.spotify.com/api/token"
 
-    def __init__(self):
-        self.token_info = None
-        self.state = None
-        self.auth_code = None
-        self.client_id = CLIENT_ID
-        self.client_secret = CLIENT_SECRET
+    _instance = None
+    _is_init = False
 
-        auth = base64.b64encode((CLIENT_ID + ":" + CLIENT_SECRET).encode("ascii"))
-        self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
-        if TOKEN_PATH.exists():
-            self.token_info = eval(TOKEN_PATH.read_text("utf-8"))
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(SpotifyUserAuth, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
+    def __init__(self):
+        if not self._is_init:
+            self.user_token_info = None
+            self.client_token_info = None
+            self.state = None
+            self.auth_code = None
+            self.client_id = CLIENT_ID
+            self.client_secret = CLIENT_SECRET
+
+            auth = base64.b64encode((CLIENT_ID + ":" + CLIENT_SECRET).encode("ascii"))
+            self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
+            if TOKEN_PATH.exists():
+                self.user_token_info = eval(TOKEN_PATH.read_text("utf-8"))
+
+            self._fetch_client_access_token()
+
+            self._is_init = True
 
     @staticmethod
     def _generate_random_state():
@@ -97,39 +111,54 @@ class SpotifyUserAuth:
             "redirect_uri": "http://localhost:8888/callback",
             "grant_type": 'authorization_code'
         }
-        self.token_info = requests.post(self.AUTH_TOKEN_URL, data=form, headers=self.auth_client_header).json()
-        self.token_info["expires_at"] = int(time.time()) + self.token_info["expires_in"]
+        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, data=form, headers=self.auth_client_header).json()
+        self.user_token_info["expires_at"] = int(time.time()) + self.user_token_info["expires_in"]
         self.save_token()
 
     def get_fresh_access_token(self):
-        refresh_token = self.token_info["refresh_token"]
+        refresh_token = self.user_token_info["refresh_token"]
         payloads = {
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
         }
-        self.token_info = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payloads).json()
-        if not self.token_info.get("refresh_token"):
-            self.token_info["refresh_token"] = refresh_token
-        self.token_info["expires_at"] = int(time.time()) + self.token_info["expires_in"]
+        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payloads).json()
+        if not self.user_token_info.get("refresh_token"):
+            self.user_token_info["refresh_token"] = refresh_token
+        self.user_token_info["expires_at"] = int(time.time()) + self.user_token_info["expires_in"]
         self.save_token()
 
     def save_token(self):
-        TOKEN_PATH.write_text(str(self.token_info), encoding="utf-8")
+        TOKEN_PATH.write_text(str(self.user_token_info), encoding="utf-8")
 
     def access_token(self):
-        if not self.token_info:
+        if not self.user_token_info:
             raise NoAuthError("请先引导用户完成验证")
-        if int(time.time()) < self.token_info["expires_at"]:
-            return self.token_info['access_token']
+        if int(time.time()) < self.user_token_info["expires_at"]:
+            return self.user_token_info['access_token']
         else:
             self.get_fresh_access_token()
-            return self.token_info['access_token']
+            return self.user_token_info['access_token']
 
     def auth_main(self):
         """for test"""
         print(self.get_user_auth_url())
         self.receive_user_auth_code()
         self.get_user_access_token()
+
+    def get_client_token(self):
+        if self.client_token_info["expires_at"] > int(time.time()):
+            return self.client_token_info["access_token"]
+        else:
+            self._fetch_client_access_token()
+            return self.client_token_info["access_token"]
+
+    def _fetch_client_access_token(self):
+        """获取token"""
+        payload = {"grant_type": "client_credentials"}
+        response = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payload)
+        response.raise_for_status()
+        self.client_token_info = response.json()
+        self.client_token_info["expires_at"] = int(time.time()) + self.client_token_info["expires_in"]
 
 
 if __name__ == "__main__":
@@ -138,7 +167,7 @@ if __name__ == "__main__":
     print(tt.get_user_auth_url())
     print(tt.receive_user_auth_code())
     tt.get_user_access_token()
-    print(tt.token_info)
+    print(tt.user_token_info)
     # print(tt.get_fresh_access_token())
     # tt.get_fresh_access_token()
     input()
