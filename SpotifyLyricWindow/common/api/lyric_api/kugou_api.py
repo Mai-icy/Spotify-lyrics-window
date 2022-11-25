@@ -70,7 +70,7 @@ class KugouApi(BaseMusicApi):
             "singer": song_json["author_name"],
             "songName": song_json["songName"],
             "album": album,
-            "year": year[:4],
+            "year": year[:4] if year else None,
             "trackNumber": None,
             "duration": f'{duration // 60}:{duration % 60 // 10}{duration % 10}',
             "genre": None,
