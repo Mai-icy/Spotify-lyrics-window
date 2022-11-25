@@ -18,7 +18,12 @@ class Config:
         shadow_color: str
 
     class HotkeyConfig:
-        ...
+        is_enable: bool = True
+
+        calibrate_button: tuple = ("alt", "r")
+        lock_button: tuple = ("alt", "l")
+        close_button: tuple = ("alt", "x")
+        translate_button: tuple = ("alt", "a")
 
     @classmethod
     def read_config(cls):
@@ -64,4 +69,4 @@ Config.read_config()
 
 
 if __name__ == '__main__':
-    ...
+    Config.save_config()

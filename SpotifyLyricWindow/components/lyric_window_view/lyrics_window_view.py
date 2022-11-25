@@ -8,6 +8,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from common.config import Config
 from components.lyric_window_view.raw_ui.LyricsWindow import Ui_LyricsWindow
 from components.lyric_window_view.text_scroll_area import TextScrollArea
 from components.lyric_window_view.lyric_tray_icon import LyricsTrayIcon
@@ -112,24 +113,28 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def _init_hotkey(self):
         self.hotkey = SystemHotkey()
 
-        self.hotkey_dic = {
-            self.calibrate_button.objectName(): ("alt", "r"),
-            self.lock_button.objectName(): ("alt", "l"),
-            self.close_button.objectName(): ("alt", "x"),
-            self.translate_button.objectName(): ("alt", "a")
+        self.signal_dic = {
+            "calibrate_button": self.calibrate_button.clicked,
+            "lock_button": self.lock_button.clicked,
+            "close_button": self.close_button.clicked,
+            "translate_button":  self.translate_button.clicked
         }
 
-        for button_name, hot_key in self.hotkey_dic.items():
-            self.hotkey.register(hot_key, callback=self.get_emit_func(button_name))
+        if Config.HotkeyConfig.is_enable:
+            for key in self.signal_dic.keys():
+                hotkeys = getattr(Config.HotkeyConfig, key)
+                if hotkeys:
+                    self.hotkey.register(hotkeys,
+                                         callback=self.get_emit_func(self.signal_dic[key]))
 
-    def set_hotkey(self, button_name, hotkeys: tuple):
-        old_hotkey = self.hotkey_dic.get(button_name)
-        self.hotkey_dic[button_name] = hotkeys
+    def set_hotkey(self, signal_key, hotkeys: tuple):
+        old_hotkey = getattr(Config.HotkeyConfig, signal_key)
+        setattr(Config.HotkeyConfig, signal_key, hotkeys)
         if old_hotkey:
             self.hotkey.unregister(old_hotkey)
 
         if hotkeys:
-            self.hotkey.register(hotkeys, callback=self.get_emit_func(button_name))
+            self.hotkey.register(hotkeys, callback=self.get_emit_func(self.signal_dic[signal_key]))
 
     def set_label_rgb(self, r=86, g=152, b=195):
         stylesheet = f"color:rgb({r}, {g}, {b})"
@@ -390,8 +395,9 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.lock_button.setHidden(False)
             self.calibrate_button.setHidden(False)
 
-    def get_emit_func(self, button_name_):
+    @staticmethod
+    def get_emit_func(signal):
         def emit_func(_):
-            getattr(self, button_name_).clicked.emit()
+            signal.emit()
 
         return emit_func
