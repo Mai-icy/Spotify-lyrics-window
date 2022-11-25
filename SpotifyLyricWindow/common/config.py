@@ -6,10 +6,16 @@ import rtoml
 
 class Config:
 
+    class CommonConfig:
+        pos_x: int = 500
+        pos_y: int = 900
+        width: int = 800
+        height: int = 150
+
     class LyricConfig:
         trans_type: int = 0
 
-        font: str = "微软雅黑"
+        font_family: str = "微软雅黑"
         font_size: int = 25
 
         is_always_front: bool = True

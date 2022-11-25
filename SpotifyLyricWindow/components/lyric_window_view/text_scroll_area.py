@@ -81,9 +81,9 @@ class TextScrollArea(QScrollArea):
             self._is_roll = True
         self._set_label_size()
 
-    def setCursor(self, UnionQCursor=None):
-        self._lyrics_label.setCursor(UnionQCursor)
-        return super().setCursor(UnionQCursor)
+    def setCursor(self, Union, QCursor=None, Qt_CursorShape=None):
+        self._lyrics_label.setCursor(Union)
+        return super().setCursor(Union)
 
     def set_label_stylesheet(self, stylesheet):
         self._lyrics_label.setStyleSheet(stylesheet)

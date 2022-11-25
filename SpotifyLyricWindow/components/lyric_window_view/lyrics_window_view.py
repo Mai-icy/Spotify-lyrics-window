@@ -47,6 +47,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def _init_main_window(self):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
         self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.above_scrollArea = TextScrollArea(self.lyrics_frame1)
         self.lyrics_gridLayout1.addWidget(self.above_scrollArea)
@@ -61,9 +62,12 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.set_shadow_rgb(Config.LyricConfig.shadow_color)
 
     def _init_font(self):
+        family = Config.LyricConfig.font_family
+        height = Config.CommonConfig.height
+
         self.font = QtGui.QFont()
-        self.font.setFamily("微软雅黑")
-        self.font.setPixelSize(int((self.height() - 30) / 3))
+        self.font.setFamily(family)
+        self.font.setPixelSize(int((height - 30) / 3))
         self.above_scrollArea.set_font(self.font)
         self.below_scrollArea.set_font(self.font)
 
@@ -171,13 +175,10 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
         Config.LyricConfig.rgb_style = color
 
-    def set_transparent(self, flag):
-        self.set_button_hide(flag)
-        style_hide_sheet = "*{border:none;}"
-        style_show_sheet = "*{border:none;}#background_frame{background-color: rgba(0,0,0,0.2);}"
-
-        now_sheet = style_hide_sheet if flag else style_show_sheet
-        self.setStyleSheet(now_sheet)
+    def set_font_family(self, family: str):
+        self.font.setFamily(family)
+        self.above_scrollArea.set_font(self.font)
+        self.below_scrollArea.set_font(self.font)
 
     def set_button_hide(self, flag):
         self.close_button.setHidden(flag)
@@ -230,6 +231,19 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.move_step = get_move_step(self.below_scrollArea.text_width)
         self.begin_index = (0.5 * (1 - self.roll_time_rate) * self.roll_time) // self.time_step
 
+    def _set_font_size(self, size: int):
+        self.font.setPixelSize(size)
+        self.above_scrollArea.set_font(self.font)
+        self.below_scrollArea.set_font(self.font)
+
+    def _set_transparent(self, flag):
+        self.set_button_hide(flag)
+        style_hide_sheet = "*{border:none;}"
+        style_show_sheet = "*{border:none;}#background_frame{background-color: rgba(0,0,0,0.2);}"
+
+        now_sheet = style_hide_sheet if flag else style_show_sheet
+        self.setStyleSheet(now_sheet)
+
     def _get_text_width(self, text):
         # 计算文本的总宽度
         song_font_metrics = QFontMetrics(self.font)
@@ -238,14 +252,14 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def enterEvent(self, event):
         # 定义鼠标移入事件,显示按钮,设置半透明背景
         if not self._is_locked:
-            self.set_transparent(False)
+            self._set_transparent(False)
             event.accept()
 
     def leaveEvent(self, event):
         # 定义鼠标移出事件,隐藏按钮,设置背景透明
         self._time_count_out = 0
         if not self._is_locked:
-            self.set_transparent(True)
+            self._set_transparent(True)
             event.accept()
 
     def mouseReleaseEvent(self, QMouseEvent):
@@ -386,8 +400,9 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                         pos.x(),
                         self.height() - pos.y())
 
-        # 更改字体大小
-        self._init_font()
+        if self._drag:
+            # 更改字体大小
+            self._set_font_size(int((self.height() - 30) / 3))
 
         # 判断缩放后是否开启滚动并更改文本label大小
         self.above_scrollArea.resize_label(self._get_text_width(self.above_scrollArea.text))
@@ -396,9 +411,25 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         QMouseEvent.accept()
 
     def show(self) -> None:
-        self.setGeometry(500, 900, self.width(), self.height())
+        pos_config = Config.CommonConfig
+        self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
         self.tray_icon.show()
         super(LyricsWindowView, self).show()
+
+    def hide(self):
+        self.renew_pos_config()
+        return super(LyricsWindowView, self).hide()
+
+    def close(self):
+        self.renew_pos_config()
+        Config.save_config()
+        return super(LyricsWindowView, self).close()
+    
+    def renew_pos_config(self):
+        Config.CommonConfig.pos_x = self.pos().x()
+        Config.CommonConfig.pos_y = self.pos().y()
+        Config.CommonConfig.width = self.width()
+        Config.CommonConfig.height = self.height()
 
     def update_index_timer_event(self):
         self.above_scrollArea.update_index(self.begin_index, self.move_step)
@@ -417,11 +448,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         if self._is_locked:
             self._is_locked = False
             self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lock.png"))
-            self.set_transparent(False)
+            self._set_transparent(False)
         else:
             self._is_locked = True
             self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lockopen.png"))
-            self.set_transparent(True)
+            self._set_transparent(True)
             self.lock_button.setHidden(False)
             self.calibrate_button.setHidden(False)
 
