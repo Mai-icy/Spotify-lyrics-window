@@ -1,4 +1,5 @@
 /SpotifyLyricWindow/resource/client_id_secret.json
+/SpotifyLyricWindow/resource/setting.toml
 /SpotifyLyricWindow/resource/token
 /SpotifyLyricWindow/download/
 */.idea/
