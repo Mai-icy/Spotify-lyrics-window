@@ -38,11 +38,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.set_button_hide(True)
 
     def _init_window_shadow(self):
-        effect_shadow = QtWidgets.QGraphicsDropShadowEffect(self)
-        effect_shadow.setOffset(0, 0)  # 偏移
-        effect_shadow.setBlurRadius(10)  # 阴影半径
-        effect_shadow.setColor(QtCore.Qt.gray)  # 阴影颜色
-        self.background_frame.setGraphicsEffect(effect_shadow)
+        self.effect_shadow = QtWidgets.QGraphicsDropShadowEffect(self)
+        self.effect_shadow.setOffset(0, 0)  # 偏移
+        self.effect_shadow.setBlurRadius(10)  # 阴影半径
+        # self.effect_shadow.setColor(QtCore.Qt.gray)  # 阴影颜色
+        self.background_frame.setGraphicsEffect(self.effect_shadow)
 
     def _init_main_window(self):
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
@@ -54,7 +54,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
 
-        self.set_label_rgb()
+        if Config.LyricConfig.rgb_style:
+            self.set_rgb_style(Config.LyricConfig.rgb_style)
+        else:
+            self.set_lyrics_rgb(Config.LyricConfig.lyric_color)
+            self.set_shadow_rgb(Config.LyricConfig.shadow_color)
 
     def _init_font(self):
         self.font = QtGui.QFont()
@@ -136,10 +140,36 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         if hotkeys:
             self.hotkey.register(hotkeys, callback=self.get_emit_func(self.signal_dic[signal_key]))
 
-    def set_label_rgb(self, r=86, g=152, b=195):
-        stylesheet = f"color:rgb({r}, {g}, {b})"
+    def set_lyrics_rgb(self, rgb: tuple):
+        stylesheet = f"color:rgb{rgb}"
         self.above_scrollArea.set_label_stylesheet(stylesheet)
         self.below_scrollArea.set_label_stylesheet(stylesheet)
+
+        Config.LyricConfig.lyric_color = rgb
+
+    def set_shadow_rgb(self, rgb: tuple):
+        color = QColor(*rgb)
+        self.effect_shadow.setColor(color)
+
+        Config.LyricConfig.shadow_color = rgb
+
+    def set_rgb_style(self, color: str):
+        style_dict = {
+            # color   lyrics_color    shadow_color
+            "blue": ((86, 152, 195), (190, 190, 190)),
+            "red": ((255, 77, 109),	(150, 150, 150)),
+            "violet": ((153, 111, 214),	(190, 190, 190)),
+            "green": ((152, 201, 163), (190, 190, 190)),
+            "orange": ((255, 119, 61), (120, 120, 120)),
+            "yellow": ((255, 225, 80), (150, 150, 150)),
+            "brown": ((176, 137, 104), (150, 150, 150)),
+            "cyan": ((61, 204, 199), (120, 120, 120)),
+            "pink": ((237, 178, 209), (120, 120, 120))
+        }
+        self.set_lyrics_rgb(style_dict[color][0])
+        self.set_shadow_rgb(style_dict[color][1])
+
+        Config.LyricConfig.rgb_style = color
 
     def set_transparent(self, flag):
         self.set_button_hide(flag)

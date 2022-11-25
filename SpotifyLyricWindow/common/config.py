@@ -14,8 +14,9 @@ class Config:
 
         is_always_front: bool = True
 
-        lyric_color: str
-        shadow_color: str
+        rgb_style: str = "blue"
+        lyric_color: tuple = (86, 152, 195)
+        shadow_color: tuple = (190, 190, 190)
 
     class HotkeyConfig:
         is_enable: bool = True
