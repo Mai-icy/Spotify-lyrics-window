@@ -82,7 +82,6 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         ]
 
         self.move_DragPosition = 0
-        self.pos_x_list = []
 
     def _init_mouse_track(self):
         self.setMouseTracking(True)
@@ -276,92 +275,48 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         # 重写鼠标移动的事件
         self._time_count_in = 0
         pos = event.pos()  # QMouseEvent.pos()获取相对位置
-        width = self.width()
-        height = self.height()
 
         if not self._clicked:
-            x = pos.x()
-            y = pos.y()
-
-            #  index     0    1           2
-            x_list = (-10, 10, width - 10,  width + 10)
-            y_list = (-10, 10, height - 10, height + 10)
-
-            for i in range(3):
-                if x_list[i] < x:
-                    self.x_index = i
-
-            for i in range(3):
-                if y_list[i] < y:
-                    self.y_index = i
-
+            self._update_pos_index(pos)
             if self.y_index == self.x_index == 1 and self._is_locked:
                 self.set_cursor_icon(Qt.ArrowCursor)
             if not self._is_locked:
                 self.set_cursor_icon(self._drag_cursor[self.y_index][self.x_index])
 
         if self._clicked:
-            # 右下
-            if self.y_index == self.x_index == 2:
-                self.resize(pos.x(), pos.y())
-            # 左上
-            elif self.y_index == self.x_index == 0:
-                if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                        or (self.height() == self.maximumHeight() and pos.y() < 0)):
-                    self.setGeometry(
-                        self.geometry().x(),
-                        self.geometry().y() + pos.y(),
-                        self.width(),
-                        self.height() - pos.y())
-                if not (self.width() == self.minimumWidth() and pos.x() > 0):
-                    self.setGeometry(
-                        self.geometry().x() + pos.x(),
-                        self.geometry().y(),
-                        self.width() - pos.x(),
-                        self.height())
-            # 下
-            elif self.x_index == 1 and self.y_index == 2:
-                self.resize(self.width(), pos.y())
-            # 上
-            elif self.x_index == 1 and self.y_index == 0:
-                if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                        or (self.height() == self.maximumHeight() and pos.y() < 0)):
-                    self.setGeometry(
-                        self.geometry().x(),
-                        self.geometry().y() + pos.y(),
-                        self.width(),
-                        self.height() - pos.y())
-            # 右
-            elif self.x_index == 2 and self.y_index == 1:
-                self.resize(pos.x(), self.height())
-            # 左
-            elif self.x_index == 0 and self.y_index == 1:
-                if not (self.width() == self.minimumWidth() and pos.x() > 0):
-                    self.setGeometry(
-                        self.geometry().x() + pos.x(),
-                        self.geometry().y(),
-                        self.width() - pos.x(),
-                        self.height())
-            # 左下
-            elif self.x_index == 0 and self.y_index == 2:
-                if not (self.width() == self.minimumWidth() and pos.x() > 0):
-                    self.setGeometry(
-                        self.geometry().x() + pos.x(),
-                        self.geometry().y(),
-                        self.width() - pos.x(),
-                        pos.y())
-            # 右上
-            elif self.x_index == 2 and self.y_index == 0:
-                if not ((self.height() == self.minimumHeight() and pos.y() > 0)
-                        or (self.height() == self.maximumHeight() and pos.y() < 0)):
-                    self.setGeometry(
-                        self.geometry().x(),
-                        self.geometry().y() + pos.y(),
-                        pos.x(),
-                        self.height() - pos.y())
-            else:
+            if self.x_index == self.y_index == 1:  # 中间 (1, 1)
+                # 拖动窗口 不改变大小
                 if self.move_DragPosition:
                     self.move(event.globalPos() - self.move_DragPosition)
+            elif self.x_index + self.y_index >= 3:  # 右下角 或者 下 或者 右 [(2, 2), (1, 2), (2, 1)]
+                # x_index为2 代表宽度(右边)被拖动  y_index为2 代表高度(下边)被拖动。 如果被拖动，使用光标的值
+                height = pos.y() if self.y_index == 2 else self.height()
+                width_ = pos.x() if self.x_index == 2 else self.width()
+                self.resize(width_, height)
+            else:  # 左上角 或者 上 或者 左 或者 右上角 或者 左下角[(0, 0), (1, 0), (0, 1), (2, 0), (0, 2)]
+                # 由于Qt特性 窗口扩大只支持右下方，故涉及 左 以及 上 的拖动需要先设置位置，再设置大小
+                if self.x_index == 0:  # 左端被拉动
+                    # 如果下端被拉动，则使用光标的y坐标 即(0, 2)
+                    new_geometry_y = pos.y() if self.y_index == 2 else self.height()
+
+                    if not (self.width() == self.minimumWidth() and pos.x() > 0):
+                        self.setGeometry(
+                            self.geometry().x() + pos.x(),
+                            self.geometry().y(),
+                            self.width() - pos.x(),
+                            new_geometry_y)
+
+                if self.y_index == 0:  # 上端被拉动
+                    # 如果右端被拉动，则使用光标的y坐标 即(2, 0)
+                    new_geometry_x = pos.x() if self.x_index == 2 else self.width()
+
+                    if not ((self.height() == self.minimumHeight() and pos.y() > 0)
+                            or (self.height() == self.maximumHeight() and pos.y() < 0)):
+                        self.setGeometry(
+                            self.geometry().x(),
+                            self.geometry().y() + pos.y(),
+                            new_geometry_x,
+                            self.height() - pos.y())
 
             # 更改字体大小
             self.set_font_size(int((self.height() - 30) / 3))
@@ -405,6 +360,22 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             elif self._time_count_out * self._time_step >= 1000:
                 self.lock_button.setHidden(False)
                 self.calibrate_button.setHidden(False)
+
+    def _update_pos_index(self, pos: QPoint):
+        # index  n/a  0   1                  2                n/a
+        x_list = (-10, 10, self.width() - 10, self.width() + 10)
+        y_list = (-10, 10, self.height() - 10, self.height() + 10)
+
+        x = pos.x()
+        y = pos.y()
+
+        for i in range(3):
+            if x_list[i] < x:
+                self.x_index = i
+
+        for i in range(3):
+            if y_list[i] < y:
+                self.y_index = i
 
     def lock_event(self):
         if self._is_locked:
