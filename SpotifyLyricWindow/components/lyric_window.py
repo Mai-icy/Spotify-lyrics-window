@@ -17,6 +17,7 @@ from PyQt5.QtCore import *
 
 from components.work_thread import thread_drive
 
+from common.config import Config
 from common.api.user_api import SpotifyUserApi, UserCurrentPlaying
 from common.api.api_error import UserError, NoPermission
 from common.player.lyric_player import LrcPlayer, TransType
@@ -56,7 +57,7 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth = SpotifyUserApi()
         self._init_signal()
 
-        self.user_trans = TransType.NON
+        self.user_trans = TransType(Config.LyricConfig.trans_type)
 
         self.delay_timer = QTimer()
         self.delay_timer.setSingleShot(True)
@@ -75,15 +76,15 @@ class LyricsWindow(LyricsWindowView):
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
         self.translate_button.clicked.connect(self.change_trans_button_event)
 
-        self.text_show_signal.connect(self.set_text)
+        self.text_show_signal.connect(lambda row, text, roll_time: self.set_lyrics_text(row, text, roll_time=roll_time))
 
         self.error_msg_show_signal.connect(self.error_msg_show_event)
         self.song_done_calibration_signal.connect(lambda: self.calibration_event(use_api_offset=True))
 
     def error_msg_show_event(self, error):
         self.lrc_player.is_pause = True
-        self.set_text(1, str(error), 0)
-        self.set_text(2, "Σっ°Д°;)っ!", 0)
+        self.set_lyrics_text(1, str(error))
+        self.set_lyrics_text(2, "Σっ°Д°;)っ!")
         if isinstance(error, NoPermission):
             self.delay_timer.start(2000)
             self.delay_timer.timeout.connect(self.calibration_event)
@@ -99,26 +100,26 @@ class LyricsWindow(LyricsWindowView):
     def _download_lyric(self, user_current: UserCurrentPlaying) -> UserCurrentPlaying:
         found_data = self.lrc_player.get_not_found_file(user_current.track_id)
         if found_data and int(time.time()) - found_data["last_time"] < 24 * 3600:
-            self.set_text(1, f"{user_current.track_name} - {user_current.artist}", 0)
-            self.set_text(2, f"no lyric found", 0)
+            self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
+            self.set_lyrics_text(2, f"no lyric found")
             return self._refresh_player_track(no_lyric=True)
         else:
-            self.set_text(1, "searching for lyric!", 0)
-            self.set_text(2, f"(〃'▽'〃)", 0)
+            self.set_lyrics_text(1, "searching for lyric!")
+            self.set_lyrics_text(2, f"(〃'▽'〃)")
             try:
                 if not download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id):
                     self.lrc_player.set_not_found_file(user_current.track_id,
                                                        f"{user_current.track_name} - {user_current.artist}")
-                    self.set_text(1, f"{user_current.track_name} - {user_current.artist}", 0)
-                    self.set_text(2, f"no lyric found", 0)
+                    self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
+                    self.set_lyrics_text(2, f"no lyric found")
                     return self._refresh_player_track(no_lyric=True)
             except requests.RequestException:
                 # TODO 归并错误
                 print("TOTOTOTOTOTOTOTO DOOOOO ITTTTTTTTTTTTTT!!!!!!")
                 self.lrc_player.set_not_found_file(user_current.track_id,
                                                    f"{user_current.track_name} - {user_current.artist}")
-                self.set_text(1, f"{user_current.track_name} - {user_current.artist}", 0)
-                self.set_text(2, f"no lyric found", 0)
+                self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
+                self.set_lyrics_text(2, f"no lyric found")
                 return self._refresh_player_track(no_lyric=True)
             # 成功下载
             return self._refresh_player_track()
@@ -128,16 +129,16 @@ class LyricsWindow(LyricsWindowView):
     def calibration_event(self, *_, use_api_offset=False):
         self.lrc_player.is_pause = True
         # self.calibrate_button.setEnabled(False)
-        self.set_text(1, "calibrating！", 0)
-        self.set_text(2, " (o゜▽゜)o!", 0)
+        self.set_lyrics_text(1, "calibrating！")
+        self.set_lyrics_text(2, " (o゜▽゜)o!")
         user_current = self.spotify_auth.get_current_playing()
 
         self.set_pause_button_icon(user_current.is_playing)
         self.set_rolling(user_current.is_playing)
 
         if user_current.track_name == "ad":
-            self.set_text(1, "Advertising！", 0)
-            self.set_text(2, "o(_ _)ozzZZ", 0)
+            self.set_lyrics_text(1, "Advertising！")
+            self.set_lyrics_text(2, "o(_ _)ozzZZ")
             self.lrc_player.is_pause = False
             self._refresh_player_track(user_current, no_lyric=True)
             self.lrc_player.restart_thread(0)
@@ -202,25 +203,26 @@ class LyricsWindow(LyricsWindowView):
             index_ = (ava_trans.index(self.lrc_player.trans_mode) + 1) % len(ava_trans)
             self.lrc_player.set_trans_mode(ava_trans[index_])
             self.user_trans = self.lrc_player.trans_mode
+            Config.LyricConfig.trans_type = self.user_trans.value
 
     @thread_drive(None)
     @CatchError
     def user_auth_button_event(self, *_):
         self.lrc_player.is_pause = True
 
-        self.set_text(1, "正在获取授权链接", 0)
-        self.set_text(2, "(灬°ω°灬)", 0)
+        self.set_lyrics_text(1, "正在获取授权链接")
+        self.set_lyrics_text(2, "(灬°ω°灬)")
 
         auth_url = self.spotify_auth.auth.get_user_auth_url()
         webbrowser.open_new(auth_url)
-        self.set_text(1, "请根据页面完成授权", 0)
-        self.set_text(2, "ヾ(≧ ▽ ≦)ゝ", 0)
+        self.set_lyrics_text(1, "请根据页面完成授权")
+        self.set_lyrics_text(2, "ヾ(≧ ▽ ≦)ゝ")
 
         self.spotify_auth.auth.receive_user_auth_code()
-        self.set_text(1, "正在获取验证", 0)
-        self.set_text(2, "ヾ(≧ ▽ ≦)ゝ", 0)
+        self.set_lyrics_text(1, "正在获取验证")
+        self.set_lyrics_text(2, "ヾ(≧ ▽ ≦)ゝ")
         self.spotify_auth.auth.get_user_access_token()
-        self.set_text(1, "验证成功！", 0)
+        self.set_lyrics_text(1, "验证成功！")
         self.calibration_event()
 
 

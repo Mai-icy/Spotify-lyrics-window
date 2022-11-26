@@ -122,18 +122,18 @@ class LrcPlayer:
         if mode == TransType.CHINESE and len(self.lrc_file.trans_chinese_dict) == 0:
             return False
         if mode == TransType.NON:
-            self.lyrics_window.set_text(2, "", 0)
+            self.lyrics_window.set_lyrics_text(2, "")
         else:
             time_stamp = self.lrc_file.get_time(self.order)
             if time_stamp == -2:
                 # todo
                 print("TODO TODO")
             elif mode == TransType.ROMAJI:
-                self.lyrics_window.set_text(2, self.lrc_file.trans_romaji_dict[time_stamp], 0)
-                self.lyrics_window.set_text(1, self.lrc_file.trans_non_dict[time_stamp], 0)
+                self.lyrics_window.set_lyrics_text(2, self.lrc_file.trans_romaji_dict[time_stamp])
+                self.lyrics_window.set_lyrics_text(1, self.lrc_file.trans_non_dict[time_stamp])
             elif mode == TransType.CHINESE:
-                self.lyrics_window.set_text(2, self.lrc_file.trans_chinese_dict[time_stamp], 0)
-                self.lyrics_window.set_text(1, self.lrc_file.trans_non_dict[time_stamp], 0)
+                self.lyrics_window.set_lyrics_text(2, self.lrc_file.trans_chinese_dict[time_stamp])
+                self.lyrics_window.set_lyrics_text(1, self.lrc_file.trans_non_dict[time_stamp])
         self.trans_mode = mode
 
         # self.restart_thread()
