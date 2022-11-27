@@ -59,29 +59,30 @@ class SpotifyUserApi:
             raise NoDevicesError("No device available!")
 
     def set_user_pause(self):
-        return self._player_http("put", "pause", device_id=self._get_user_devices()).json()
+        self._player_http("put", "pause", device_id=self._get_user_devices())
 
     def set_user_resume(self):
-        return self._player_http("put", "play", device_id=self._get_user_devices()).json()
+        self._player_http("put", "play", device_id=self._get_user_devices())
 
     def set_user_next(self):
-        return self._player_http("post", "next", device_id=self._get_user_devices()).json()
+        self._player_http("post", "next", device_id=self._get_user_devices())
 
     def set_user_previous(self):
-        return self._player_http("post", "previous", device_id=self._get_user_devices()).json()
+        self._player_http("post", "previous", device_id=self._get_user_devices())
 
     def seek_to_position(self, position_ms):
-        return self._player_http("put", "seek", device_id=self._get_user_devices(), position_ms=position_ms).json()
+        self._player_http("put", "seek", device_id=self._get_user_devices(), position_ms=position_ms)
 
     def _player_http(self, method, url_suffix, **kwargs):
         url = self.USER_PLAYER_URL + url_suffix
         func = getattr(requests, method)
         res = func(url, headers=self._get_auth_header(), params=kwargs)
-        if res.status_code == 204:
+        if res.status_code == 204 and url_suffix == "get_current_playing":
             raise NoActiveUser("no user active")
-        res_json = res.json()
-        if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
-            raise NoPermission("Premium required!")
+        if res.status_code == 200:
+            res_json = res.json()
+            if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
+                raise NoPermission("Premium required!")
         return res
 
 
