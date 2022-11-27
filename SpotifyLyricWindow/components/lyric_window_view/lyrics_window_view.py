@@ -136,7 +136,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             "calibrate_button": self.calibrate_button.clicked,
             "lock_button": self.lock_button.clicked,
             "close_button": self.close_button.clicked,
-            "translate_button": self.translate_button.clicked
+            "translate_button": self.translate_button.clicked,
+            "next_button": self.next_button.clicked,
+            "last_button": self.last_button.clicked,
+            "pause_button": self.pause_button.clicked,
+            "show_window": self.tray_icon.showAction.triggered
         }
         # 导入配置
         if Config.HotkeyConfig.is_enable:

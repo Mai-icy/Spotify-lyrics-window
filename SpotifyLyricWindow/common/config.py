@@ -31,6 +31,10 @@ class Config:
         lock_button: tuple = ("alt", "l")
         close_button: tuple = ("alt", "x")
         translate_button: tuple = ("alt", "a")
+        next_button: tuple = ("alt", "right")
+        last_button: tuple = ("alt", "left")
+        pause_button: tuple = ("alt", "p")
+        show_window: tuple = ("alt", "s")
 
     @classmethod
     def read_config(cls):
