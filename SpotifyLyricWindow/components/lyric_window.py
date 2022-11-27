@@ -134,7 +134,7 @@ class LyricsWindow(LyricsWindowView):
         user_current = self.spotify_auth.get_current_playing()
 
         self.set_pause_button_icon(user_current.is_playing)
-        self.set_rolling(user_current.is_playing)
+        self.set_lyrics_rolling(user_current.is_playing)
 
         if user_current.track_name == "ad":
             self.set_lyrics_text(1, "Advertising！")
@@ -189,12 +189,12 @@ class LyricsWindow(LyricsWindowView):
             self.spotify_auth.set_user_pause()
             self.calibration_event()
             self.set_pause_button_icon(False)
-            self.set_rolling(False)
+            self.set_lyrics_rolling(False)
         else:
             self.spotify_auth.set_user_resume()
             self.calibration_event()
             self.set_pause_button_icon(True)
-            self.set_rolling(True)
+            self.set_lyrics_rolling(True)
 
     @CatchError
     def change_trans_button_event(self, *_):

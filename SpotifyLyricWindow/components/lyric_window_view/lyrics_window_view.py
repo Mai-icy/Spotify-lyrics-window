@@ -24,7 +24,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.tray_icon = LyricsTrayIcon(self)
 
         # 界面相关
-        self._init_window_shadow()
+        self._init_lyrics_shadow()
         self._init_main_window()
         self._init_font()
 
@@ -37,7 +37,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
         self.set_button_hide(True)
 
-    def _init_window_shadow(self):
+    def _init_lyrics_shadow(self):
+        """初始化歌词阴影"""
         self.effect_shadow = QtWidgets.QGraphicsDropShadowEffect(self)
         self.effect_shadow.setOffset(0, 0)  # 偏移
         self.effect_shadow.setBlurRadius(10)  # 阴影半径
@@ -45,6 +46,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.background_frame.setGraphicsEffect(self.effect_shadow)
 
     def _init_main_window(self):
+        """初始化界面控件以及属性"""
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setAttribute(Qt.WA_DeleteOnClose)
@@ -55,6 +57,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
 
+        # 导入配置
         if Config.LyricConfig.rgb_style:
             self.set_rgb_style(Config.LyricConfig.rgb_style)
         else:
@@ -62,6 +65,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.set_shadow_rgb(Config.LyricConfig.shadow_color)
 
     def _init_font(self):
+        """初始化字体 字体类型 以及 大小"""
+        # 导入配置
         family = Config.LyricConfig.font_family
         height = Config.CommonConfig.height
 
@@ -72,9 +77,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.below_scrollArea.set_font(self.font)
 
     def _init_window_drag_flag(self):
+        """拖动相关变量初始化"""
         self._clicked = False
 
         self.x_index = self.y_index = -1
+        # 在各个方向的 Qt.CursorShape
         self._drag_cursor = [
             (Qt.SizeFDiagCursor, Qt.SizeVerCursor, Qt.SizeBDiagCursor),
             (Qt.SizeHorCursor,   Qt.SizeAllCursor, Qt.SizeHorCursor),
@@ -84,6 +91,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.move_DragPosition = 0
 
     def _init_mouse_track(self):
+        """设置鼠标跟踪"""
         self.setMouseTracking(True)
         self.background_frame.setMouseTracking(True)
         self.lyrics_frame1.setMouseTracking(True)
@@ -93,16 +101,19 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.buttons_frame.setMouseTracking(True)
 
     def _init_signal(self):
+        """初始化基本信号连接"""
         self.close_button.clicked.connect(self.hide)
-        self.lock_button.clicked.connect(self.lock_event)
+        self.lock_button.clicked.connect(self._lock_event)
         self.set_timer_status_signal.connect(lambda flag: self.timer.start() if flag else self.timer.stop())
 
     def _init_window_lock_flag(self):
+        """初始化锁定相关变量"""
         self._is_locked = False
         self._time_count_out = 0
         self._time_count_in = 0
 
     def _init_roll(self):
+        """初始化滚动相关变量"""
         self._time_step = 20  # 刷新时间间隔
         self._move_step = 1  # 步长
         self._roll_time = 0
@@ -114,10 +125,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
         self.timer = QTimer()
         self.timer.setInterval(self._time_step)
-        self.timer.timeout.connect(self.update_index_timer_event)
+        self.timer.timeout.connect(self._update_index_timer_event)
         self.timer.start()
 
     def _init_hotkey(self):
+        """初始化快捷键"""
         self.hotkey = SystemHotkey()
 
         self.signal_dic = {
@@ -126,7 +138,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             "close_button": self.close_button.clicked,
             "translate_button": self.translate_button.clicked
         }
-
+        # 导入配置
         if Config.HotkeyConfig.is_enable:
             for key in self.signal_dic.keys():
                 hotkeys = getattr(Config.HotkeyConfig, key)
@@ -134,29 +146,53 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                     self.hotkey.register(hotkeys,
                                          callback=self.get_emit_func(self.signal_dic[key]))
 
-    def set_signal_hotkey(self, signal_key, hotkeys: tuple):
+    def set_signal_hotkey(self, signal_key: str, hotkeys: tuple):
+        """
+        设置绑定 快捷键 以触发 对应信号
+
+        :param signal_key: 代表对应信号的键  请使用self.signal_dic内的key
+        :param hotkeys: 对应快捷键 例如 ("alt", "r")
+        """
+        # 解除旧的绑定
         old_hotkey = getattr(Config.HotkeyConfig, signal_key)
-        setattr(Config.HotkeyConfig, signal_key, hotkeys)
         if old_hotkey:
             self.hotkey.unregister(old_hotkey)
 
+        # 进行新的的绑定
         if hotkeys:
             self.hotkey.register(hotkeys, callback=self.get_emit_func(self.signal_dic[signal_key]))
 
+        # 同步到配置
+        setattr(Config.HotkeyConfig, signal_key, hotkeys)
+
     def set_lyrics_rgb(self, rgb: tuple):
+        """
+        为歌词设置颜色
+
+        :param rgb: 对应的rgb颜色值 例如 (237, 178, 209)
+        """
         stylesheet = f"color:rgb{rgb}"
         self.above_scrollArea.set_label_stylesheet(stylesheet)
         self.below_scrollArea.set_label_stylesheet(stylesheet)
-
+        # 同步到配置
         Config.LyricConfig.lyric_color = rgb
 
     def set_shadow_rgb(self, rgb: tuple):
+        """
+        为歌词阴影设置颜色
+
+        :param rgb: 对应的rgb颜色值 例如 (114, 514, 191)
+        """
         color = QColor(*rgb)
         self.effect_shadow.setColor(color)
-
+        # 同步到配置
         Config.LyricConfig.shadow_color = rgb
 
     def set_rgb_style(self, color: str):
+        """
+        使用预设的 9 种颜色方案。会同时设置歌词颜色以及歌词阴影颜色
+        :param color: 仅能为 "blue", "red", "violet", "green", "orange", "yellow", "brown", "cyan", "pink" 其中之一
+        """
         style_dict = {
             # color   lyrics_color    shadow_color
             "blue": ((86, 152, 195), (190, 190, 190)),
@@ -175,11 +211,22 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         Config.LyricConfig.rgb_style = color
 
     def set_font_family(self, family: str):
+        """
+        设置歌词字体
+
+        :param family: 必须为原有配套字体 例如 “微软雅黑”
+        """
         self.font.setFamily(family)
         self.above_scrollArea.set_font(self.font)
         self.below_scrollArea.set_font(self.font)
 
     def set_font_size(self, size: int, *, resize_window: bool = False):
+        """
+        设置字体大小，一般根据窗口高度自动调整
+
+        :param size: 字体大小
+        :param resize_window: 是否由字体大小反向设置窗口大小
+        """
         self.font.setPixelSize(size)
         self.above_scrollArea.set_font(self.font)
         self.below_scrollArea.set_font(self.font)
@@ -188,6 +235,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.resize(self.width(), height)
 
     def set_button_hide(self, flag: bool):
+        """
+        设置隐藏按钮
+
+        :param flag: True 为隐藏
+        """
         self.close_button.setHidden(flag)
         self.last_button.setHidden(flag)
         self.lock_button.setHidden(flag)
@@ -201,6 +253,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.translate_button.setHidden(flag)
 
     def set_transparent(self, flag: bool):
+        """
+        设置半透明背景是否可见
+
+        :param flag: True 为隐藏
+        """
         self.set_button_hide(flag)
         style_hide_sheet = "*{border:none;}"
         style_show_sheet = "*{border:none;}#background_frame{background-color: rgba(0,0,0,0.2);}"
@@ -208,8 +265,12 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         now_sheet = style_hide_sheet if flag else style_show_sheet
         self.setStyleSheet(now_sheet)
 
-    def set_cursor_icon(self, cursor: QCursor):
-        # 设置光标图标
+    def set_cursor_icon(self, cursor: Qt.CursorShape):
+        """
+        设置光标图标
+
+        :param cursor: Qt.CursorShape类型
+        """
         # self.setCursor(cursor)
         # self.background_frame.setCursor(cursor)
         self.buttons_frame.setCursor(cursor)
@@ -217,62 +278,72 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.below_scrollArea.setCursor(cursor)
 
     def set_pause_button_icon(self, flag: bool):
+        """
+        设置暂停按钮图标
+
+        :param flag: True 为暂停图标
+        """
         if flag:
             self.pause_button.setIcon(QtGui.QIcon(u":/pic/images/pause.png"))
         else:
             self.pause_button.setIcon(QtGui.QIcon(u":/pic/images/continue.png"))
 
-    def set_rolling(self, flag: bool):
+    def set_lyrics_rolling(self, flag: bool):
+        """
+        设置歌词是否 可滚动
+
+        :param flag: True 额为 可滚动
+        """
         if (flag and not self.timer.isActive()) or (not flag and self.timer.isActive()):
             self.set_timer_status_signal.emit(flag)
 
     def set_lyrics_text(self, rows: int, text: str, *, roll_time: int = 0):
-        width = self._get_text_width(text)
-        self._roll_time = roll_time
+        """
+        设置歌词文本
 
+        :param rows: 1 为上行歌词， 2为下面歌词
+        :param text: 需要显示文本
+        :param roll_time: 滚动时间
+        """
+        width = self._get_text_width(text)
         if rows == 1:
             self.above_scrollArea.set_text(text, width)
             self.update()
         if rows == 2:
             self.below_scrollArea.set_text(text, width)
+        self._update_rolling_step(roll_time)
 
-        max_width = max(self.above_scrollArea.text_width, self.below_scrollArea.text_width)
-        self._move_step = ceil(2 * (self._time_step * (max_width - self.width()))
-                               / (roll_time * self._roll_time_rate)) if roll_time else 0
-        self._begin_index = (0.5 * (1 - self._roll_time_rate) * self._roll_time) // self._time_step
-
-    def _get_text_width(self, text):
-        # 计算文本的总宽度
+    def _get_text_width(self, text: str):
+        """计算文本的总宽度"""
         song_font_metrics = QFontMetrics(self.font)
         return song_font_metrics.width(text)
 
-    def enterEvent(self, event):
-        # 定义鼠标移入事件,显示按钮,设置半透明背景
+    def enterEvent(self, event: QEvent):
+        """定义鼠标移入事件,显示按钮,设置半透明背景"""
         if not self._is_locked:
             self.set_transparent(False)
             event.accept()
 
-    def leaveEvent(self, event):
-        # 定义鼠标移出事件,隐藏按钮,设置背景透明
+    def leaveEvent(self, event: QEvent):
+        """定义鼠标移出事件,隐藏按钮,设置背景透明"""
         self._time_count_out = 0
         if not self._is_locked:
             self.set_transparent(True)
             event.accept()
 
     def mouseReleaseEvent(self, event: QMouseEvent):
-        # 鼠标释放后，扳机复位
+        """鼠标释放后，扳机复位"""
         self._init_window_drag_flag()
 
-    def mousePressEvent(self, event):
-        # 重写鼠标点击的事件
-        if not self._is_locked:
-            if event.button() == Qt.LeftButton:
-                self._clicked = True
-                self.move_DragPosition = event.globalPos() - self.pos()
-                event.accept()
+    def mousePressEvent(self, event: QMouseEvent):
+        """重写鼠标点击的事件"""
+        if not self._is_locked and event.button() == Qt.LeftButton:
+            self._clicked = True
+            self.move_DragPosition = event.globalPos() - self.pos()  # 开始拖动 鼠标相对窗口的位置
+            event.accept()
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        # 重写鼠标移动的事件
+        """关于 窗口拖动 以及 窗口拉伸"""
         self._time_count_in = 0
         pos = event.pos()  # QMouseEvent.pos()获取相对位置
 
@@ -328,27 +399,42 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         event.accept()
 
     def show(self):
+        """从隐藏状态到显示状态"""
+        if not self.isHidden():
+            return
         pos_config = Config.CommonConfig
         self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
         self.tray_icon.show()
         super(LyricsWindowView, self).show()
 
     def hide(self):
-        self.renew_pos_config()
+        """从显示状态到隐藏状态"""
+        self._renew_pos_config()
         return super(LyricsWindowView, self).hide()
 
     def close(self):
-        self.renew_pos_config()
+        """结束程序"""
+        self._renew_pos_config()
         Config.save_config()
         return super(LyricsWindowView, self).close()
 
-    def renew_pos_config(self):
+    def _renew_pos_config(self):
+        """同步配置文件 关于窗口的位置 以至下次打开在原来位置"""
         Config.CommonConfig.pos_x = self.pos().x()
         Config.CommonConfig.pos_y = self.pos().y()
         Config.CommonConfig.width = self.width()
         Config.CommonConfig.height = self.height()
 
-    def update_index_timer_event(self):
+    def _update_rolling_step(self, roll_time: int):
+        """更新滚动相关参数"""
+        self._roll_time = roll_time
+        max_width = max(self.above_scrollArea.text_width, self.below_scrollArea.text_width)
+        self._move_step = ceil(2 * (self._time_step * (max_width - self.width()))
+                               / (roll_time * self._roll_time_rate)) if roll_time else 0
+        self._begin_index = (0.5 * (1 - self._roll_time_rate) * self._roll_time) // self._time_step
+
+    def _update_index_timer_event(self):
+        """更新timer状态"""
         self.above_scrollArea.update_index(self._begin_index, self._move_step)
         self.below_scrollArea.update_index(self._begin_index, self._move_step)
         self._time_count_in += 1
@@ -362,6 +448,17 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                 self.calibrate_button.setHidden(False)
 
     def _update_pos_index(self, pos: QPoint):
+        """
+        更新鼠标关于窗口的位置区间 以供判断 拉伸状况 同步到 x_index 以及 y_index
+         x_index--> 0           1              2
+      y_index 0   左上拉|        上拉伸         |右上拉
+         |       ------------------------------------
+         v            |                      |
+              1  左拉伸|        拖动           |右拉伸
+                      |                      |
+                 ------------------------------------
+              2  左下拉|        下拉伸         |右下拉
+        """
         # index  n/a  0   1                  2                n/a
         x_list = (-10, 10, self.width() - 10, self.width() + 10)
         y_list = (-10, 10, self.height() - 10, self.height() + 10)
@@ -377,7 +474,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             if y_list[i] < y:
                 self.y_index = i
 
-    def lock_event(self):
+    def _lock_event(self):
+        """上锁按钮事件"""
         if self._is_locked:
             self._is_locked = False
             self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lock.png"))
@@ -391,6 +489,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     @staticmethod
     def get_emit_func(signal):
+        """返回对应信号触发函数，lambda函数因引用问题不使用"""
         def emit_func(_):
             signal.emit()
 
