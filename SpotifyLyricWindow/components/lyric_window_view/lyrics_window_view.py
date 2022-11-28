@@ -26,6 +26,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         # 界面相关
         self._init_lyrics_shadow()
         self._init_main_window()
+        self._init_color_rgb()
         self._init_font()
 
         # 功能效果相关
@@ -34,8 +35,6 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._init_mouse_track()
         self._init_roll()
         self._init_hotkey()
-
-        self.set_button_hide(True)
 
     def _init_lyrics_shadow(self):
         """初始化歌词阴影"""
@@ -57,6 +56,10 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
 
+        self.set_button_hide(True)
+
+    def _init_color_rgb(self):
+        """初始化 歌词 以及 阴影 颜色"""
         # 导入配置
         if Config.LyricConfig.rgb_style:
             self.set_rgb_style(Config.LyricConfig.rgb_style)
@@ -68,7 +71,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         """初始化字体 字体类型 以及 大小"""
         # 导入配置
         family = Config.LyricConfig.font_family
-        height = Config.CommonConfig.height
+        height = Config.PositionConfig.height
 
         self.font = QtGui.QFont()
         self.font.setFamily(family)
@@ -287,10 +290,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
         :param flag: True 为暂停图标
         """
-        if flag:
-            self.pause_button.setIcon(QtGui.QIcon(u":/pic/images/pause.png"))
-        else:
-            self.pause_button.setIcon(QtGui.QIcon(u":/pic/images/continue.png"))
+        icon = "pause.png" if flag else "continue.png"
+        self.pause_button.setIcon(QtGui.QIcon(f":/pic/images/{icon}"))
 
     def set_lyrics_rolling(self, flag: bool):
         """
@@ -406,7 +407,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         """从隐藏状态到显示状态"""
         if not self.isHidden():
             return
-        pos_config = Config.CommonConfig
+        pos_config = Config.PositionConfig
         self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
         self.tray_icon.show()
         super(LyricsWindowView, self).show()
@@ -424,10 +425,10 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def _renew_pos_config(self):
         """同步配置文件 关于窗口的位置 以至下次打开在原来位置"""
-        Config.CommonConfig.pos_x = self.pos().x()
-        Config.CommonConfig.pos_y = self.pos().y()
-        Config.CommonConfig.width = self.width()
-        Config.CommonConfig.height = self.height()
+        Config.PositionConfig.pos_x = self.pos().x()
+        Config.PositionConfig.pos_y = self.pos().y()
+        Config.PositionConfig.width = self.width()
+        Config.PositionConfig.height = self.height()
 
     def _update_rolling_step(self, roll_time: int):
         """更新滚动相关参数"""

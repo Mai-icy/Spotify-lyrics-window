@@ -6,7 +6,7 @@ from types import MethodType
 from PyQt5.QtCore import QThread, pyqtSignal
 
 
-def thread_drive(done_emit_func):
+def thread_drive(done_emit_func=None):
     """修饰线程驱动的类成员函数（槽函数必须依附于设置槽函数的线程）"""
     def outer(func):
         @wraps(func)

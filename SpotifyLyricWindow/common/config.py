@@ -6,7 +6,7 @@ import rtoml
 
 class Config:
 
-    class CommonConfig:
+    class PositionConfig:
         pos_x: int = 500
         pos_y: int = 900
         width: int = 800
@@ -38,42 +38,41 @@ class Config:
 
     @classmethod
     def read_config(cls):
-        data = rtoml.load(SETTING_TOML_PATH)
-        cls._load_config(cls, data)
-        return cls
+        """读取toml配置文件配置，存储在Config类属性"""
+        def _load_config(last_cls, dic):
+            for key in dic.keys():
+                if isinstance(dic[key], dict):
+                    now_cls = getattr(last_cls, key)
+                    _load_config(now_cls, dic[key])
+                else:
+                    setattr(last_cls, key, dic[key])
 
-    @classmethod
-    def _load_config(cls, last_cls, dic):
-        for key in dic.keys():
-            if isinstance(dic[key], dict):
-                now_cls = getattr(last_cls, key)
-                cls._load_config(now_cls, dic[key])
-            else:
-                setattr(last_cls, key, dic[key])
+        data = rtoml.load(SETTING_TOML_PATH)
+        _load_config(cls, data)
 
     @classmethod
     def save_config(cls):
+        """写入toml配置文件配置，存储Config类属性至文件"""
+        def _save_config(last_cls, dic):
+            attr_dict = last_cls.__dict__
+            for attr in attr_dict.keys():
+                if not attr.startswith("__"):
+                    value = getattr(last_cls, attr)
+                    if hasattr(value, '__dict__'):
+                        dic[attr] = {}
+                        now_cls = getattr(last_cls, attr)
+                        _save_config(now_cls, dic[attr])
+                    else:
+                        dic[attr] = value
+
         config_dic = {}
-        cls._save_config(cls, config_dic)
+        _save_config(cls, config_dic)
 
         for key in list(config_dic.keys()):
             if not config_dic[key]:
                 config_dic.pop(key)
 
         rtoml.dump(config_dic, SETTING_TOML_PATH)
-
-    @classmethod
-    def _save_config(cls, last_cls, dic):
-        attr_dict = last_cls.__dict__
-        for attr in attr_dict.keys():
-            if not attr.startswith("__"):
-                value = getattr(last_cls, attr)
-                if hasattr(value, '__dict__'):
-                    dic[attr] = {}
-                    now_cls = getattr(last_cls, attr)
-                    cls._save_config(now_cls, dic[attr])
-                else:
-                    dic[attr] = value
 
 
 Config.read_config()
