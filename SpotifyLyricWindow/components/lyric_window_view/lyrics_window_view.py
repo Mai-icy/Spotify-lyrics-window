@@ -146,12 +146,22 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             "show_window": self.tray_icon.showAction.triggered
         }
         # 导入配置
-        if Config.HotkeyConfig.is_enable:
-            for key in self.signal_dic.keys():
-                hotkeys = getattr(Config.HotkeyConfig, key)
-                if hotkeys:
+        self.set_hotkey_enable(True)
+
+    def set_hotkey_enable(self, flag: bool):
+        """
+        设置全局快捷键是否打开
+
+        :param flag: 是否 打开
+        """
+        for key in self.signal_dic.keys():
+            hotkeys = getattr(Config.HotkeyConfig, key)
+            if hotkeys:
+                if flag and Config.HotkeyConfig.is_enable:
                     self.hotkey.register(hotkeys,
                                          callback=self.get_emit_func(self.signal_dic[key]))
+                else:
+                    self.hotkey.unregister(hotkeys)
 
     def set_signal_hotkey(self, signal_key: str, hotkeys: tuple):
         """
@@ -198,6 +208,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def set_rgb_style(self, color: str):
         """
         使用预设的 9 种颜色方案。会同时设置歌词颜色以及歌词阴影颜色
+
         :param color: 仅能为 "blue", "red", "violet", "green", "orange", "yellow", "brown", "cyan", "pink" 其中之一
         """
         style_dict = {
