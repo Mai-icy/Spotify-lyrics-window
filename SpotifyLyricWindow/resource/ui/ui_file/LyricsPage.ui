@@ -326,14 +326,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="trans_checkBox">
+       <widget class="QRadioButton" name="trans_radioButton">
         <property name="text">
          <string>显示翻译</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="romoji_checkBox">
+       <widget class="QRadioButton" name="romaji_radioButton">
         <property name="text">
          <string>显示音译</string>
         </property>
