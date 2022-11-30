@@ -5,6 +5,7 @@ import rtoml
 
 
 class Config:
+    default_dict = {}
 
     class PositionConfig:
         pos_x: int = 500
@@ -27,14 +28,14 @@ class Config:
     class HotkeyConfig:
         is_enable: bool = True
 
-        calibrate_button: tuple = ("alt", "r")
-        lock_button: tuple = ("alt", "l")
-        close_button: tuple = ("alt", "x")
-        translate_button: tuple = ("alt", "a")
-        next_button: tuple = ("alt", "right")
-        last_button: tuple = ("alt", "left")
         pause_button: tuple = ("alt", "p")
+        last_button: tuple = ("alt", "left")
+        next_button: tuple = ("alt", "right")
+        lock_button: tuple = ("alt", "l")
+        calibrate_button: tuple = ("alt", "r")
+        translate_button: tuple = ("alt", "a")
         show_window: tuple = ("alt", "s")
+        close_button: tuple = ("alt", "x")
 
     @classmethod
     def read_config(cls):
@@ -53,6 +54,13 @@ class Config:
     @classmethod
     def save_config(cls):
         """写入toml配置文件配置，存储Config类属性至文件"""
+        config_dic = cls.to_dict()
+
+        rtoml.dump(config_dic, SETTING_TOML_PATH)
+
+    @classmethod
+    def to_dict(cls) -> dict:
+        """将当前配置装换为字典并返回"""
         def _save_config(last_cls, dic):
             attr_dict = last_cls.__dict__
             for attr in attr_dict.keys():
@@ -72,11 +80,14 @@ class Config:
             if not config_dic[key]:
                 config_dic.pop(key)
 
-        rtoml.dump(config_dic, SETTING_TOML_PATH)
+        return config_dic
 
 
+Config.default_dict = Config.to_dict()
 Config.read_config()
 
 
 if __name__ == '__main__':
-    Config.save_config()
+    # Config.save_config()
+
+    print(Config.default_dict)
