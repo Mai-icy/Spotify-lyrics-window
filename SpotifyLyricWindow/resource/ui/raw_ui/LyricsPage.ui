@@ -1,0 +1,695 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LyricsPage</class>
+ <widget class="QWidget" name="LyricsPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>643</width>
+    <height>470</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+    <pointsize>12</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>LyricsPage</string>
+  </property>
+  <layout class="QGridLayout" name="lyricspage_gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item row="3" column="0">
+    <widget class="QFrame" name="change_color_frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="ChangeColorGridLayout_2">
+      <item row="1" column="3">
+       <spacer name="color_horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="color_label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>更改歌词颜色:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4">
+       <widget class="QPushButton" name="lyricsdefault_button">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>恢复默认</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QFrame" name="shadow_color_frame">
+        <property name="maximumSize">
+         <size>
+          <width>132</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="ShadowColorHorizontalLayout_2">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="shadow_color_label">
+           <property name="minimumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="shadow_color_button">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>阴影</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QFrame" name="lyrics_color_frame">
+        <property name="maximumSize">
+         <size>
+          <width>132</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="LyricsColorHorizontalLayout_2">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="lyrics_color_label">
+           <property name="minimumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="lyrics_color_button">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>100</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>歌词</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QComboBox" name="color_comboBox">
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>自定义</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>蓝</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>红</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>紫</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>绿</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>橘</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>黄</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>棕</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>青</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>粉</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QFrame" name="lyrics_trans_frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="LyricsTransVerticalLayout_2">
+      <item>
+       <widget class="QLabel" name="lyrics_trans_label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>歌词翻译:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="trans_checkBox">
+        <property name="text">
+         <string>显示翻译</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="romoji_checkBox">
+        <property name="text">
+         <string>显示音译</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QFrame" name="font_frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="FontVerticalLayout_2">
+      <item>
+       <widget class="QLabel" name="font_label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>字体:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="font_comboBox">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>44</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>Ebrima</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Gadugi</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Leelawadee</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Leelawadee UI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Lucida Sans Unicode</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MS Gothic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MS Mincho</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MS PGothic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MS PMincho</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>MS UI Gothic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Malgun Gothic</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Malgun Gothic Semilight</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Meiryo</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Meiryo UI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Microsoft JhengHei UI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Microsoft JhengHei UI Light</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Microsoft Sans Serif</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Microsoft YaHei UI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Microsoft YaHei UI Light</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Nirmala UI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Nirmala UI Semilight</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Segoe UI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Segoe UI Light</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Segoe UI Semibold</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Segoe UI Semilight</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>SimSun-ExtB</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Tahoma</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yu Gothic UI</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yu Gothic UI Light</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yu Gothic UI Semibold</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Yu Gothic UI Semilight</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>仿宋</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文中宋</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文仿宋</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文宋体</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文彩云</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文新魏</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文楷体</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文琥珀</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文细黑</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文行楷</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>华文隶书</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>宋体</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>幼圆</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>微软雅黑</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>微软雅黑 Light</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>新宋体</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>方正姚体</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>方正舒体</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>楷体</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>等线</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>等线 Light</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>隶书</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>黑体</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QFrame" name="always_front_frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="AlwaysFrontVerticalLayout_3">
+      <item>
+       <widget class="QLabel" name="always_front_label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>总在最前:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="enable_front_checkBox">
+        <property name="text">
+         <string>启用总在最前</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

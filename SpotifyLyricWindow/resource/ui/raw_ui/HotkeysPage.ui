@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HotkeysPage</class>
+ <widget class="QWidget" name="HotkeysPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>376</height>
+   </rect>
+  </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+    <pointsize>12</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>LyricsPage</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0" colspan="2">
+    <widget class="QFrame" name="hotkeys_frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="HotkeysFrameGridLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item row="0" column="0">
+       <widget class="QFrame" name="hotkeyslabel_frame">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QVBoxLayout" name="HotkeysLabelFrameVerticalLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="pause_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>暂停/继续</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="last_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>上一首</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="next_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>下一首</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="lock_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>锁定</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="calibration_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>校准</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="trans_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>切换翻译</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="show_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>显示</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="close_hotkey_label">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>关闭</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QFrame" name="hotkeyslineedit_frame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QVBoxLayout" name="HotkeysLineEditFrameVerticalLayout">
+         <property name="leftMargin">
+          <number>20</number>
+         </property>
+         <item>
+          <widget class="QLineEdit" name="pause_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + p</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="last_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + left</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="next_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + right</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="lock_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + l</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="calibration_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + r</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="trans_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + a</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="show_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + s</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="close_hotkey_lineEdit">
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>alt + x</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="enable_hotkeys_checkBox">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>启用快捷键</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <spacer name="hotkeys_page_horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>164</width>
+       <height>29</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="2">
+    <widget class="QPushButton" name="hotkeys_default_button">
+     <property name="minimumSize">
+      <size>
+       <width>100</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>100</width>
+       <height>32</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>恢复默认</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
