@@ -5,7 +5,7 @@ import rtoml
 
 
 class Config:
-    default_dict = {}
+    _default_dict = {}
 
     class PositionConfig:
         pos_x: int = 500
@@ -40,6 +40,8 @@ class Config:
     @classmethod
     def read_config(cls):
         """读取toml配置文件配置，存储在Config类属性"""
+        cls._default_dict = cls.to_dict()
+
         def _load_config(last_cls, dic):
             for key in dic.keys():
                 if isinstance(dic[key], dict):
@@ -64,7 +66,7 @@ class Config:
         def _save_config(last_cls, dic):
             attr_dict = last_cls.__dict__
             for attr in attr_dict.keys():
-                if not attr.startswith("__"):
+                if not attr.startswith("_"):
                     value = getattr(last_cls, attr)
                     if hasattr(value, '__dict__'):
                         dic[attr] = {}
@@ -82,12 +84,14 @@ class Config:
 
         return config_dic
 
+    @classmethod
+    def get_default_dict(cls) -> dict:
+        return cls._default_dict
 
-Config.default_dict = Config.to_dict()
+
 Config.read_config()
 
 
 if __name__ == '__main__':
     # Config.save_config()
-
-    print(Config.default_dict)
+    ...
