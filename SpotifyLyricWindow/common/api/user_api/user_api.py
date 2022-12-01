@@ -77,7 +77,7 @@ class SpotifyUserApi:
         url = self.USER_PLAYER_URL + url_suffix
         func = getattr(requests, method)
         res = func(url, headers=self._get_auth_header(), params=kwargs)
-        if res.status_code == 204 and url_suffix == "get_current_playing":
+        if res.status_code == 204 and url_suffix == "currently-playing":
             raise NoActiveUser("no user active")
         if res.status_code == 200:
             res_json = res.json()
