@@ -11,6 +11,7 @@ from components.lyric_window import LyricsWindow
 if __name__ == "__main__":
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     myWin = LyricsWindow()
     myWin.show()
     sys.exit(app.exec_())

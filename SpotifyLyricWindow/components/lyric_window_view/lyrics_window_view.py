@@ -3,13 +3,13 @@
 from math import ceil
 from system_hotkey import SystemHotkey
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from common.config import Config
-from components.lyric_window_view.raw_ui.LyricsWindow import Ui_LyricsWindow
+from components.raw_ui.LyricsWindow import Ui_LyricsWindow
 from components.lyric_window_view.text_scroll_area import TextScrollArea
 from components.lyric_window_view.lyric_tray_icon import LyricsTrayIcon
 
@@ -48,7 +48,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         """初始化界面控件以及属性"""
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setAttribute(Qt.WA_DeleteOnClose)
+        # self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.above_scrollArea = TextScrollArea(self.lyrics_frame1)
         self.lyrics_gridLayout1.addWidget(self.above_scrollArea)

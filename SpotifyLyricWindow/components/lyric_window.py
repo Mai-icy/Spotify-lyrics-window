@@ -16,6 +16,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from components.work_thread import thread_drive
+from components.setting_window.setting_window import SettingWindow
 
 from common.config import Config
 from common.api.user_api import SpotifyUserApi, UserCurrentPlaying
@@ -55,8 +56,8 @@ class LyricsWindow(LyricsWindowView):
         super(LyricsWindow, self).__init__(parent)
         self.lrc_player = LrcPlayer(self)
 
-        self._init_signal()
         self._init_common()
+        self._init_signal()
 
         self.calibration_event()
 
@@ -72,6 +73,8 @@ class LyricsWindow(LyricsWindowView):
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
         self.translate_button.clicked.connect(self.change_trans_button_event)
+        self.settings_button.clicked.connect(self.setting_open_event)
+        self.setting_window.close_signal.connect(self.setting_close_event)
 
         self.text_show_signal.connect(lambda row, text, roll_time: self.set_lyrics_text(row, text, roll_time=roll_time))
 
@@ -85,6 +88,8 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth = SpotifyUserApi()
         self.delay_timer = QTimer()
         self.delay_timer.setSingleShot(True)
+
+        self.setting_window = SettingWindow()
 
     @thread_drive()
     @CatchError
@@ -190,6 +195,15 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth.auth.get_user_access_token()
         self.set_lyrics_text(1, "验证成功！")
         self.calibration_event()
+
+    def setting_open_event(self):
+        if self.setting_window.isVisible():
+            return
+        self.set_hotkey_enable(False)
+        self.setting_window.show()
+
+    def setting_close_event(self):
+        self.set_hotkey_enable(True)
 
     def _error_msg_show_event(self, error: Exception):
         """

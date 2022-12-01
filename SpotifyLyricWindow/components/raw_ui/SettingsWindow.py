@@ -1,0 +1,67 @@
+# -*- coding: utf-8 -*-
+
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+
+class Ui_SettingsWindow(object):
+    def setupUi(self, SettingsWindow):
+        SettingsWindow.setObjectName("SettingsWindow")
+        SettingsWindow.resize(720, 498)
+        SettingsWindow.setMinimumSize(QtCore.QSize(720, 480))
+        SettingsWindow.setMaximumSize(QtCore.QSize(1024, 640))
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        font.setPointSize(12)
+        SettingsWindow.setFont(font)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/pic/images/LyricsIcon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        SettingsWindow.setWindowIcon(icon)
+        self.MainGridLayout = QtWidgets.QGridLayout(SettingsWindow)
+        self.MainGridLayout.setContentsMargins(0, 0, 0, 0)
+        self.MainGridLayout.setSpacing(0)
+        self.MainGridLayout.setObjectName("MainGridLayout")
+        self.page_listWidget = QtWidgets.QListWidget(SettingsWindow)
+        self.page_listWidget.setMinimumSize(QtCore.QSize(90, 0))
+        self.page_listWidget.setMaximumSize(QtCore.QSize(90, 16777215))
+        font = QtGui.QFont()
+        font.setFamily("黑体")
+        font.setPointSize(16)
+        self.page_listWidget.setFont(font)
+        self.page_listWidget.setObjectName("page_listWidget")
+        item = QtWidgets.QListWidgetItem()
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        item.setFont(font)
+        self.page_listWidget.addItem(item)
+        item = QtWidgets.QListWidgetItem()
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        item.setFont(font)
+        self.page_listWidget.addItem(item)
+        item = QtWidgets.QListWidgetItem()
+        font = QtGui.QFont()
+        font.setFamily("微软雅黑")
+        item.setFont(font)
+        self.page_listWidget.addItem(item)
+        self.MainGridLayout.addWidget(self.page_listWidget, 0, 0, 1, 1)
+        self.page_stackedWidget = QtWidgets.QStackedWidget(SettingsWindow)
+        self.page_stackedWidget.setObjectName("page_stackedWidget")
+        self.MainGridLayout.addWidget(self.page_stackedWidget, 0, 1, 1, 1)
+
+        self.retranslateUi(SettingsWindow)
+        self.page_stackedWidget.setCurrentIndex(-1)
+        QtCore.QMetaObject.connectSlotsByName(SettingsWindow)
+
+    def retranslateUi(self, SettingsWindow):
+        _translate = QtCore.QCoreApplication.translate
+        SettingsWindow.setWindowTitle(_translate("SettingsWindow", "设置"))
+        __sortingEnabled = self.page_listWidget.isSortingEnabled()
+        self.page_listWidget.setSortingEnabled(False)
+        item = self.page_listWidget.item(0)
+        item.setText(_translate("SettingsWindow", "歌词"))
+        item = self.page_listWidget.item(1)
+        item.setText(_translate("SettingsWindow", "快捷键"))
+        item = self.page_listWidget.item(2)
+        item.setText(_translate("SettingsWindow", "工具"))
+        self.page_listWidget.setSortingEnabled(__sortingEnabled)
