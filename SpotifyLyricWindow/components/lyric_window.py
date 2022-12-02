@@ -73,8 +73,7 @@ class LyricsWindow(LyricsWindowView):
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
         self.translate_button.clicked.connect(self.change_trans_button_event)
-        self.settings_button.clicked.connect(self.setting_open_event)
-        self.setting_window.close_signal.connect(self.setting_close_event)
+        self.settings_button.clicked.connect(self.setting_window.show)
 
         self.text_show_signal.connect(lambda row, text, roll_time: self.set_lyrics_text(row, text, roll_time=roll_time))
 
@@ -89,7 +88,7 @@ class LyricsWindow(LyricsWindowView):
         self.delay_timer = QTimer()
         self.delay_timer.setSingleShot(True)
 
-        self.setting_window = SettingWindow()
+        self.setting_window = SettingWindow(lyric_window=self)
 
     @thread_drive()
     @CatchError
@@ -195,15 +194,6 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth.auth.get_user_access_token()
         self.set_lyrics_text(1, "验证成功！")
         self.calibration_event()
-
-    def setting_open_event(self):
-        if self.setting_window.isVisible():
-            return
-        self.set_hotkey_enable(False)
-        self.setting_window.show()
-
-    def setting_close_event(self):
-        self.set_hotkey_enable(True)
 
     def _error_msg_show_event(self, error: Exception):
         """

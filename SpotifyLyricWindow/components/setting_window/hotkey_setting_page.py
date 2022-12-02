@@ -15,13 +15,9 @@ class HotkeysPage(QWidget, Ui_HotkeysPage):
     def __init__(self, parent=None):
         super(HotkeysPage, self).__init__(parent)
         self.setupUi(self)
+
         self._init_line_edit()
-        self._init_common()
-
         self._init_signal()
-
-    def _init_common(self):
-        self.enable_hotkeys_checkBox.setChecked(True)
 
     def _init_line_edit(self):
         self.calibration_hotkey_lineEdit = HotkeyLineEdit("calibrate_button", self.hotkeyslineedit_frame)
@@ -42,24 +38,22 @@ class HotkeysPage(QWidget, Ui_HotkeysPage):
             line_edit.setMaximumSize(QSize(170, 32))
             self.HotkeysLineEditFrameVerticalLayout.addWidget(line_edit)
 
-        # _translate = QCoreApplication.translate
-        # self.pause_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + P"))
-        # self.last_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + ←"))
-        # self.next_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + →"))
-        # self.lock_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + L"))
-        # self.calibration_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + R"))
-        # self.trans_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + A"))
-        # self.show_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + S"))
-        # self.close_hotkey_lineEdit.setText(_translate("HotkeysPage", "Alt + X"))
-
     def _init_signal(self):
         self.hotkeys_default_button.clicked.connect(self.set_default_event)
         self.enable_hotkeys_checkBox.stateChanged.connect(self.enable_hotkeys_event)
 
+    def load_config(self):
+        for line_edit in self.line_edit_list:
+            signal_key = line_edit.get_signal_key()
+            current_hot_keys = getattr(Config.HotkeyConfig, signal_key)
+            line_edit.set_hotkey(current_hot_keys)
+
+        self.enable_hotkeys_checkBox.setChecked(Config.HotkeyConfig.is_enable)
+
     def set_default_event(self):
         default_dict = Config.get_default_dict()["HotkeyConfig"]
         for line_edit in self.line_edit_list:
-            line_edit.set_hotkey_text(default_dict[line_edit.get_signal_key()])
+            line_edit.set_hotkey(default_dict[line_edit.get_signal_key()])
 
     def enable_hotkeys_event(self):
         if self.enable_hotkeys_checkBox.isChecked() and not self.pause_hotkey_lineEdit.isEnabled():

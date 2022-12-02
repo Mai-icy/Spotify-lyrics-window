@@ -14,17 +14,40 @@ class HotkeyLineEdit(QLineEdit):
         self.unvalidated = False
         self.signal_key = signal_key
         self.start_record = False
-        self.current_hot_keys = getattr(Config.HotkeyConfig, signal_key)
-        self.set_hotkey_text(self.current_hot_keys)
+        self.current_hot_keys = ()
 
         self.setReadOnly(True)
 
     def get_signal_key(self) -> str:
         return self.signal_key
 
+    def set_hotkey(self, hotkey):
+        self.current_hot_keys = hotkey
+        if not hotkey:
+            self.setText("None")
+        forward_dict = {
+            "left": "←",
+            "right": "→",
+            "up": "↑",
+            "down": "↓"
+        }
+        show_keys = []
+        for key_ in hotkey:
+            if key_ in forward_dict.keys():
+                show_keys.append(forward_dict[key_])
+            else:
+                show_keys.append(key_.capitalize())
+
+        self.setText(" + ".join(show_keys))
+
+        if hotkey:
+            setattr(Config.HotkeyConfig, self.signal_key, self.current_hot_keys)
+        else:
+            setattr(Config.HotkeyConfig, self.signal_key, None)
+
     def focusOutEvent(self, event: QtGui.QFocusEvent) -> None:
         if self.unvalidated:
-            self.set_hotkey_text([])
+            self.set_hotkey([])
             self.unvalidated = False
             return
         super(HotkeyLineEdit, self).focusOutEvent(event)
@@ -62,7 +85,7 @@ class HotkeyLineEdit(QLineEdit):
             self.setText(" + ".join(modify.capitalize() for modify in modifiers))
             self.unvalidated = True
         if modifiers and key:
-            self.set_hotkey_text(modifiers + [key])
+            self.set_hotkey(modifiers + [key])
             self.unvalidated = False
 
         if event.key() == Qt.Key_Escape:
@@ -75,33 +98,9 @@ class HotkeyLineEdit(QLineEdit):
             return
 
         if self.unvalidated:
-            self.set_hotkey_text([])
+            self.set_hotkey([])
             self.unvalidated = False
             return
 
         self.start_record = False
         super(HotkeyLineEdit, self).keyReleaseEvent(event)
-
-    def set_hotkey_text(self, hotkey):
-        self.current_hot_keys = hotkey
-        if not hotkey:
-            self.setText("None")
-        forward_dict = {
-            "left": "←",
-            "right": "→",
-            "up": "↑",
-            "down": "↓"
-        }
-        show_keys = []
-        for key_ in hotkey:
-            if key_ in forward_dict.keys():
-                show_keys.append(forward_dict[key_])
-            else:
-                show_keys.append(key_.capitalize())
-
-        self.setText(" + ".join(show_keys))
-
-        if hotkey:
-            setattr(Config.HotkeyConfig, self.signal_key, self.current_hot_keys)
-        else:
-            setattr(Config.HotkeyConfig, self.signal_key, None)
