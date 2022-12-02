@@ -12,8 +12,9 @@ class HotkeyLineEdit(QLineEdit):
     def __init__(self, signal_key, parent=None):
         super(HotkeyLineEdit, self).__init__(parent)
         self.unvalidated = False
-        self.signal_key = signal_key
         self.start_record = False
+
+        self.signal_key = signal_key
         self.current_hot_keys = ()
 
         self.setReadOnly(True)
@@ -21,7 +22,12 @@ class HotkeyLineEdit(QLineEdit):
     def get_signal_key(self) -> str:
         return self.signal_key
 
-    def set_hotkey(self, hotkey):
+    def set_hotkey(self, hotkey: list):
+        """
+        设置该输入框对应的快捷键，会保存至配置文件
+
+        :param hotkey: 快捷键组合 例如： ["ctrl", "a"]
+        """
         self.current_hot_keys = hotkey
         if not hotkey:
             self.setText("None")
@@ -46,6 +52,7 @@ class HotkeyLineEdit(QLineEdit):
             setattr(Config.HotkeyConfig, self.signal_key, None)
 
     def focusOutEvent(self, event: QtGui.QFocusEvent) -> None:
+        """防止焦点外放后 使输入停止 从而一直显示非法热键"""
         if self.unvalidated:
             self.set_hotkey([])
             self.unvalidated = False
@@ -53,6 +60,7 @@ class HotkeyLineEdit(QLineEdit):
         super(HotkeyLineEdit, self).focusOutEvent(event)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
+        """捕获快捷键"""
         self.start_record = True
         key_value = event.key()
         other_key_dict = {
@@ -94,6 +102,7 @@ class HotkeyLineEdit(QLineEdit):
         super(HotkeyLineEdit, self).keyPressEvent(event)
 
     def keyReleaseEvent(self, event: QKeyEvent) -> None:
+        """松开按键检验是否合法 保存显示合法按键"""
         if not self.start_record:
             return
 

@@ -296,7 +296,6 @@ class LyricThread(threading.Thread):
                 self.player.lyrics_window.song_done_calibration_signal.emit("")
                 # 依据 timestamp 为准
                 return
-            print(self.player.duration, self.player.get_time())
 
     def terminate(self):
         self.is_running = False

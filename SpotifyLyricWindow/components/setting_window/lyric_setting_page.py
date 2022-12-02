@@ -22,7 +22,8 @@ class LyricPage(QWidget, Ui_LyricsPage):
         self._init_signal()
 
     def _init_comboBox(self):
-        self.color_list = ['red', 'blue', 'violet', 'green', 'orange', 'yellow', 'brown', 'cyan', 'pink', 'other']
+        """初始化下拉选框"""
+        self.color_list = ['red', 'blue', 'violet', 'green', 'orange', 'yellow', 'brown', 'cyan', 'pink']  # 'other'
         self.font_family_list = ["Ebrima", "Gadugi", "Leelawadee", "Leelawadee UI", "Lucida Sans Unicode", "MS Gothic",
                                  "MS Mincho", "MS PGothic", "MS PMincho", "MS UI Gothic", "Malgun Gothic",
                                  "Malgun Gothic Semilight", "Meiryo", "Meiryo UI", "Microsoft JhengHei UI",
@@ -37,14 +38,16 @@ class LyricPage(QWidget, Ui_LyricsPage):
         self.font_comboBox.addItems(self.font_family_list)
 
     def _init_radioButton(self):
+        """初始化翻译按钮"""
         self.trans_button_group = QButtonGroup()
         self.trans_button_group.addButton(self.non_trans_radioButton, id=0)
         self.trans_button_group.addButton(self.romaji_radioButton, id=1)
         self.trans_button_group.addButton(self.trans_radioButton, id=2)
 
     def _init_signal(self):
+        """初始化信号"""
         self.font_comboBox.currentIndexChanged.connect(self.font_change_event)
-        self.color_comboBox.currentIndexChanged.connect(self.color_change_event)
+        self.color_comboBox.currentIndexChanged.connect(self.color_style_change_event)
 
         self.trans_button_group.buttonClicked.connect(self.trans_change_event)
         self.enable_front_checkBox.stateChanged.connect(self.front_change_event)
@@ -52,6 +55,7 @@ class LyricPage(QWidget, Ui_LyricsPage):
         self.lyrics_default_button.clicked.connect(self.set_default_event)
 
     def load_config(self):
+        """导入配置"""
         color_style = Config.LyricConfig.rgb_style
         font_family = Config.LyricConfig.font_family
         is_always_front = Config.LyricConfig.is_always_front
@@ -63,6 +67,7 @@ class LyricPage(QWidget, Ui_LyricsPage):
         self.trans_button_group.button(trans_type).setChecked(True)
 
     def set_default_event(self):
+        """恢复默认值事件"""
         default_dict = Config.get_default_dict()["LyricConfig"]
 
         font_family = default_dict["font_family"]
@@ -78,22 +83,30 @@ class LyricPage(QWidget, Ui_LyricsPage):
         self.trans_change_event()
 
     def trans_change_event(self):
+        """切换翻译"""
         trans_val = self.trans_button_group.checkedId()
         trans_type = TransType(trans_val)
+        # 同步到歌词窗口
         self.lyric_window.set_trans_mode(trans_type)
 
     def front_change_event(self):
+        """修改置顶事件"""
         is_always_front = self.enable_front_checkBox.isChecked()
+        # 同步到歌词窗口
         self.lyric_window.set_always_front(is_always_front)
         setattr(Config.LyricConfig, "is_always_front", is_always_front)
 
     def font_change_event(self):
+        """修改字体事件"""
         font_family = self.font_comboBox.currentText()
+        # 同步到歌词窗口
         self.lyric_window.set_font_family(font_family)
         setattr(Config.LyricConfig, "font_family", font_family)
 
-    def color_change_event(self):
+    def color_style_change_event(self):
+        """修改歌词颜色方案事件"""
         color_style = self.color_comboBox.currentText()
+        # 同步到歌词窗口
         self.lyric_window.set_rgb_style(color_style)
         setattr(Config.LyricConfig, "rgb_style", color_style)
 

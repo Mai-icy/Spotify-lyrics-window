@@ -25,6 +25,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         self._init_signal()
 
     def _init_page(self):
+        """初始化设置页面"""
         self.lyric_page = LyricPage(self, lyric_window=self.lyric_window)
         self.hotkeys_page = HotkeysPage(self)
 
@@ -32,9 +33,11 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         self.page_stackedWidget.addWidget(self.hotkeys_page)
 
     def _init_signal(self):
+        """初始化信号"""
         self.page_listWidget.itemClicked.connect(self.page_click_event)
 
     def page_click_event(self, item: QListWidgetItem):
+        """切换配置页面"""
         index = self.page_listWidget.row(item)
         self.page_stackedWidget.setCurrentIndex(index)
 
@@ -42,7 +45,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         if self.isVisible():
             self.raise_()
             return
-
+        # 载入配置
         self.lyric_page.load_config()
         self.hotkeys_page.load_config()
 
@@ -51,8 +54,10 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         super(SettingWindow, self).show()
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+        """关闭设置窗口"""
+        # 歌词窗口 配置 始终和配置同步 快捷键需要先被关闭再打开
         self.lyric_window.set_hotkey_enable(True)
-
+        # 保存配置
         Config.save_config()
 
         super(SettingWindow, self).closeEvent(a0)
