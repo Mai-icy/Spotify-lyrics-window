@@ -166,13 +166,11 @@ class LyricsWindow(LyricsWindowView):
 
     @CatchError
     def change_trans_button_event(self, *_):
-        """更改当前的翻译"""
+        """更改当前的翻译为下一个 可用的 翻译"""
         ava_trans = self.lrc_player.lrc_file.available_trans()
         if len(ava_trans) > 1:
             index_ = (ava_trans.index(self.lrc_player.trans_mode) + 1) % len(ava_trans)
-            self.lrc_player.set_trans_mode(ava_trans[index_])
-            self.user_trans = self.lrc_player.trans_mode
-            Config.LyricConfig.trans_type = self.user_trans.value
+            self.set_trans_mode(ava_trans[index_])
 
     @thread_drive()
     @CatchError
@@ -194,6 +192,16 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth.auth.get_user_access_token()
         self.set_lyrics_text(1, "验证成功！")
         self.calibration_event()
+
+    def set_trans_mode(self, mode: TransType):
+        """
+        设置当前翻译
+
+        :param mode: 翻译的模式
+        """
+        self.lrc_player.set_trans_mode(mode)
+        self.user_trans = self.lrc_player.trans_mode
+        Config.LyricConfig.trans_type = self.user_trans.value
 
     def _error_msg_show_event(self, error: Exception):
         """

@@ -8,32 +8,20 @@ from PyQt5.QtWidgets import *
 from components.raw_ui.LyricsPage import Ui_LyricsPage
 
 from common.config import Config
-
-from components.lyric_window_view.lyrics_window_view import LyricsWindowView
+from common.lyric_type.lyric_decode import TransType
 
 
 class LyricPage(QWidget, Ui_LyricsPage):
-    def __init__(self, parent=None, *, lyric_window: LyricsWindowView = None):
+    def __init__(self, parent=None, *, lyric_window=None):
         super(LyricPage, self).__init__(parent)
         self.lyric_window = lyric_window
         self.setupUi(self)
 
+        self._init_radioButton()
         self._init_comboBox()
         self._init_signal()
 
     def _init_comboBox(self):
-        # self.color_dict = {
-        #     "红": "red",
-        #     "蓝": "blue",
-        #     "紫": "violet",
-        #     "绿": "green",
-        #     "橘": "orange",
-        #     "黄": "yellow",
-        #     "棕": "brown",
-        #     "青": "cyan",
-        #     "粉": "pink",
-        #     "自定义": "other"
-        # }
         self.color_list = ['red', 'blue', 'violet', 'green', 'orange', 'yellow', 'brown', 'cyan', 'pink', 'other']
         self.font_family_list = ["Ebrima", "Gadugi", "Leelawadee", "Leelawadee UI", "Lucida Sans Unicode", "MS Gothic",
                                  "MS Mincho", "MS PGothic", "MS PMincho", "MS UI Gothic", "Malgun Gothic",
@@ -48,9 +36,17 @@ class LyricPage(QWidget, Ui_LyricsPage):
         self.color_comboBox.addItems(self.color_list)
         self.font_comboBox.addItems(self.font_family_list)
 
+    def _init_radioButton(self):
+        self.trans_button_group = QButtonGroup()
+        self.trans_button_group.addButton(self.non_trans_radioButton, id=0)
+        self.trans_button_group.addButton(self.romaji_radioButton, id=1)
+        self.trans_button_group.addButton(self.trans_radioButton, id=2)
+
     def _init_signal(self):
         self.font_comboBox.currentIndexChanged.connect(self.font_change_event)
         self.color_comboBox.currentIndexChanged.connect(self.color_change_event)
+
+        self.trans_button_group.buttonClicked.connect(self.trans_change_event)
 
         self.lyrics_default_button.clicked.connect(self.set_default_event)
 
@@ -58,10 +54,12 @@ class LyricPage(QWidget, Ui_LyricsPage):
         color_style = Config.LyricConfig.rgb_style
         font_family = Config.LyricConfig.font_family
         is_always_front = Config.LyricConfig.is_always_front
+        trans_type = Config.LyricConfig.trans_type
 
         self.enable_front_checkBox.setChecked(is_always_front)
         self.color_comboBox.setCurrentIndex(self.color_list.index(color_style))
         self.font_comboBox.setCurrentIndex(self.font_family_list.index(font_family))
+        self.trans_button_group.button(trans_type).setChecked(True)
 
     def set_default_event(self):
         default_dict = Config.get_default_dict()["LyricConfig"]
@@ -69,10 +67,19 @@ class LyricPage(QWidget, Ui_LyricsPage):
         font_family = default_dict["font_family"]
         color_style = default_dict["rgb_style"]
         is_always_front = default_dict["is_always_front"]
+        trans_type = default_dict["trans_type"]
 
         self.enable_front_checkBox.setChecked(is_always_front)
         self.color_comboBox.setCurrentIndex(self.color_list.index(color_style))
         self.font_comboBox.setCurrentIndex(self.font_family_list.index(font_family))
+
+        self.trans_button_group.button(trans_type).setChecked(True)
+        self.trans_change_event()
+
+    def trans_change_event(self):
+        trans_val = self.trans_button_group.checkedId()
+        trans_type = TransType(trans_val)
+        self.lyric_window.set_trans_mode(trans_type)
 
     def font_change_event(self):
         font_family = self.font_comboBox.currentText()
