@@ -46,7 +46,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def _init_main_window(self):
         """初始化界面控件以及属性"""
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
+        self.set_always_front(Config.LyricConfig.is_always_front)
+        # self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
         self.setAttribute(Qt.WA_TranslucentBackground)
         # self.setAttribute(Qt.WA_DeleteOnClose)
 
@@ -308,7 +309,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         """
         设置歌词是否 可滚动
 
-        :param flag: True 额为 可滚动
+        :param flag: True 为 可滚动
         """
         if (flag and not self.timer.isActive()) or (not flag and self.timer.isActive()):
             self.set_timer_status_signal.emit(flag)
@@ -328,6 +329,25 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         if rows == 2:
             self.below_scrollArea.set_text(text, width)
         self._update_rolling_step(roll_time)
+
+    def set_always_front(self, flag: bool):
+        """
+        设置窗口是否在最上层
+
+        :param flag: True 为 在最上层
+        """
+        if not self.isHidden():
+            self.hide()
+            if flag:
+                self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.SplashScreen | Qt.FramelessWindowHint)
+            else:
+                self.setWindowFlags(Qt.SplashScreen | Qt.FramelessWindowHint)
+            self.show()
+        else:
+            if flag:
+                self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.SplashScreen | Qt.FramelessWindowHint)
+            else:
+                self.setWindowFlags(Qt.SplashScreen | Qt.FramelessWindowHint)
 
     def _get_text_width(self, text: str):
         """计算文本的总宽度"""
@@ -416,7 +436,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def show(self):
         """从隐藏状态到显示状态"""
-        if not self.isHidden():
+        if self.isVisible():
             return
         pos_config = Config.PositionConfig
         self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)

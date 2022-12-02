@@ -40,6 +40,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
 
     def show(self) -> None:
         if self.isVisible():
+            self.raise_()
             return
 
         self.lyric_page.load_config()

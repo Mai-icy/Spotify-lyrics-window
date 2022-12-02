@@ -47,6 +47,7 @@ class LyricPage(QWidget, Ui_LyricsPage):
         self.color_comboBox.currentIndexChanged.connect(self.color_change_event)
 
         self.trans_button_group.buttonClicked.connect(self.trans_change_event)
+        self.enable_front_checkBox.stateChanged.connect(self.front_change_event)
 
         self.lyrics_default_button.clicked.connect(self.set_default_event)
 
@@ -80,6 +81,11 @@ class LyricPage(QWidget, Ui_LyricsPage):
         trans_val = self.trans_button_group.checkedId()
         trans_type = TransType(trans_val)
         self.lyric_window.set_trans_mode(trans_type)
+
+    def front_change_event(self):
+        is_always_front = self.enable_front_checkBox.isChecked()
+        self.lyric_window.set_always_front(is_always_front)
+        setattr(Config.LyricConfig, "is_always_front", is_always_front)
 
     def font_change_event(self):
         font_family = self.font_comboBox.currentText()
