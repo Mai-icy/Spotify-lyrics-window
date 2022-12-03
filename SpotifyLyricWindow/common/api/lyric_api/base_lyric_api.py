@@ -3,7 +3,7 @@
 import abc
 from typing import List
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
-from common.lyric_type.lyric_decode import LrcFile
+from common.lyric.lyric_type import LrcFile
 
 
 class BaseMusicApi(abc.ABC):

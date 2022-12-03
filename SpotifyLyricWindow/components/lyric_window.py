@@ -22,7 +22,7 @@ from common.config import Config
 from common.api.user_api import SpotifyUserApi, UserCurrentPlaying
 from common.api.api_error import UserError, NoPermission
 from common.player.lyric_player import LrcPlayer, TransType
-from common.download_lrc import download_lrc
+from common.lyric import download_lrc, is_lyric_exist, get_not_found_file, set_not_found_file
 
 
 class CatchError:
@@ -116,11 +116,11 @@ class LyricsWindow(LyricsWindowView):
             self.lrc_player.restart_thread(0)
             return
 
-        if not self.lrc_player.is_lyric_exist(user_current.track_id):
+        if not is_lyric_exist(user_current.track_id):
             user_current = self._download_lyric(user_current)
         else:
-            if self.lrc_player.get_not_found_file(user_current.track_id):
-                self.lrc_player.set_not_found_file(user_current.track_id, "")
+            if get_not_found_file(user_current.track_id):
+                set_not_found_file(user_current.track_id, "")
             user_current = self._refresh_player_track(user_current)
 
         print("开始播放歌词")
@@ -239,7 +239,7 @@ class LyricsWindow(LyricsWindowView):
         :param user_current: 用户播放信息
         :return: 返回输入的用户播放信息
         """
-        found_data = self.lrc_player.get_not_found_file(user_current.track_id)
+        found_data = get_not_found_file(user_current.track_id)
         if found_data and int(time.time()) - found_data["last_time"] < 24 * 3600:
             self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
             self.set_lyrics_text(2, f"no lyric found")
@@ -249,7 +249,7 @@ class LyricsWindow(LyricsWindowView):
             self.set_lyrics_text(2, f"(〃'▽'〃)")
             try:
                 if not download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id):
-                    self.lrc_player.set_not_found_file(user_current.track_id,
+                    set_not_found_file(user_current.track_id,
                                                        f"{user_current.track_name} - {user_current.artist}")
                     self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
                     self.set_lyrics_text(2, f"no lyric found")
@@ -257,7 +257,7 @@ class LyricsWindow(LyricsWindowView):
             except requests.RequestException:
                 # TODO 归并错误
                 print("TOTOTOTOTOTOTOTO DOOOOO ITTTTTTTTTTTTTT!!!!!!")
-                self.lrc_player.set_not_found_file(user_current.track_id,
+                set_not_found_file(user_current.track_id,
                                                    f"{user_current.track_name} - {user_current.artist}")
                 self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
                 self.set_lyrics_text(2, f"no lyric found")

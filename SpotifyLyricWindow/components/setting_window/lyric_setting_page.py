@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 from components.raw_ui.LyricsPage import Ui_LyricsPage
 
 from common.config import Config
-from common.lyric_type.lyric_decode import TransType
+from common.lyric.lyric_type import TransType
 
 
 class LyricPage(QWidget, Ui_LyricsPage):

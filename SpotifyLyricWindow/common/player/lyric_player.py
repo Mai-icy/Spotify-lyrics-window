@@ -1,19 +1,13 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import ctypes
-import inspect
 import json
 import threading
 import time
 
 from common.api import SpotifyUserApi
-from common.lyric_type.lyric_decode import LrcFile, MrcFile, KrcFile, TransType
-from common.path import LRC_PATH, OFFSET_FILE_PATH, NOT_FOUND_LRC_FILE_PATH
-from common.get_windows_title import get_spotify_pid, get_pid_title
-
-
-class NotLyricFound(Exception):
-    """歌词文件不存在，需要下载"""
+from common.lyric.lyric_type import LrcFile, TransType
+from common.win_utils.get_windows_title import get_spotify_pid, get_pid_title
+from common.lyric import get_offset_file, set_offset_file, read_lyric_file
 
 
 class LrcPlayer:
@@ -29,7 +23,7 @@ class LrcPlayer:
         self.order = 0
         self.offset = 0
         self.duration = 0
-        self.api_offset = self._get_offset_file("api_offset")
+        self.api_offset = get_offset_file("api_offset")
 
         self.trans_mode = TransType.NON
         self.is_pause = False
@@ -41,69 +35,21 @@ class LrcPlayer:
 
         self.is_ad = False
 
-    @staticmethod
-    def _set_offset_file(track_id: str, offset: int):
-        """save the offset to offset.json"""
-        with OFFSET_FILE_PATH.open(encoding="utf-8") as f:
-            data_json = json.load(f)
-        data_json[track_id] = offset
-        with OFFSET_FILE_PATH.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(data_json, indent=4, ensure_ascii=False))
-
-    @staticmethod
-    def _get_offset_file(track_id: str) -> int:
-        """get the offset from offset.json"""
-        with OFFSET_FILE_PATH.open(encoding="utf-8") as f:
-            data_json = json.load(f)
-        return data_json.get(track_id, 0)
-
-    @staticmethod
-    def set_not_found_file(track_id: str, track_title: str):
-        with NOT_FOUND_LRC_FILE_PATH.open(encoding="utf-8") as f:
-            data_json = json.load(f)
-        if not track_title:
-            data_json.pop(track_id)
-        else:
-            data_json[track_id] = {"track_title": track_title, "last_time": int(time.time())}
-        with NOT_FOUND_LRC_FILE_PATH.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(data_json, indent=4, ensure_ascii=False))
-
-    @staticmethod
-    def get_not_found_file(track_id: str) -> dict:
-        with NOT_FOUND_LRC_FILE_PATH.open(encoding="utf-8") as f:
-            data_json = json.load(f)
-        return data_json.get(track_id, None)
-
-    @staticmethod
-    def is_lyric_exist(track_id: str) -> bool:
-        lrc_path = LRC_PATH / (track_id + '.mrc')
-        return lrc_path.exists()
-
     def _reload_lrc_data(self):
         """Make the in-class data correspond to the lyrics file data."""
         if self.no_lyric:
             return
-        for file in LRC_PATH.iterdir():
-            if file.name.startswith(self.track_id):
-                if file.suffix == ".mrc":
-                    self.lrc_file = MrcFile(file)
-                elif file.suffix == ".lrc":
-                    self.lrc_file = LrcFile(file)
-                elif file.suffix == ".krc":
-                    self.lrc_file = KrcFile(file)
-                break
-        else:
-            raise NotLyricFound("未找到歌词文件")
+        self.lrc_file = read_lyric_file(self.track_id)
 
     def set_track(self, track_id: str, duration: int, *, no_lyric=False):
         """change the current lrc. the duration is used to auto next song"""
         if self.track_id and self.offset:
-            self._set_offset_file(self.track_id, self.offset)
+            set_offset_file(self.track_id, self.offset)
         if self.api_offset:
-            self._set_offset_file("api_offset", self.api_offset)
+            set_offset_file("api_offset", self.api_offset)
 
         self.track_id = track_id
-        self.offset = self._get_offset_file(track_id)
+        self.offset = get_offset_file(track_id)
         self.no_lyric = no_lyric
         self.duration = duration
 
@@ -173,7 +119,7 @@ class LrcPlayer:
 
         if api_offset:
             # 自动切歌的时候 progress_ms 不准确，timestamp准确
-            saved_api_offset = self._get_offset_file("api_offset")
+            saved_api_offset = get_offset_file("api_offset")
             if self.title_changed_timestamp:
                 self.timer_value = self.title_changed_timestamp
                 self.title_changed_timestamp = 0
