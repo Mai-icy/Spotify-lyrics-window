@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from common.config import Config
+from components.mask_widget import MaskWidget
 from components.raw_ui.SettingsWindow import Ui_SettingsWindow
 from components.setting_window.lyric_setting_page import LyricPage
 from components.setting_window.hotkey_setting_page import HotkeysPage
@@ -26,7 +27,9 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
 
     def _init_page(self):
         """初始化设置页面"""
-        self.lyric_page = LyricPage(self, lyric_window=self.lyric_window)
+        self.mask_ = MaskWidget(self)
+
+        self.lyric_page = LyricPage(lyric_window=self.lyric_window, setting_window=self)
         self.hotkeys_page = HotkeysPage(self)
 
         self.page_stackedWidget.addWidget(self.lyric_page)

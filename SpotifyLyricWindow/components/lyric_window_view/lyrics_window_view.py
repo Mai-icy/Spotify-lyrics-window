@@ -62,7 +62,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     def _init_color_rgb(self):
         """初始化 歌词 以及 阴影 颜色"""
         # 导入配置
-        if Config.LyricConfig.rgb_style:
+        if Config.LyricConfig.rgb_style != "other":
             self.set_rgb_style(Config.LyricConfig.rgb_style)
         else:
             self.set_lyrics_rgb(Config.LyricConfig.lyric_color)
@@ -189,7 +189,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
         :param rgb: 对应的rgb颜色值 例如 (237, 178, 209)
         """
-        stylesheet = f"color:rgb{rgb}"
+        stylesheet = f"color:rgb({rgb[0]}, {rgb[1]}, {rgb[2]})"
         self.above_scrollArea.set_label_stylesheet(stylesheet)
         self.below_scrollArea.set_label_stylesheet(stylesheet)
         # 同步到配置
