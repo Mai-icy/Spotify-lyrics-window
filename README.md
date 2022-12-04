@@ -36,8 +36,8 @@ Customize the style of the lyrics 自定义歌词的风格
 ## 📝 TODO
 
 - [x] basic function 基本功能
+- [x] Use the palette to customize the colors 使用调色盘自定义颜色
 - [ ] more lyric api 更多的歌词api
 - [ ] Manually adjust the lyrics file  手动调整歌词文件
-- [ ] Use the palette to customize the colors 使用调色盘自定义颜色
 - [ ] Beautify the window 美化窗口
 - [ ] etc.
