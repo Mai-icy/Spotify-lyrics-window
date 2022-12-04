@@ -19,7 +19,7 @@ class HotkeyLineEdit(QLineEdit):
         self.signal_key = signal_key
         self.current_hot_keys = []
 
-        self.setReadOnly(False)
+        self.setReadOnly(True)
 
     def get_signal_key(self) -> str:
         return self.signal_key
