@@ -157,7 +157,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         """
         for key in self.signal_dic.keys():
             hotkeys = getattr(Config.HotkeyConfig, key)
-            if hotkeys:
+            if hotkeys and hotkeys != "null":
                 if flag and Config.HotkeyConfig.is_enable:
                     self.hotkey.register(hotkeys,
                                          callback=self.get_emit_func(self.signal_dic[key]))

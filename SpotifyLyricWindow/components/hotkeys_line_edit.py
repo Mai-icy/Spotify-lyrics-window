@@ -9,15 +9,17 @@ from common.config import Config
 
 
 class HotkeyLineEdit(QLineEdit):
+    hotkeys_conflict_signal = pyqtSignal(str)
+
     def __init__(self, signal_key, parent=None):
         super(HotkeyLineEdit, self).__init__(parent)
         self.unvalidated = False
         self.start_record = False
 
         self.signal_key = signal_key
-        self.current_hot_keys = ()
+        self.current_hot_keys = []
 
-        self.setReadOnly(True)
+        self.setReadOnly(False)
 
     def get_signal_key(self) -> str:
         return self.signal_key
@@ -28,9 +30,21 @@ class HotkeyLineEdit(QLineEdit):
 
         :param hotkey: 快捷键组合 例如： ["ctrl", "a"]
         """
+        # 判断是否冲突
+        hotkeys_dict = Config.to_dict().get("HotkeyConfig", {})
+        for signal_key in hotkeys_dict.keys():
+            if hotkeys_dict[signal_key] == hotkey:
+                # signal_key 为冲突的热键信号名
+                self.hotkeys_conflict_signal.emit(signal_key)
+                # HotkeysPage 负责接收信号并进行处理
+                break
+
         self.current_hot_keys = hotkey
         if not hotkey:
             self.setText("None")
+            setattr(Config.HotkeyConfig, self.signal_key, None)
+            return
+
         forward_dict = {
             "left": "←",
             "right": "→",
@@ -45,11 +59,7 @@ class HotkeyLineEdit(QLineEdit):
                 show_keys.append(key_.capitalize())
 
         self.setText(" + ".join(show_keys))
-
-        if hotkey:
-            setattr(Config.HotkeyConfig, self.signal_key, self.current_hot_keys)
-        else:
-            setattr(Config.HotkeyConfig, self.signal_key, None)
+        setattr(Config.HotkeyConfig, self.signal_key, self.current_hot_keys)
 
     def focusOutEvent(self, event: QtGui.QFocusEvent) -> None:
         """防止焦点外放后 使输入停止 从而一直显示非法热键"""

@@ -28,14 +28,14 @@ class Config:
     class HotkeyConfig:
         is_enable: bool = True
 
-        pause_button: tuple = ("alt", "p")
-        last_button: tuple = ("alt", "left")
-        next_button: tuple = ("alt", "right")
-        lock_button: tuple = ("alt", "l")
-        calibrate_button: tuple = ("alt", "r")
-        translate_button: tuple = ("alt", "a")
-        show_window: tuple = ("alt", "s")
-        close_button: tuple = ("alt", "x")
+        pause_button: list = ["alt", "p"]
+        last_button: list = ["alt", "left"]
+        next_button: list = ["alt", "right"]
+        lock_button: list = ["alt", "l"]
+        calibrate_button: list = ["alt", "r"]
+        translate_button: list = ["alt", "a"]
+        show_window: list = ["alt", "s"]
+        close_button: list = ["alt", "x"]
 
     @classmethod
     def read_config(cls):
