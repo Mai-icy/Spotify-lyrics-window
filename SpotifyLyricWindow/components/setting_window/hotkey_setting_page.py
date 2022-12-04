@@ -57,7 +57,10 @@ class HotkeysPage(QWidget, Ui_HotkeysPage):
         for line_edit in self.line_edit_dict.values():
             signal_key = line_edit.get_signal_key()
             current_hot_keys = getattr(Config.HotkeyConfig, signal_key)
-            line_edit.set_hotkey(current_hot_keys)
+            if current_hot_keys and current_hot_keys != "null":
+                line_edit.set_hotkey(current_hot_keys)
+            else:
+                line_edit.set_hotkey([])
 
         self.enable_hotkeys_checkBox.setChecked(Config.HotkeyConfig.is_enable)
 
