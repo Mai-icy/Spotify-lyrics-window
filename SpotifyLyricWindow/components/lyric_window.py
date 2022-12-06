@@ -265,6 +265,12 @@ class LyricsWindow(LyricsWindowView):
             # 成功下载
             return self._refresh_player_track()
 
+    def closeEvent(self, event):
+        print("closeEvent")
+        del self.lrc_player
+        del self.lyric_file_manage
+        super(LyricsWindow, self).closeEvent(event)
+
 
 if __name__ == "__main__":
     # 适配2k等高分辨率屏幕,低分辨率屏幕可以缺省

@@ -3,6 +3,7 @@
 import json
 import threading
 import time
+import weakref
 
 from common.api import SpotifyUserApi
 from common.lyric.lyric_type import LrcFile, TransType
@@ -163,9 +164,13 @@ class LyricThread(threading.Thread):
     def __init__(self, player: LrcPlayer):
         super(LyricThread, self).__init__(target=self.__play_lrc_thread)
         self.stop = threading.Event()
-        self.player = player
+        self.player_ = weakref.ref(player)
         self.position = 0
         self.is_running = True
+
+    @property
+    def player(self):
+        return self.player_()
 
     def set_position(self, position):
         self.position = position
@@ -251,10 +256,14 @@ class LyricThread(threading.Thread):
 class WindowsSpotifyTitleThread(threading.Thread):
     def __init__(self, player: LrcPlayer):
         super(WindowsSpotifyTitleThread, self).__init__(target=self.check_title_changed_func)
-        self.player = player
+        self.player_ = weakref.ref(player)
         self.stop = threading.Event()
         self.is_running = True
         self.max_times = 40
+
+    @property
+    def player(self):
+        return self.player_()
 
     def set_times(self, times):
         self.max_times = times
