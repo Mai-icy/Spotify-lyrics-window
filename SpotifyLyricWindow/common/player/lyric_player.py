@@ -8,7 +8,7 @@ import weakref
 from common.api import SpotifyUserApi
 from common.lyric.lyric_type import LrcFile, TransType
 from common.win_utils.get_windows_title import get_spotify_pid, get_pid_title
-from common.lyric import get_offset_file, set_offset_file, read_lyric_file
+from common.lyric import LyricFileManage
 
 
 class LrcPlayer:
@@ -18,13 +18,14 @@ class LrcPlayer:
         self.timer_value = int(time.time() * 1000)
 
         self.lrc_file = LrcFile()
+        self.lyric_file_manage = LyricFileManage()
 
         self.no_lyric = True
 
         self.order = 0
         self.offset = 0
         self.duration = 0
-        self.api_offset = get_offset_file("api_offset")
+        self.api_offset = self.lyric_file_manage.get_offset_file("api_offset")
 
         self.trans_mode = TransType.NON
         self.is_pause = False
@@ -40,17 +41,17 @@ class LrcPlayer:
         """Make the in-class data correspond to the lyrics file data."""
         if self.no_lyric:
             return
-        self.lrc_file = read_lyric_file(self.track_id)
+        self.lrc_file = self.lyric_file_manage.read_lyric_file(self.track_id)
 
     def set_track(self, track_id: str, duration: int, *, no_lyric=False):
         """change the current lrc. the duration is used to auto next song"""
         if self.track_id and self.offset:
-            set_offset_file(self.track_id, self.offset)
+            self.lyric_file_manage.set_offset_file(self.track_id, self.offset)
         if self.api_offset:
-            set_offset_file("api_offset", self.api_offset)
+            self.lyric_file_manage.set_offset_file("api_offset", self.api_offset)
 
         self.track_id = track_id
-        self.offset = get_offset_file(track_id)
+        self.offset = self.lyric_file_manage.get_offset_file(track_id)
         self.no_lyric = no_lyric
         self.duration = duration
 
@@ -120,7 +121,7 @@ class LrcPlayer:
 
         if api_offset:
             # 自动切歌的时候 progress_ms 不准确，timestamp准确
-            saved_api_offset = get_offset_file("api_offset")
+            saved_api_offset = self.lyric_file_manage.get_offset_file("api_offset")
             if self.title_changed_timestamp:
                 self.timer_value = self.title_changed_timestamp
                 self.title_changed_timestamp = 0
