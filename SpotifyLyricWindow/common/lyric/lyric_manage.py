@@ -24,7 +24,7 @@ class LyricFileManage:
         if not self._is_init:
             with LYRIC_DATA_FILE_PATH.open(encoding="utf-8") as f:
                 self.lyric_data_json = json.load(f)
-            keys = ["offset", "no_lyric", "title2id", "id2title"]
+            keys = ["offset", "no_lyric", "id2title"]
 
             for base_key in keys:
                 if base_key not in self.lyric_data_json:
@@ -66,11 +66,7 @@ class LyricFileManage:
     def get_title(self, track_id) -> str:
         return self.lyric_data_json["id2title"].get(track_id)
 
-    def get_track_id(self, title) -> str:
-        return self.lyric_data_json["title2id"].get(title)
-
     def set_track_id_map(self, track_id, title):
-        self.lyric_data_json["title2id"][title] = track_id
         self.lyric_data_json["id2title"][track_id] = title
 
     def get_offset_file(self, track_id: str) -> int:
@@ -85,7 +81,6 @@ lyric.json 文件格式
 {
 "offset": {}
 "no_lyric":{}
-"title2id":{}
 "id2title":{}
 }
 
