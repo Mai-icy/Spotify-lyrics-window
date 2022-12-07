@@ -5,6 +5,7 @@ import requests
 from common.api import *
 from common.song_metadata.compare_metadata import compare_song_info
 from common.path import LRC_PATH
+from common.lyric.lyric_manage import LyricFileManage
 
 cloud_api = CloudMusicWebApi()
 kugou_api = KugouApi()
@@ -46,6 +47,7 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
             lrc = cloud_api.fetch_song_lyric(cloud_song_id)
             if not lrc.empty():
                 lrc.save_to_mrc(str(file_name))
+                LyricFileManage().set_track_id_map(track_id, track_name)
                 return True
         except requests.RequestException:
             pass
