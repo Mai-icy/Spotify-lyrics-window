@@ -65,9 +65,6 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QListWidget" name="musics_listWidget"/>
-   </item>
    <item row="2" column="0" colspan="2">
     <widget class="QFrame" name="music_frame">
      <property name="sizePolicy">
@@ -107,7 +104,10 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <property name="spacing">
+      <property name="horizontalSpacing">
+       <number>10</number>
+      </property>
+      <property name="verticalSpacing">
        <number>0</number>
       </property>
       <item row="0" column="0" rowspan="2">
@@ -247,6 +247,9 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QTableWidget" name="musics_tableWidget"/>
    </item>
   </layout>
  </widget>
