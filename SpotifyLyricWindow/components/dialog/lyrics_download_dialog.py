@@ -17,6 +17,8 @@ from common.api.api_error import NoneResultError
 class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
     download_lrc_signal = pyqtSignal(object)
 
+    _load_data_signal = pyqtSignal(list)
+
     def __init__(self, parent=None):
         super(LyricsDownloadDialog, self).__init__(parent)
         self.setupUi(self)
@@ -38,6 +40,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.download_button.clicked.connect(self.download_event)
         self.search_tableWidget.itemDoubleClicked.connect(self.download_event)
         self.cancel_button.clicked.connect(self.close)
+
+        self._load_data_signal.connect(self._load_result_table_widget)
 
     def _init_api(self):
         self.kugou_api = KugouApi()
@@ -113,15 +117,18 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
 
         if not res_list:
             self.songname_label.setText("搜索词无结果")
+            return
 
         self.search_tableWidget.setRowCount(len(res_list))
-        for outer_index, outer_data in enumerate(res_list):
+        self._load_data_signal.emit(res_list)
+        self.songname_label.setText("请在上方选择")
+
+    def _load_result_table_widget(self, result_data):
+        for outer_index, outer_data in enumerate(result_data):
             for inner_index, inner_data in enumerate(outer_data):
                 item = QTableWidgetItem()
                 item.setText(inner_data)
                 self.search_tableWidget.setItem(outer_index, inner_index, item)
-
-        self.songname_label.setText("请在上方选择")
 
     @thread_drive()
     def result_click_event(self, item):
