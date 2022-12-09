@@ -44,7 +44,7 @@ class SpotifyApi(BaseMusicApi):
         duration = int(song_json["duration_ms"]) // 1000
 
         if download_pic:
-            pic_url = song_json["album"]["images"][-1]["url"]
+            pic_url = song_json["album"]["images"][0]["url"]
             pic_data = requests.get(pic_url, timeout=10).content
             pic_buffer = io.BytesIO(pic_data)
         else:

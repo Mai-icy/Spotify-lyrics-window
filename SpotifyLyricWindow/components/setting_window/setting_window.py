@@ -32,7 +32,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
 
         self.lyric_page = LyricPage(lyric_window=self.lyric_window, setting_window=self)
         self.hotkeys_page = HotkeysPage(self)
-        self.lyric_manage_page = LyricsManagePage()
+        self.lyric_manage_page = LyricsManagePage(setting_window=self)
 
         self.page_stackedWidget.addWidget(QWidget())
         self.page_stackedWidget.addWidget(self.lyric_page)
@@ -55,6 +55,8 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         # 载入配置
         self.lyric_page.load_config()
         self.hotkeys_page.load_config()
+
+        self.lyric_manage_page.load_lyrics_file()
 
         self.lyric_window.set_hotkey_enable(False)
 
