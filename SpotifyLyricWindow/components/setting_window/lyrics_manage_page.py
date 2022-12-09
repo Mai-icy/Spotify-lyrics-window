@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import re
 import weakref
 
 from PyQt5 import QtGui, QtWidgets
@@ -188,11 +189,15 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         lrc_text = self.lyrics_plainTextEdit.toPlainText()
         if not lrc_text or lrc_text == "无歌词":
             return
+        item = self.lyrics_listWidget.currentItem()
+        title = item.text()
 
+        file_name = re.sub(r'[\\/:*?"<>|]', '-', title)
         self.setting_window.mask_.show()
-        file_path = QFileDialog.getSaveFileName(self, "save file", "", "Lyric (*.lrc);;Text files (*.txt)")
+
+        file_path = QFileDialog.getSaveFileName(self, "save file", file_name, "Lyric (*.lrc);;Text files (*.txt)")
         self.setting_window.mask_.hide()
-        if not file_path:
+        if not file_path[0]:
             return
 
         lrc = LrcFile()
@@ -207,6 +212,9 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self._set_modify_mode(False)
 
         new_lyric_text = self.lyrics_plainTextEdit.toPlainText()
+        if new_lyric_text == "无歌词":
+            return
+
         trans_type = TransType(self.show_comboBox.currentIndex())
         LrcFile.load_content(self.current_lrc, new_lyric_text, trans_type)
         try:
@@ -226,7 +234,11 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
     def _set_modify_mode(self, flag: bool):
         self.confirm_button.setVisible(flag)
         self.cancel_button.setVisible(flag)
+
+        self.export_button.setEnabled(not flag)
+        self.download_button.setEnabled(not flag)
         self.show_comboBox.setEnabled(not flag)
+        self.lyrics_listWidget.setEnabled(not flag)
         self.lyrics_plainTextEdit.setReadOnly(not flag)
 
     def lyric_show_trans_event(self, index_=None):

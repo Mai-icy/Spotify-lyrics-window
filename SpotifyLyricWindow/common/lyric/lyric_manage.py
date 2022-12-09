@@ -53,9 +53,13 @@ class LyricFileManage:
         else:
             raise NotLyricFound("未找到歌词文件")
 
-    @staticmethod
-    def save_lyric_file(track_id: str, lrc_file: LrcFile):
+    def save_lyric_file(self, track_id: str, lrc_file: LrcFile):
         lrc_file.save_to_mrc(LRC_PATH / (track_id + ".mrc"))
+        if track_id in self.lyric_data_json["no_lyric"]:
+            title = self.lyric_data_json["no_lyric"][track_id]["track_title"]
+            self.lyric_data_json["no_lyric"].pop(track_id)
+            self.lyric_data_json["id2title"][track_id] = title
+            self.save_json()
 
     def get_not_found(self, track_id: str) -> dict:
         return self.lyric_data_json["no_lyric"].get(track_id, None)

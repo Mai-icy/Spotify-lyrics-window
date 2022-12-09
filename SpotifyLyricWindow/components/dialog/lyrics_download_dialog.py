@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import io
+
 import requests
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -9,6 +11,7 @@ from components.raw_ui.LyricsDownloadDialog import Ui_LyricsDownloadDialog
 from components.work_thread import thread_drive
 from common.api.lyric_api import CloudMusicWebApi, KugouApi
 from common.temp_manage import TempFileManage
+from common.api.api_error import NoneResultError
 
 
 class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
@@ -20,15 +23,21 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self._init_table_widget()
         self._init_signal()
         self._init_api()
+        self._init_label()
         self.temp_file_manage = TempFileManage()
 
+    def _init_label(self):
         self.image_label.setScaledContents(True)
+        self.songname_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.singer_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
     def _init_signal(self):
         self.search_tableWidget.itemClicked.connect(self.result_click_event)
         self.search_button.clicked.connect(self.search_event)
 
         self.download_button.clicked.connect(self.download_event)
+        self.search_tableWidget.itemDoubleClicked.connect(self.download_event)
+        self.cancel_button.clicked.connect(self.close)
 
     def _init_api(self):
         self.kugou_api = KugouApi()
@@ -51,6 +60,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
 
         self.search_tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.search_tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.search_tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
         # self.search_tableWidget.clear()
         self.search_tableWidget.setColumnCount(5)
@@ -65,7 +75,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.setAcceptDrops(True)
         self.search_tableWidget.setAcceptDrops(True)  # 允许文件拖入
 
-        column_text_list = ['曲名', '歌手', '时长', 'api', 'id']
+        column_text_list = ['曲名', '歌手', '时长', '来源', 'id']
         for column in range(5):
             item = QTableWidgetItem()
             item.setText(column_text_list[column])
@@ -76,9 +86,19 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
     def search_event(self, *_):
         self.search_tableWidget.clearContents()
 
+        self.singer_label.setText("")
+        self.songname_label.setText("正在搜索相关歌词，请稍后")
+
         keyword = self.search_lineEdit.text()
-        res_kugou = self.kugou_api.search_song_id(keyword)
-        res_cloud = self.cloud_api.search_song_id(keyword)
+
+        try:
+            res_kugou = self.kugou_api.search_song_id(keyword)
+        except NoneResultError:
+            res_kugou = []
+        try:
+            res_cloud = self.cloud_api.search_song_id(keyword)
+        except NoneResultError:
+            res_cloud = []
 
         res_list = []
         for i in range(len(res_kugou) + len(res_cloud)):
@@ -91,12 +111,17 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
                 new_data = (data.songName, data.singer, data.duration, "cloud", data.idOrMd5)
                 res_list.append(new_data)
 
+        if not res_list:
+            self.songname_label.setText("搜索词无结果")
+
         self.search_tableWidget.setRowCount(len(res_list))
         for outer_index, outer_data in enumerate(res_list):
             for inner_index, inner_data in enumerate(outer_data):
                 item = QTableWidgetItem()
                 item.setText(inner_data)
                 self.search_tableWidget.setItem(outer_index, inner_index, item)
+
+        self.songname_label.setText("请在上方选择")
 
     @thread_drive()
     def result_click_event(self, item):
@@ -121,6 +146,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             image = song_data.picBuffer
             if image:
                 self.temp_file_manage.save_temp_image(track_id, image)
+            else:
+                image = io.BytesIO()
 
         if self.search_tableWidget.currentItem().row() == item.row():
             pix = QPixmap()
@@ -130,8 +157,10 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             else:
                 self.image_label.setText("无图片")
 
-    def download_event(self):
-        item = self.search_tableWidget.currentItem()
+    def download_event(self, item=None):
+        if not item:
+            item = self.search_tableWidget.currentItem()
+
         if not item:
             return
         track_id_or_md5 = self.search_tableWidget.item(item.row(), 4).text()
