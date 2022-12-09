@@ -33,8 +33,7 @@ class LyricFileManage:
             self._is_init = True
 
     def __del__(self):
-        with LYRIC_DATA_FILE_PATH.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(self.lyric_data_json, indent=4, ensure_ascii=False))
+        self.save_json()
 
     @staticmethod
     def is_lyric_exist(track_id: str) -> bool:
@@ -54,6 +53,10 @@ class LyricFileManage:
         else:
             raise NotLyricFound("未找到歌词文件")
 
+    @staticmethod
+    def save_lyric_file(track_id: str, lrc_file: LrcFile):
+        lrc_file.save_to_mrc(LRC_PATH / (track_id + ".mrc"))
+
     def get_not_found(self, track_id: str) -> dict:
         return self.lyric_data_json["no_lyric"].get(track_id, None)
 
@@ -62,19 +65,31 @@ class LyricFileManage:
             self.lyric_data_json["no_lyric"].pop(track_id)
         else:
             self.lyric_data_json["no_lyric"][track_id] = {"track_title": track_title, "last_time": int(time.time())}
+        self.save_json()
 
     def get_title(self, track_id) -> str:
         return self.lyric_data_json["id2title"].get(track_id)
 
     def set_track_id_map(self, track_id, title):
         self.lyric_data_json["id2title"][track_id] = title
+        self.save_json()
 
     def get_offset_file(self, track_id: str) -> int:
         return self.lyric_data_json["offset"].get(track_id, 0)
 
     def set_offset_file(self, track_id: str, offset: int):
         self.lyric_data_json["offset"][track_id] = offset
+        self.save_json()
 
+    def get_tracks_id_data(self) -> dict:
+        return self.lyric_data_json["id2title"]
+
+    def get_not_found_data(self) -> dict:
+        return self.lyric_data_json["no_lyric"]
+
+    def save_json(self):
+        with LYRIC_DATA_FILE_PATH.open("w", encoding="utf-8") as f:
+            f.write(json.dumps(self.lyric_data_json, indent=4, ensure_ascii=False))
 
 """
 lyric.json 文件格式
