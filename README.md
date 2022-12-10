@@ -33,6 +33,10 @@ Customize the style of the lyrics 自定义歌词的风格
 
 ![1](https://github.com/Mai-icy/Spotify-lyrics-window/blob/main/image-folder/gif_example2.gif)
 
+Manage and download Lyrics 管理和下载歌词
+
+![1](https://github.com/Mai-icy/Spotify-lyrics-window/blob/main/image-folder/gif_example3.gif)
+
 ## 📝 TODO
 
 - [x] basic function 基本功能
