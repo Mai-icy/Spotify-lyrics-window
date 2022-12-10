@@ -1,28 +1,26 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import time
-
-import requests
-
-from components.lyric_window_view import LyricsWindowView
-
 import sys
+import time
+import webbrowser
 from functools import wraps
 from types import MethodType
-import webbrowser
 
+import requests
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
-from components.work_thread import thread_drive
-from components.setting_window.setting_window import SettingWindow
-
-from common.config import Config
-from common.api.user_api import SpotifyUserApi, UserCurrentPlaying
 from common.api.api_error import UserError, NoPermission
+from common.api.user_api import SpotifyUserApi, UserCurrentPlaying
+from common.config import Config
+from common.lyric import LyricFileManage
+from common.lyric.lyric_download import download_lrc
+from common.temp_manage import TempFileManage
 from common.player.lyric_player import LrcPlayer, TransType
-from common.lyric import LyricFileManage, download_lrc
+from components.lyric_window_view import LyricsWindowView
+from components.setting_window.setting_window import SettingWindow
+from components.work_thread import thread_drive
 
 
 class CatchError:
@@ -83,6 +81,7 @@ class LyricsWindow(LyricsWindowView):
     def _init_common(self):
         """初始化其他辅助部件"""
         self.lyric_file_manage = LyricFileManage()
+        self.temp_manage = TempFileManage()
 
         self.user_trans = TransType(Config.LyricConfig.trans_type)
 
@@ -268,9 +267,9 @@ class LyricsWindow(LyricsWindowView):
             return self._refresh_player_track()
 
     def closeEvent(self, event):
-        print("closeEvent")
         del self.lrc_player
         del self.lyric_file_manage
+        self.temp_manage.auto_clean_temp()
         super(LyricsWindow, self).closeEvent(event)
 
 

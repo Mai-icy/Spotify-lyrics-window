@@ -10,6 +10,16 @@ from common.lyric.lyric_error import NotLyricFound
 
 
 class LyricFileManage:
+    """
+    歌词管理类（单例）
+
+    lyric.json 文件格式
+    {
+    "offset": {}
+    "no_lyric":{}
+    "id2title":{}
+    }
+    """
     _instance = None
     _is_init = False
 
@@ -61,6 +71,15 @@ class LyricFileManage:
             self.lyric_data_json["id2title"][track_id] = title
             self.save_json()
 
+    def delete_lyric_file(self, track_id: str):
+        title = self.lyric_data_json["id2title"][track_id]
+        self.lyric_data_json["id2title"].pop(track_id)
+        lrc_path = LRC_PATH / (track_id + ".mrc")
+        if lrc_path.exists():
+            lrc_path.unlink()
+        if track_id not in self.lyric_data_json["no_lyric"]:
+            self.set_not_found(track_id, title)
+
     def get_not_found(self, track_id: str) -> dict:
         return self.lyric_data_json["no_lyric"].get(track_id, None)
 
@@ -95,15 +114,6 @@ class LyricFileManage:
         with LYRIC_DATA_FILE_PATH.open("w", encoding="utf-8") as f:
             f.write(json.dumps(self.lyric_data_json, indent=4, ensure_ascii=False))
 
-"""
-lyric.json 文件格式
-{
-"offset": {}
-"no_lyric":{}
-"id2title":{}
-}
-
-"""
 
 if __name__ == "__main__":
     test = LyricFileManage()

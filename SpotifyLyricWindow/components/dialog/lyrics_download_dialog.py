@@ -33,26 +33,31 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.warning_dialog = WarningDialog(self)
 
     def _init_label(self):
+        """初始化标签"""
         self.image_label.setScaledContents(True)
         self.songname_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.singer_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
     def _init_signal(self):
+        """初始化信号"""
+        # 表格信号连接
         self.search_tableWidget.itemClicked.connect(self.result_click_event)
-        self.search_button.clicked.connect(self.search_event)
-
-        self.download_button.clicked.connect(self.download_event)
         self.search_tableWidget.itemDoubleClicked.connect(self.download_event)
+        # 按钮信号连接
+        self.search_button.clicked.connect(self.search_event)
+        self.download_button.clicked.connect(self.download_event)
         self.cancel_button.clicked.connect(self.close)
-
+        # 设置文本信号连接（为了便于线程设置文本不出现未响应）
         self._load_detail_signal.connect(self._set_detail_label)
         self._load_data_signal.connect(self._load_result_table_widget)
 
     def _init_api(self):
+        """初始化使用的歌词api"""
         self.kugou_api = KugouApi()
         self.cloud_api = CloudMusicWebApi()
 
     def _init_table_widget(self):
+        """初始化表格属性"""
         self.search_tableWidget.horizontalHeader().setVisible(True)
         self.search_tableWidget.horizontalHeader().setHighlightSections(True)
         self.search_tableWidget.horizontalHeader().setSortIndicatorShown(False)
@@ -93,6 +98,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
 
     @thread_drive()
     def search_event(self, *_):
+        """搜索事件"""
         self.search_tableWidget.clearContents()
 
         self.image_label.setPixmap(QPixmap())
@@ -109,6 +115,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         except NoneResultError:
             res_cloud = []
 
+        # 交叉合并搜索结果，在前的优先级高
         res_list = []
         for i in range(len(res_kugou) + len(res_cloud)):
             if res_kugou:
@@ -128,15 +135,9 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self._load_data_signal.emit(res_list)
         self._load_detail_signal.emit(("请在上方选择", ""))
 
-    def _load_result_table_widget(self, result_data):
-        for outer_index, outer_data in enumerate(result_data):
-            for inner_index, inner_data in enumerate(outer_data):
-                item = QTableWidgetItem()
-                item.setText(inner_data)
-                self.search_tableWidget.setItem(outer_index, inner_index, item)
-
     @thread_drive()
     def result_click_event(self, item):
+        """点击搜索结果事件"""
         title = self.search_tableWidget.item(item.row(), 0).text()
         singer = self.search_tableWidget.item(item.row(), 1).text()
         api = self.search_tableWidget.item(item.row(), 3).text()
@@ -171,6 +172,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
                 self.image_label.setText("无图片")
 
     def download_event(self, item=None):
+        """下载歌词事件"""
         if not item:
             item = self.search_tableWidget.currentItem()
 
@@ -192,10 +194,14 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.close()
 
     def _set_detail_label(self, texts):
+        """设置文本，利于非主线程控制"""
         self.songname_label.setText(texts[0])
         self.singer_label.setText(texts[1])
 
-
-
-
-
+    def _load_result_table_widget(self, result_data):
+        """设置搜索结果到表格，利于非主线程控制"""
+        for outer_index, outer_data in enumerate(result_data):
+            for inner_index, inner_data in enumerate(outer_data):
+                item = QTableWidgetItem()
+                item.setText(inner_data)
+                self.search_tableWidget.setItem(outer_index, inner_index, item)

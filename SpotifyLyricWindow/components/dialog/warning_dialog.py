@@ -34,13 +34,3 @@ class WarningDialog(QDialog, Ui_WarningDialog):
                 self.parent().mask_widget.show()
             else:
                 self.parent().mask_widget.hide()
-
-
-if __name__ == "__main__":
-    import sys
-    # 适配2k等高分辨率屏幕,低分辨率屏幕可以缺省
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
-    app = QApplication(sys.argv)
-    myWin = WarningDialog()
-    myWin.show()
-    sys.exit(app.exec_())

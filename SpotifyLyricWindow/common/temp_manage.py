@@ -8,6 +8,7 @@ from common.path import TEMP_DATA_FILE_PATH, TEMP_PATH, TEMP_IMAGE_PATH
 
 
 class TempFileManage:
+    """临时文件管理类（单例）"""
     TEMP_IMAGE_PATH = TEMP_PATH / "image"
     _instance = None
     _is_init = False
@@ -56,7 +57,7 @@ class TempFileManage:
 
     def auto_clean_temp(self):
         for temp_id in self.temp_data_json["image"]:
-            if int(time.time()) - self.temp_data_json[temp_id] >= 259200:
+            if int(time.time()) - self.temp_data_json["image"][temp_id]["last_time"] >= 259200:
                 self.delete_temp_image(temp_id)
 
     def json_save(self):
