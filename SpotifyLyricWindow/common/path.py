@@ -9,7 +9,6 @@ TEMP_PATH = BASE_PATH / Path(r"download/temp")
 TEMP_IMAGE_PATH = TEMP_PATH / "image"
 
 TOKEN_PATH = BASE_PATH / Path(r"resource/token")
-CLIENT_ID_SECRET_PATH = BASE_PATH / Path(r"resource/client_id_secret.json")
 
 LYRIC_DATA_FILE_PATH = LRC_PATH / "lyric.json"
 TEMP_DATA_FILE_PATH = TEMP_PATH / "temp.json"
@@ -22,10 +21,6 @@ def path_check():
     for dir_ in (LRC_PATH, TEMP_PATH, TEMP_IMAGE_PATH):
         if not dir_.exists():
             dir_.mkdir(parents=True)
-
-    if not CLIENT_ID_SECRET_PATH.exists():
-        with CLIENT_ID_SECRET_PATH.open("w", encoding="utf-8") as f:
-            f.write(json.dumps({"client_id": "", "client_secret": ""}, indent=4, ensure_ascii=False))
 
     for json_file in (LYRIC_DATA_FILE_PATH, TEMP_DATA_FILE_PATH):
         if not json_file.exists():

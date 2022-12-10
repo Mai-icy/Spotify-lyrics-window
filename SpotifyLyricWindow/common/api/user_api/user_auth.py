@@ -11,9 +11,7 @@ import requests
 
 from common.path import TOKEN_PATH
 from common.api.api_error import NoAuthError
-from common.api.get_client_id_secret import get_client_id_secret
-
-CLIENT_ID, CLIENT_SECRET = get_client_id_secret()
+from common.config import Config
 
 
 class SpotifyUserAuth:
@@ -34,17 +32,23 @@ class SpotifyUserAuth:
             self.client_token_info = None
             self.state = None
             self.auth_code = None
-            self.client_id = CLIENT_ID
-            self.client_secret = CLIENT_SECRET
-
-            auth = base64.b64encode((CLIENT_ID + ":" + CLIENT_SECRET).encode("ascii"))
+            self.client_id = Config.ClientConfig.client_id
+            self.client_secret = Config.ClientConfig.client_secret
+            auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
             self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
             if TOKEN_PATH.exists():
                 self.user_token_info = eval(TOKEN_PATH.read_text("utf-8"))
-
-            self._fetch_client_access_token()
+            # self._fetch_client_access_token()
 
             self._is_init = True
+
+    def load_client_config(self):
+        self.client_id = Config.ClientConfig.client_id
+        self.client_secret = Config.ClientConfig.client_secret
+        try:
+            self._fetch_client_access_token()
+        except NotImplementedError:
+            raise NotImplementedError("请检查client_id以及client_secret是否正确")
 
     @staticmethod
     def _generate_random_state():
@@ -156,6 +160,8 @@ class SpotifyUserAuth:
         """获取token"""
         payload = {"grant_type": "client_credentials"}
         response = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payload)
+        if response.json().get("error") == 'invalid_client':
+            raise NotImplementedError("请在设置输入您的client_id以及client_secret")
         response.raise_for_status()
         self.client_token_info = response.json()
         self.client_token_info["expires_at"] = int(time.time()) + self.client_token_info["expires_in"]

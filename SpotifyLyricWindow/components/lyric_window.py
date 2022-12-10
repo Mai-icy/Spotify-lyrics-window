@@ -35,6 +35,8 @@ class CatchError:
         except requests.RequestException as e:
             new_err = Exception("Requests Error")
             args[0].error_msg_show_signal.emit(new_err)
+        except NotImplementedError as e:
+            args[0].error_msg_show_signal.emit(str(e))
         except Exception as e:
             raise e
 

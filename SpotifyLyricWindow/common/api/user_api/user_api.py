@@ -17,6 +17,11 @@ class SpotifyUserApi:
 
     def __init__(self):
         self.auth = SpotifyUserAuth()
+        self.is_load = False
+
+    def load_client_id_secret(self):
+        self.auth.load_client_config()
+        self.is_load = True
 
     def _get_auth_header(self):
         auth_header = {
@@ -74,6 +79,8 @@ class SpotifyUserApi:
         self._player_http("put", "seek", device_id=self._get_user_devices(), position_ms=position_ms)
 
     def _player_http(self, method, url_suffix, **kwargs):
+        if not self.is_load:
+            self.load_client_id_secret()
         url = self.USER_PLAYER_URL + url_suffix
         func = getattr(requests, method)
         res = func(url, headers=self._get_auth_header(), params=kwargs)

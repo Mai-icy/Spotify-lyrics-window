@@ -7,6 +7,10 @@ import rtoml
 class Config:
     _default_dict = {}
 
+    class ClientConfig:
+        client_id: str = ""
+        client_secret: str = ""
+
     class PositionConfig:
         pos_x: int = 500
         pos_y: int = 900
@@ -93,5 +97,5 @@ Config.read_config()
 
 
 if __name__ == '__main__':
-    # Config.save_config()
+    Config.save_config()
     ...
