@@ -35,8 +35,8 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         self.lyric_manage_page = LyricsManagePage(setting_window=self)
 
         self.page_stackedWidget.addWidget(QWidget())
-        self.page_stackedWidget.addWidget(self.lyric_page)
         self.page_stackedWidget.addWidget(self.hotkeys_page)
+        self.page_stackedWidget.addWidget(self.lyric_page)
         self.page_stackedWidget.addWidget(self.lyric_manage_page)
 
     def _init_signal(self):
