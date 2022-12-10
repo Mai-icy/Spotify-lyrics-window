@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
-    <height>498</height>
+    <width>928</width>
+    <height>632</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -84,7 +84,7 @@
      </item>
      <item>
       <property name="text">
-       <string>歌词</string>
+       <string>快捷键</string>
       </property>
       <property name="font">
        <font>
@@ -94,7 +94,7 @@
      </item>
      <item>
       <property name="text">
-       <string>快捷键</string>
+       <string>歌词设置</string>
       </property>
       <property name="font">
        <font>

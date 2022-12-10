@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LyricsPage</class>
- <widget class="QWidget" name="LyricsPage">
+ <class>LyricsSettingsPage</class>
+ <widget class="QWidget" name="LyricsSettingsPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>643</width>
-    <height>470</height>
+    <width>875</width>
+    <height>604</height>
    </rect>
   </property>
   <property name="font">
@@ -17,20 +17,20 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>LyricsPage</string>
+   <string>LyricsSettingsPage</string>
   </property>
-  <layout class="QGridLayout" name="lyricspage_gridLayout">
+  <layout class="QGridLayout" name="lyricssettingspage_gridLayout">
    <property name="leftMargin">
-    <number>0</number>
+    <number>50</number>
    </property>
    <property name="topMargin">
-    <number>0</number>
+    <number>40</number>
    </property>
    <property name="rightMargin">
-    <number>0</number>
+    <number>50</number>
    </property>
    <property name="bottomMargin">
-    <number>0</number>
+    <number>40</number>
    </property>
    <property name="spacing">
     <number>0</number>
@@ -43,7 +43,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QGridLayout" name="ChangeColorGridLayout_2">
+     <layout class="QGridLayout" name="changecolor_gridLayout">
       <item row="1" column="3">
        <spacer name="color_horizontalSpacer">
         <property name="orientation">
@@ -103,7 +103,7 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QHBoxLayout" name="ShadowColorHorizontalLayout_2">
+        <layout class="QHBoxLayout" name="shadowcolor_horizontalLayout">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -174,7 +174,7 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QHBoxLayout" name="LyricsColorHorizontalLayout_2">
+        <layout class="QHBoxLayout" name="lyricscolor_horizontalLayout">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -261,7 +261,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="LyricsTransVerticalLayout_2">
+     <layout class="QVBoxLayout" name="lyricstrans_verticalLayout">
       <item>
        <widget class="QLabel" name="lyrics_trans_label">
         <property name="maximumSize">
@@ -307,7 +307,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="FontVerticalLayout_2">
+     <layout class="QVBoxLayout" name="font_verticalLayout">
       <item>
        <widget class="QLabel" name="font_label">
         <property name="maximumSize">
@@ -351,7 +351,7 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="AlwaysFrontVerticalLayout_3">
+     <layout class="QVBoxLayout" name="alwaysfront_verticalLayout">
       <item>
        <widget class="QLabel" name="always_front_label">
         <property name="maximumSize">
