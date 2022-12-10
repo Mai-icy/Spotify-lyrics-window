@@ -37,6 +37,7 @@ class FileListWidgetItem(QListWidgetItem):
 
 class LyricsManagePage(QWidget, Ui_LyricsManage):
     set_plain_text_signal = pyqtSignal(str)
+    set_detail_label_signal = pyqtSignal(tuple)
 
     def __init__(self, parent=None, *, setting_window=None):
         super(LyricsManagePage, self).__init__(parent)
@@ -49,14 +50,9 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self._init_signal()
 
     def _init_components(self):
-        self.trans_text_list = ["无翻译", "音译", "中文翻译"]
-
         self.image_label.setScaledContents(True)
         self.songname_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         self.singer_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-
-        self.show_comboBox.clear()
-        self.show_comboBox.addItems(self.trans_text_list)
 
         self.lyrics_plainTextEdit.setReadOnly(True)
 
@@ -87,6 +83,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.offset_doubleSpinBox.valueChanged.connect(self.set_offset_event)
 
         self.set_plain_text_signal.connect(self.set_plain_text)
+        self.set_detail_label_signal.connect(self.set_detail_label)
+
         self.show_comboBox.currentIndexChanged.connect(self.lyric_show_trans_event)
 
     def _init_dialog(self):
@@ -121,8 +119,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         image = self.temp_file_manage.get_temp_image(track_id)
         offset = self.lyrics_file_manage.get_offset_file(track_id)
         title, singer = track_title.split(" - ")[:2]  # todo
-        self.songname_label.setText(title)
-        self.singer_label.setText(singer)
+        self.set_detail_label_signal.emit((title, singer))
 
         self.offset_doubleSpinBox.setValue(offset)
 
@@ -268,4 +265,6 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
     def set_plain_text(self, text):
         self.lyrics_plainTextEdit.setPlainText(text)
 
-
+    def set_detail_label(self, texts):
+        self.songname_label.setText(texts[0])
+        self.singer_label.setText(texts[1])

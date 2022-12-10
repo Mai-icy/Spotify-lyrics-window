@@ -19,6 +19,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
     download_lrc_signal = pyqtSignal(object)
 
     _load_data_signal = pyqtSignal(list)
+    _load_detail_signal = pyqtSignal(tuple)
 
     def __init__(self, parent=None):
         super(LyricsDownloadDialog, self).__init__(parent)
@@ -44,6 +45,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.search_tableWidget.itemDoubleClicked.connect(self.download_event)
         self.cancel_button.clicked.connect(self.close)
 
+        self._load_detail_signal.connect(self._set_detail_label)
         self._load_data_signal.connect(self._load_result_table_widget)
 
     def _init_api(self):
@@ -94,8 +96,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.search_tableWidget.clearContents()
 
         self.image_label.setPixmap(QPixmap())
-        self.singer_label.setText("")
-        self.songname_label.setText("正在搜索相关歌词，请稍后")
+        self._load_detail_signal.emit(("正在搜索相关歌词，请稍后", ""))
 
         keyword = self.search_lineEdit.text()
 
@@ -120,12 +121,12 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
                 res_list.append(new_data)
 
         if not res_list:
-            self.songname_label.setText("搜索词无结果")
+            self._load_detail_signal.emit(("搜索词无结果", ""))
             return
 
         self.search_tableWidget.setRowCount(len(res_list))
         self._load_data_signal.emit(res_list)
-        self.songname_label.setText("请在上方选择")
+        self._load_detail_signal.emit(("请在上方选择", ""))
 
     def _load_result_table_widget(self, result_data):
         for outer_index, outer_data in enumerate(result_data):
@@ -146,8 +147,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             data_api = self.cloud_api
 
         image = self.temp_file_manage.get_temp_image(track_id)
-        self.songname_label.setText(title)
-        self.singer_label.setText(singer)
+        self._load_detail_signal.emit((title, singer))
 
         if not image.getvalue():
             self.image_label.clear()
@@ -191,8 +191,9 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.download_lrc_signal.emit(lrc)
         self.close()
 
-
-
+    def _set_detail_label(self, texts):
+        self.songname_label.setText(texts[0])
+        self.singer_label.setText(texts[1])
 
 
 

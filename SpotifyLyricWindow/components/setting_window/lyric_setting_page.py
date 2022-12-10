@@ -5,13 +5,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from components.raw_ui.LyricsPage import Ui_LyricsPage
+from components.raw_ui.LyricsSettingsPage import Ui_LyricsSettingsPage
 
 from common.config import Config
 from common.lyric.lyric_type import TransType
 
 
-class LyricPage(QWidget, Ui_LyricsPage):
+class LyricPage(QWidget, Ui_LyricsSettingsPage):
     def __init__(self, parent=None, *, lyric_window=None, setting_window=None):
         super(LyricPage, self).__init__(parent)
         self.setting_window = setting_window
