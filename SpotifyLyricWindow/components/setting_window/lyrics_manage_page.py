@@ -52,6 +52,9 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.trans_text_list = ["无翻译", "音译", "中文翻译"]
 
         self.image_label.setScaledContents(True)
+        self.songname_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.singer_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+
         self.show_comboBox.clear()
         self.show_comboBox.addItems(self.trans_text_list)
 
@@ -80,6 +83,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.confirm_button.clicked.connect(self.confirm_modify_text_event)
         self.modify_button.clicked.connect(self.modify_lyric_text_event)
         self.export_button.clicked.connect(self.export_lyric_event)
+
+        self.offset_doubleSpinBox.valueChanged.connect(self.set_offset_event)
 
         self.set_plain_text_signal.connect(self.set_plain_text)
         self.show_comboBox.currentIndexChanged.connect(self.lyric_show_trans_event)
@@ -114,9 +119,12 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         track_title = item.text()
 
         image = self.temp_file_manage.get_temp_image(track_id)
+        offset = self.lyrics_file_manage.get_offset_file(track_id)
         title, singer = track_title.split(" - ")[:2]  # todo
         self.songname_label.setText(title)
         self.singer_label.setText(singer)
+
+        self.offset_doubleSpinBox.setValue(offset)
 
         if self.lyrics_file_manage.is_lyric_exist(track_id):
             self.current_lrc = self.lyrics_file_manage.read_lyric_file(track_id)
@@ -140,6 +148,14 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
     @property
     def lyrics_file_manage(self):
         return self.lyrics_file_manage_()
+
+    def set_offset_event(self):
+        item = self.lyrics_listWidget.currentItem()
+        if not item:
+            return
+
+        offset = self.offset_doubleSpinBox.value()
+        self.lyrics_file_manage.set_offset_file(item.track_id, offset * 1000)
 
     def load_lyrics_file(self):
         tracks_id_data = self.lyrics_file_manage.get_tracks_id_data()

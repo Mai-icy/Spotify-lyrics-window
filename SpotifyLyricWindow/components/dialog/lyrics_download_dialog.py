@@ -90,6 +90,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
     def search_event(self, *_):
         self.search_tableWidget.clearContents()
 
+        self.image_label.setPixmap(QPixmap())
         self.singer_label.setText("")
         self.songname_label.setText("正在搜索相关歌词，请稍后")
 
