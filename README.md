@@ -18,7 +18,8 @@ spotify 歌词滚动窗口
 ## 💿How to use 使用
 
 1. Get your own spotify client id and client secret.
-2. Run the program for the first time, the```resource/client_id_secret.json```  will be generated.
+2. Run the program for the first time, the```resource/setting.toml```  will be generated.
+> Will be moved to the Settings window in the future 将在未来被移至设置窗口
 3. put your client_id and client_secret in it.
 4. run again, and click the authorization button and complete the authorization
 5. enjoy it! 😋
@@ -43,6 +44,7 @@ Manage and download Lyrics 管理和下载歌词
 - [x] Use the palette to customize the colors 使用调色盘自定义颜色
 - [x] Manually adjust the lyrics file  手动调整歌词文件
 - [x] Download the lyrics file by api  手动下载歌词文件
+- [ ] Common settings page 设置常规页面
 - [ ] More lyric api 更多的歌词api
 - [ ] Lyrics displayed vertically 竖向歌词显示
 - [ ] Beautify the window 美化窗口
