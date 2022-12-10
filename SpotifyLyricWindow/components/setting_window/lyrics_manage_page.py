@@ -232,9 +232,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             return
 
         trans_type = TransType(self.show_comboBox.currentIndex())
-        LrcFile.load_content(self.current_lrc, new_lyric_text, trans_type)
         try:
-            pass
+            LrcFile.load_content(self.current_lrc, new_lyric_text, trans_type)
         except Exception as e:
             print(e)
             self.set_plain_text_signal.emit(self.ori_plain_text)

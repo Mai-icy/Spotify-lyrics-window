@@ -8,6 +8,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from components.raw_ui.LyricsDownloadDialog import Ui_LyricsDownloadDialog
+from components.dialog.warning_dialog import WarningDialog
 from components.work_thread import thread_drive
 from common.api.lyric_api import CloudMusicWebApi, KugouApi
 from common.temp_manage import TempFileManage
@@ -27,6 +28,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self._init_api()
         self._init_label()
         self.temp_file_manage = TempFileManage()
+
+        self.warning_dialog = WarningDialog(self)
 
     def _init_label(self):
         self.image_label.setScaledContents(True)
@@ -157,7 +160,9 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             else:
                 image = io.BytesIO()
 
-        if self.search_tableWidget.currentItem().row() == item.row():
+        item = self.search_tableWidget.currentItem()
+
+        if item and item.row() == item.row():
             pix = QPixmap()
             if image.getvalue():
                 pix.loadFromData(image.read())
@@ -180,7 +185,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         try:
             lrc = data_api.fetch_song_lyric(track_id_or_md5)
         except requests.RequestException as e:
-            print(e)  # todo
+            self.warning_dialog.show()
+            self.warning_dialog.set_text(str(e))
             return
         self.download_lrc_signal.emit(lrc)
         self.close()

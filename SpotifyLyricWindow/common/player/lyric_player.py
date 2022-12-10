@@ -171,7 +171,11 @@ class LyricThread(threading.Thread):
 
     @property
     def player(self):
-        return self.player_()
+        if not self.player_():
+            self.terminate()
+            return LrcPlayer()
+        else:
+            return self.player_()
 
     def set_position(self, position):
         self.position = position
@@ -264,7 +268,11 @@ class WindowsSpotifyTitleThread(threading.Thread):
 
     @property
     def player(self):
-        return self.player_()
+        if not self.player_():
+            self.terminate()
+            return LrcPlayer()
+        else:
+            return self.player_()
 
     def set_times(self, times):
         self.max_times = times
