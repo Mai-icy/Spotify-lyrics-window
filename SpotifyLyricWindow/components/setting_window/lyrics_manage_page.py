@@ -157,7 +157,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             self.image_label.clear()
             self.image_label.setText("正在获取封面")
             try:
-                song_data = self.spotify_api.search_song_info(track_id, download_pic=True)
+                song_data = self.spotify_api.search_song_info(track_id, download_pic=True, pic_size=64)
             except requests.RequestException:
                 return
             image = song_data.picBuffer

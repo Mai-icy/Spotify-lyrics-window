@@ -43,7 +43,7 @@ class CloudMusicWebApi(BaseMusicApi):
         else:
             raise NoneResultError
 
-    def search_song_info(self, song_id: str, *, download_pic: bool = False) -> SongInfo:
+    def search_song_info(self, song_id: str, *, download_pic: bool = False, pic_size: int = 0) -> SongInfo:
         url = self._SEARCH_SONG_INFO_URL.format(song_id, song_id)
         res_json = requests.post(url, timeout=10).json()
 
@@ -53,10 +53,13 @@ class CloudMusicWebApi(BaseMusicApi):
         song_json = res_json['songs'][0]
         artists_list = [info["name"] for info in song_json["artists"]]
         duration = song_json["duration"] // 1000
-
         if download_pic:
+            if not pic_size:
+                param = {}  # if you need original pic, remove params
+            else:
+                param = {"param": f"{pic_size}y{pic_size}"}
             pic_url = song_json["album"]["picUrl"]
-            pic_data = requests.get(pic_url, timeout=10).content
+            pic_data = requests.get(pic_url, timeout=10, params=param).content
             pic_buffer = io.BytesIO(pic_data)
         else:
             pic_buffer = None

@@ -97,5 +97,6 @@ Config.read_config()
 
 
 if __name__ == '__main__':
+    Config.read_config()
     Config.save_config()
     ...

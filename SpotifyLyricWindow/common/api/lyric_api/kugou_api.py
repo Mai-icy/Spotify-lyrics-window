@@ -47,7 +47,7 @@ class KugouApi(BaseMusicApi):
         else:
             raise NoneResultError
 
-    def search_song_info(self, md5: str, *, download_pic: bool = False) -> SongInfo:
+    def search_song_info(self, md5: str, *, download_pic: bool = False, pic_size: int = 0) -> SongInfo:
         song_json = requests.get(self._SEARCH_SONG_INFO_URL.format(md5), headers=self.header, timeout=4).json()
         duration = song_json["timeLength"]
         album_img = str(song_json["album_img"])
@@ -59,7 +59,11 @@ class KugouApi(BaseMusicApi):
             album = album_json["data"].get("albumname", None)
             year = album_json["data"].get("publishtime", None)  # like '2021-08-11 00:00:00'
 
-        pic_url = album_img.replace("/{size}/", "/")
+        if not pic_size:
+            pic_url = album_img.format(size=pic_size)
+        else:
+            pic_url = album_img.replace("/{size}/", "/")  # original pic
+
         if download_pic and pic_url:
             pic_data = requests.get(pic_url, timeout=10).content
             pic_buffer = io.BytesIO(pic_data)

@@ -37,16 +37,24 @@ class SpotifyApi(BaseMusicApi):
             song_info_list.append(SongSearchInfo(**song_info))
         return song_info_list
 
-    def search_song_info(self, song_id: str, *, download_pic: bool = False):
+    def search_song_info(self, song_id: str, *, download_pic: bool = False, pic_size: int = 0):
         url = self._SEARCH_SONG_INFO_URL.format(song_id)
         song_json = requests.get(url, headers=self._get_token()).json()
 
         duration = int(song_json["duration_ms"]) // 1000
 
         if download_pic:
-            pic_url = song_json["album"]["images"][0]["url"]
-            pic_data = requests.get(pic_url, timeout=10).content
-            pic_buffer = io.BytesIO(pic_data)
+            if not pic_size:
+                pic_size = 640
+
+            pic_jsons = [pic_url for pic_url in song_json["album"]["images"] if pic_url['height'] == pic_size]
+            if pic_jsons:
+                pic_json = pic_jsons[0]
+                pic_url = pic_json["url"]
+                pic_data = requests.get(pic_url, timeout=10).content
+                pic_buffer = io.BytesIO(pic_data)
+            else:
+                pic_buffer = None
         else:
             pic_buffer = None
 
@@ -73,7 +81,8 @@ if __name__ == "__main__":
     from pprint import pprint
 
     test_api = SpotifyApi()
+    test_api.auth.load_client_config()
     print("\n----test----(search_song_id)")
     pprint(test_api.search_song_id("miku"))
     print("\n----test----(search_song_info)")
-    print(test_api.search_song_info("5mJ8Sj9EqT9UgpWY1RnEi2"))
+    print(test_api.search_song_info("5mJ8Sj9EqT9UgpWY1RnEi2", download_pic=True))

@@ -23,12 +23,13 @@ class BaseMusicApi(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def search_song_info(self, song_id: str, *, download_pic: bool = False) -> SongInfo:
+    def search_song_info(self, song_id: str, *, download_pic: bool = False, pic_size: int = 0) -> SongInfo:
         """
         Get the detailed info of the song.
 
         :param song_id: the id of track (in Kugou the id is md5 value of track)
         :param download_pic: whether to download the album image
+        :param pic_size: the size of album image(must be 64 or 300 or 640 in spotify)
         :return: SongInfo
         """
         ...

@@ -154,7 +154,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             self.image_label.clear()
             self.image_label.setText("正在获取封面")
 
-            song_data = data_api.search_song_info(track_id, download_pic=True)
+            song_data = data_api.search_song_info(track_id, download_pic=True, pic_size=64)
             image = song_data.picBuffer
             if image:
                 self.temp_file_manage.save_temp_image(track_id, image)
