@@ -2,10 +2,25 @@
 # -*- coding:utf-8 -*-
 import json
 from pathlib import Path
+
+from common.config import Config
+
 BASE_PATH = Path(__file__).parent.parent
 
-LRC_PATH = BASE_PATH / Path(r"download/lyrics")
-TEMP_PATH = BASE_PATH / Path(r"download/temp")
+ORI_LRC_PATH = BASE_PATH / Path(r"download/lyrics")
+ORI_TEMP_PATH = BASE_PATH / Path(r"download/temp")
+
+path_config = Config.CommonConfig.PathConfig
+if path_config.lyrics_file_path:
+    LRC_PATH = Path(path_config.lyrics_file_path)
+else:
+    LRC_PATH = ORI_LRC_PATH
+
+if path_config.temp_file_path:
+    TEMP_PATH = Path(path_config.temp_file_path)
+else:
+    TEMP_PATH = ORI_TEMP_PATH
+
 TEMP_IMAGE_PATH = TEMP_PATH / "image"
 
 TOKEN_PATH = BASE_PATH / Path(r"resource/token")
@@ -26,9 +41,6 @@ def path_check():
         if not json_file.exists():
             with json_file.open("w", encoding="utf-8") as f:
                 f.write(json.dumps({}, indent=4, ensure_ascii=False))
-
-    if not SETTING_TOML_PATH.exists():
-        SETTING_TOML_PATH.write_text("")
 
 
 path_check()

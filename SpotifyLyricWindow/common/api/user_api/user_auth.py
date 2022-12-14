@@ -32,8 +32,8 @@ class SpotifyUserAuth:
             self.client_token_info = None
             self.state = None
             self.auth_code = None
-            self.client_id = Config.ClientConfig.client_id
-            self.client_secret = Config.ClientConfig.client_secret
+            self.client_id = Config.CommonConfig.ClientConfig.client_id
+            self.client_secret = Config.CommonConfig.ClientConfig.client_secret
             auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
             self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
             if TOKEN_PATH.exists():
@@ -43,8 +43,10 @@ class SpotifyUserAuth:
             self._is_init = True
 
     def load_client_config(self):
-        self.client_id = Config.ClientConfig.client_id
-        self.client_secret = Config.ClientConfig.client_secret
+        self.client_id = Config.CommonConfig.ClientConfig.client_id
+        self.client_secret = Config.CommonConfig.ClientConfig.client_secret
+        auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
+        self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
         try:
             self._fetch_client_access_token()
         except NotImplementedError:

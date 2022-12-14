@@ -72,7 +72,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         """初始化字体 字体类型 以及 大小"""
         # 导入配置
         family = Config.LyricConfig.font_family
-        height = Config.PositionConfig.height
+        height = Config.CommonConfig.PositionConfig.height
 
         self.font = QtGui.QFont()
         self.font.setFamily(family)
@@ -88,7 +88,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         # 在各个方向的 Qt.CursorShape
         self._drag_cursor = [
             (Qt.SizeFDiagCursor, Qt.SizeVerCursor, Qt.SizeBDiagCursor),
-            (Qt.SizeHorCursor,   Qt.SizeAllCursor, Qt.SizeHorCursor),
+            (Qt.SizeHorCursor, Qt.SizeAllCursor, Qt.SizeHorCursor),
             (Qt.SizeBDiagCursor, Qt.SizeVerCursor, Qt.SizeFDiagCursor)
         ]
 
@@ -106,7 +106,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def _init_signal(self):
         """初始化基本信号连接"""
-        self.close_button.clicked.connect(self.hide)
+        self.close_button.clicked.connect(lambda _: self.tray_icon.quit() if Config.CommonConfig.is_quit_on_close else
+                                                    self.hide())
         self.lock_button.clicked.connect(self._lock_event)
         self.set_timer_status_signal.connect(lambda flag: self.timer.start() if flag else self.timer.stop())
 
@@ -438,7 +439,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         """从隐藏状态到显示状态"""
         if self.isVisible():
             return
-        pos_config = Config.PositionConfig
+        pos_config = Config.CommonConfig.PositionConfig
         self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
         self.tray_icon.show()
         super(LyricsWindowView, self).show()
@@ -456,10 +457,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def _renew_pos_config(self):
         """同步配置文件 关于窗口的位置 以至下次打开在原来位置"""
-        Config.PositionConfig.pos_x = self.pos().x()
-        Config.PositionConfig.pos_y = self.pos().y()
-        Config.PositionConfig.width = self.width()
-        Config.PositionConfig.height = self.height()
+        if Config.CommonConfig.is_save_position:
+            Config.CommonConfig.PositionConfig.pos_x = self.pos().x()
+            Config.CommonConfig.PositionConfig.pos_y = self.pos().y()
+            Config.CommonConfig.PositionConfig.width = self.width()
+            Config.CommonConfig.PositionConfig.height = self.height()
 
     def _update_rolling_step(self, roll_time: int):
         """更新滚动相关参数"""
@@ -526,6 +528,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
     @staticmethod
     def get_emit_func(signal):
         """返回对应信号触发函数，lambda函数因引用问题不使用"""
+
         def emit_func(_):
             signal.emit()
 
