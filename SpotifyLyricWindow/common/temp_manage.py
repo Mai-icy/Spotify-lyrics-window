@@ -55,12 +55,12 @@ class TempFileManage:
             return io.BytesIO()
 
     def auto_clean_temp(self):
-        for temp_id in self.temp_data_json["image"]:
+        for temp_id in self.temp_data_json["image"].keys().copy():
             if int(time.time()) - self.temp_data_json["image"][temp_id]["last_time"] >= 259200:
                 self.delete_temp_image(temp_id)
 
     def clean_all_temp(self):
-        for temp_id in self.temp_data_json["image"]:
+        for temp_id in self.temp_data_json["image"].keys().copy():
             self.delete_temp_image(temp_id)
 
     def json_save(self):
