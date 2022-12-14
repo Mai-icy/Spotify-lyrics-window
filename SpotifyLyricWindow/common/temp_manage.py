@@ -4,12 +4,11 @@ import io
 import json
 import time
 import weakref
-from common.path import TEMP_DATA_FILE_PATH, TEMP_PATH, TEMP_IMAGE_PATH
+from common.path import TEMP_DATA_FILE_PATH, TEMP_IMAGE_PATH
 
 
 class TempFileManage:
     """临时文件管理类（单例）"""
-    TEMP_IMAGE_PATH = TEMP_PATH / "image"
     _instance = None
     _is_init = False
 
@@ -59,6 +58,10 @@ class TempFileManage:
         for temp_id in self.temp_data_json["image"]:
             if int(time.time()) - self.temp_data_json["image"][temp_id]["last_time"] >= 259200:
                 self.delete_temp_image(temp_id)
+
+    def clean_all_temp(self):
+        for temp_id in self.temp_data_json["image"]:
+            self.delete_temp_image(temp_id)
 
     def json_save(self):
         with TEMP_DATA_FILE_PATH.open("w", encoding="utf-8") as f:

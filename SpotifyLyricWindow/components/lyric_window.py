@@ -64,7 +64,7 @@ class LyricsWindow(LyricsWindowView):
     def _init_signal(self):
         """初始化信号"""
         super(LyricsWindow, self)._init_signal()
-        
+
         self.account_button.clicked.connect(self.user_auth_button_event)
         self.calibrate_button.clicked.connect(self.calibration_event)
         self.next_button.clicked.connect(self.set_user_next_event)
@@ -216,8 +216,12 @@ class LyricsWindow(LyricsWindowView):
         self.set_lyrics_text(1, str(error))
         self.set_lyrics_text(2, "Σっ°Д°;)っ!")
         if isinstance(error, NoPermission):
-            self.delay_timer.start(2000)
-            self.delay_timer.timeout.connect(self.calibration_event)
+            self.delay_calibration()
+
+    def delay_calibration(self):
+        """延时触发校准事件"""
+        self.delay_timer.start(2000)
+        self.delay_timer.timeout.connect(self.calibration_event)
 
     def _refresh_player_track(self, user_current: UserCurrentPlaying = None, *, no_lyric: bool = False) \
             -> UserCurrentPlaying:
@@ -253,7 +257,7 @@ class LyricsWindow(LyricsWindowView):
             try:
                 if not download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id):
                     self.lyric_file_manage.set_not_found(user_current.track_id,
-                                                       f"{user_current.track_name} - {user_current.artist}")
+                                                         f"{user_current.track_name} - {user_current.artist}")
                     self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
                     self.set_lyrics_text(2, f"no lyric found")
                     return self._refresh_player_track(no_lyric=True)
@@ -261,7 +265,7 @@ class LyricsWindow(LyricsWindowView):
                 # TODO 归并错误
                 print("TOTOTOTOTOTOTOTO DOOOOO ITTTTTTTTTTTTTT!!!!!!")
                 self.lyric_file_manage.set_not_found(user_current.track_id,
-                                                   f"{user_current.track_name} - {user_current.artist}")
+                                                     f"{user_current.track_name} - {user_current.artist}")
                 self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
                 self.set_lyrics_text(2, f"no lyric found")
                 return self._refresh_player_track(no_lyric=True)

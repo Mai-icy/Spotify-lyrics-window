@@ -1,21 +1,34 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from common.path import SETTING_TOML_PATH
 import rtoml
+from pathlib import Path
+
+BASE_PATH = Path(__file__).parent.parent
+SETTING_TOML_PATH = BASE_PATH / Path(r"resource/setting.toml")
 
 
 class Config:
     _default_dict = {}
 
-    class ClientConfig:
-        client_id: str = ""
-        client_secret: str = ""
+    class CommonConfig:
+        is_quit_on_close: bool = False
+        is_save_position: bool = True
 
-    class PositionConfig:
-        pos_x: int = 500
-        pos_y: int = 900
-        width: int = 800
-        height: int = 150
+        api_offset: int = 0
+
+        class ClientConfig:
+            client_id: str = ""
+            client_secret: str = ""
+
+        class PathConfig:
+            temp_file_path: str = ""
+            lyrics_file_path: str = ""
+
+        class PositionConfig:
+            pos_x: int = 500
+            pos_y: int = 900
+            width: int = 800
+            height: int = 150
 
     class LyricConfig:
         trans_type: int = 0
@@ -44,6 +57,10 @@ class Config:
     @classmethod
     def read_config(cls):
         """读取toml配置文件配置，存储在Config类属性"""
+        if not SETTING_TOML_PATH.exists():
+            cls.save_config()
+            return
+
         cls._default_dict = cls.to_dict()
 
         def _load_config(last_cls, dic):
