@@ -34,7 +34,7 @@ class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
             self.main_window.show()
 
     def show_settings(self):
-        pass
+        self.main_window.settings_button.clicked.emit(True)
 
     def quit(self):
         self.main_window.close()
