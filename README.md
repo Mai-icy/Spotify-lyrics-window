@@ -15,14 +15,15 @@ spotify 歌词滚动窗口
 
 - You can customize the font and color of the lyrics. 歌词支持多种样式
 
+- You can manage and download lyric 你可以自己管理下载和编辑歌词
+
 ## 💿How to use 使用
 
-1. Get your own spotify client id and client secret.
-2. Run the program for the first time, the```resource/setting.toml```  will be generated.
-> Will be moved to the Settings window in the future 将在未来被移至设置窗口
-3. put your client_id and client_secret in it.
-4. run again, and click the authorization button and complete the authorization
-5. enjoy it! 😋
+1. Get your own spotify client id and secret from [spotify developer](https://developer.spotify.com/dashboard/). 从spotify开发者面板获取您的app id和密码
+2. Create a developer app and edit its setting. 打开新创建的应用并且编辑设置
+3. add ```http://localhost:8888/callback``` to your **Redirect URIs** setting. 将该网址加入此设置项
+4. Run the program and open setting page. Put your client_id and client_secret in it. 运行程序并打开设置窗口输入您获取到的app id以及密码
+5. click the sure and enjoy it! 😋 按下确定，然后试试！
 
 ## 🎼 example 用例
 
@@ -32,11 +33,11 @@ Play the lyrics 播放歌词
 
 Customize the style of the lyrics 自定义歌词的风格
 
-![1](https://github.com/Mai-icy/Spotify-lyrics-window/blob/main/image-folder/gif_example2.gif)
+![2](https://github.com/Mai-icy/Spotify-lyrics-window/blob/main/image-folder/gif_example2.gif)
 
 Manage and download Lyrics 管理和下载歌词
 
-![1](https://github.com/Mai-icy/Spotify-lyrics-window/blob/main/image-folder/gif_example3.gif)
+![3](https://github.com/Mai-icy/Spotify-lyrics-window/blob/main/image-folder/gif_example3.gif)
 
 ## 📝 TODO
 
