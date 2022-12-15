@@ -38,4 +38,5 @@ class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
 
     def quit(self):
         self.main_window.close()
-        QtWidgets.qApp.quit()
+        # QtWidgets.qApp.quit()
+        QtCore.QCoreApplication.exit(0)
