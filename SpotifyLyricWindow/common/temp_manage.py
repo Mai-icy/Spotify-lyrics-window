@@ -48,6 +48,9 @@ class TempFileManage:
     def get_temp_image(self, track_id) -> io.BytesIO:
         if track_id in self.temp_data_json["image"]:
             file_path = TEMP_IMAGE_PATH / (track_id + ".jpg")
+            if not file_path.exists():
+                self.delete_temp_image(track_id)
+                return io.BytesIO()
             self.temp_data_json["image"][track_id]["last_time"] = int(time.time())
             self.json_save()
             return io.BytesIO(file_path.read_bytes())
@@ -55,12 +58,12 @@ class TempFileManage:
             return io.BytesIO()
 
     def auto_clean_temp(self):
-        for temp_id in self.temp_data_json["image"].keys().copy():
+        for temp_id in list(self.temp_data_json["image"].keys()):
             if int(time.time()) - self.temp_data_json["image"][temp_id]["last_time"] >= 259200:
                 self.delete_temp_image(temp_id)
 
     def clean_all_temp(self):
-        for temp_id in self.temp_data_json["image"].keys().copy():
+        for temp_id in list(self.temp_data_json["image"].keys()):
             self.delete_temp_image(temp_id)
 
     def json_save(self):
