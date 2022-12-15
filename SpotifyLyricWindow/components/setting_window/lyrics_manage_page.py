@@ -227,6 +227,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         item = self.lyrics_listWidget.currentItem()
         if not item:
             return
+        if not self.lyrics_file_manage.is_lyric_exist(item.track_id):
+            return
         self.lyrics_file_manage.delete_lyric_file(item.track_id)
         item.set_no_lyric(True)
 
