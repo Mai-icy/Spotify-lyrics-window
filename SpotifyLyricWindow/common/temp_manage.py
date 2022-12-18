@@ -32,12 +32,14 @@ class TempFileManage:
             self._is_init = True
 
     def delete_temp_image(self, track_id):
+        """删除对应的缓存图片"""
         file_path = TEMP_IMAGE_PATH / (track_id + ".jpg")
         if file_path.exists():
             file_path.unlink()
         self.temp_data_json["image"].pop(track_id)
 
     def save_temp_image(self, track_id, img_io: io.BytesIO):
+        """将下载到的图片载入临时文件文件夹"""
         if not img_io:
             return
         self.temp_data_json["image"][track_id] = {"last_time": int(time.time())}
@@ -46,6 +48,7 @@ class TempFileManage:
         file_path.write_bytes(img_io.getvalue())
 
     def get_temp_image(self, track_id) -> io.BytesIO:
+        """获取临时缓存的图片，若不存在，则返回空io对象"""
         if track_id in self.temp_data_json["image"]:
             file_path = TEMP_IMAGE_PATH / (track_id + ".jpg")
             if not file_path.exists():
@@ -58,11 +61,13 @@ class TempFileManage:
             return io.BytesIO()
 
     def auto_clean_temp(self):
+        """自动清理临时文件，最近一次使用距今3天将被清除"""
         for temp_id in list(self.temp_data_json["image"].keys()):
             if int(time.time()) - self.temp_data_json["image"][temp_id]["last_time"] >= 259200:
                 self.delete_temp_image(temp_id)
 
     def clean_all_temp(self):
+        """清理掉所有的临时图片"""
         for temp_id in list(self.temp_data_json["image"].keys()):
             self.delete_temp_image(temp_id)
 

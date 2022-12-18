@@ -430,8 +430,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.set_font_size(int((self.height() - 30) / 3))
 
         # 判断缩放后是否开启滚动并更改文本label大小
-        self.above_scrollArea.resize_label(self._get_text_width(self.above_scrollArea.text))
-        self.below_scrollArea.resize_label(self._get_text_width(self.below_scrollArea.text))
+        self.above_scrollArea._resize_label(self._get_text_width(self.above_scrollArea.text))
+        self.below_scrollArea._resize_label(self._get_text_width(self.below_scrollArea.text))
 
         event.accept()
 
