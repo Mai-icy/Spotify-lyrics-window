@@ -32,6 +32,7 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.temp_file_manage_ = weakref.ref(TempFileManage())
 
     def _init_label(self):
+        """初始化标签属性"""
         self.register_label.setOpenExternalLinks(True)
         self.register_label.setText('<a href="https://developer.spotify.com/dashboard/">注册client</a>')
 
@@ -39,12 +40,14 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.lyrics_tip_label.setText("")
 
     def _init_line_edit(self):
+        """初始化lineEdit"""
         self.secret_lineEdit.setEchoMode(QLineEdit.PasswordEchoOnEdit)
 
         self.cache_path_lineEdit.setReadOnly(True)
         self.lyrics_path_lineEdit.setReadOnly(True)
 
     def _init_signal(self):
+        """初始化信号"""
         self.cache_path_button.clicked.connect(lambda _: self.set_path_event(self.cache_path_lineEdit))
         self.lyrics_path_button.clicked.connect(lambda _: self.set_path_event(self.lyrics_path_lineEdit))
 
@@ -62,6 +65,7 @@ class CommonPage(QWidget, Ui_CommonPage):
             lambda _: self.set_check_box_event(self.save_position_checkBox))
 
     def load_config(self):
+        """载入配置文件"""
         common_config = Config.CommonConfig
 
         client_id = common_config.ClientConfig.client_id
@@ -86,6 +90,7 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.lyrics_tip_label.setText("")
 
     def confirm_client_event(self):
+        """确认输入的client事件"""
         Config.CommonConfig.ClientConfig.client_id = self.id_lineEdit.text()
         Config.CommonConfig.ClientConfig.client_secret = self.secret_lineEdit.text()
         try:
@@ -115,6 +120,7 @@ class CommonPage(QWidget, Ui_CommonPage):
         Config.CommonConfig.PathConfig.temp_file_path = ""
 
     def set_path_event(self, line_edit: QLineEdit):
+        """设置路径事件"""
         self.setting_window.mask_.show()
         file_path = QFileDialog.getExistingDirectory(self, "选择一个目录", "./", QFileDialog.ShowDirsOnly)
         self.setting_window.mask_.hide()
@@ -129,6 +135,7 @@ class CommonPage(QWidget, Ui_CommonPage):
             Config.CommonConfig.PathConfig.temp_file_path = file_path
 
     def set_check_box_event(self, check_box: QCheckBox):
+        """设置勾选框事件"""
         flag = check_box.isChecked()
         if check_box is self.save_position_checkBox:
             Config.CommonConfig.is_save_position = flag
@@ -136,10 +143,12 @@ class CommonPage(QWidget, Ui_CommonPage):
             Config.CommonConfig.is_quit_on_close = flag
 
     def set_api_offset_event(self):
+        """修改全局偏移事件"""
         new_val = self.global_offset_doubleSpinBox.value()
         self.lyrics_file_manage.set_offset_file("api_offset", new_val * 1000)
 
     def path_change_tip_event(self, tip_label: QLabel):
+        """修改路径事件"""
         tip_label.setText("路径修改将在重启后生效")
 
     @property

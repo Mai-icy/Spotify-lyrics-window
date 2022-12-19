@@ -16,7 +16,7 @@ class TextScrollArea(QScrollArea):
         self._lyrics_label = QtWidgets.QLabel()
         self._lyrics_label.setObjectName("lyrics_label")
         self._lyrics_label.setMinimumSize(QSize(552, 38))
-        #self._lyrics_label.setAttribute(Qt.WA_TranslucentBackground, True)
+        # self._lyrics_label.setAttribute(Qt.WA_TranslucentBackground, True)
         self._lyrics_label.setAlignment(Qt.AlignCenter)
 
         self.setWidget(self._lyrics_label)
@@ -36,7 +36,7 @@ class TextScrollArea(QScrollArea):
         self._scrollbar = self.horizontalScrollBar()
 
     def set_text(self, text='', width=0):
-        self.resize_label(width)
+        self._resize_label(width)
         self._lyrics_label.setText(text)
         self.text = text
         self.text_index = 0
@@ -47,7 +47,7 @@ class TextScrollArea(QScrollArea):
         else:
             self._is_roll = False
             self.setAlignment(Qt.AlignCenter)
-        self._scrollbar.setValue(0)     # 滚动条复位
+        self._scrollbar.setValue(0)  # 滚动条复位
 
     def set_font(self, font):
         self._lyrics_label.setFont(font)
@@ -73,7 +73,7 @@ class TextScrollArea(QScrollArea):
             if self.text_index > begin_index:
                 self._scrollbar.setValue((self.text_index - begin_index) * move_step)
 
-    def resize_label(self, new_text_width):
+    def _resize_label(self, new_text_width):
         self.text_width = new_text_width
         if new_text_width < self.width():
             self._is_roll = False
@@ -81,9 +81,9 @@ class TextScrollArea(QScrollArea):
             self._is_roll = True
         self._set_label_size()
 
-    def setCursor(self, Union, QCursor=None, Qt_CursorShape=None):
-        self._lyrics_label.setCursor(Union)
-        return super().setCursor(Union)
+    def setCursor(self, union, cursor=None, Qt_CursorShape=None):
+        self._lyrics_label.setCursor(union)
+        return super().setCursor(union)
 
     def set_label_stylesheet(self, stylesheet):
         self._lyrics_label.setStyleSheet(stylesheet)
