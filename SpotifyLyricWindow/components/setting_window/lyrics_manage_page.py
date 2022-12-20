@@ -46,6 +46,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self._init_common()
         self._init_label()
         self._init_dialog()
+        self._init_list_widget()
         self._init_signal()
 
         self._set_modify_mode(False)
@@ -86,6 +87,13 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         # 设置文本信号连接（为了便于线程设置文本不出现未响应）
         self.set_plain_text_signal.connect(self._set_plain_text_event)
         self.set_detail_label_signal.connect(self._set_detail_label_event)
+
+    def _init_list_widget(self):
+        """初始化歌词文件列 添加右键菜单栏"""
+        self.lyrics_listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.lyrics_listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+
+        self.lyrics_listWidget.customContextMenuRequested.connect(self.menu_show_event)
 
     def load_lyrics_file(self):
         """导入已有的歌词文件，显示在左边"""
@@ -274,6 +282,23 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             self.set_plain_text_signal.emit("无歌词")
         else:
             self.set_plain_text_signal.emit(self.current_lrc.get_content(trans_type))
+
+    def menu_show_event(self, position):
+        """item右键菜单栏事件"""
+        if not self.lyrics_listWidget.itemAt(position):
+            return
+        list_widget_menu = QMenu()
+        del_item_action = QAction("删除歌词", self)
+        list_widget_menu.addAction(del_item_action)
+        del_item_action.triggered.connect(self.menu_delete_item)
+
+        list_widget_menu.exec_(self.lyrics_listWidget.mapToGlobal(position))
+
+    def menu_delete_item(self):
+        """删除歌词文件项事件"""
+        item = self.lyrics_listWidget.takeItem(self.lyrics_listWidget.currentRow())
+        self.lyrics_file_items.remove(item)
+        self.lyrics_file_manage.delete_lyric_file(item.track_id)
 
     def _set_plain_text_event(self, text: str):
         """设置文本，利于非主线程控制"""

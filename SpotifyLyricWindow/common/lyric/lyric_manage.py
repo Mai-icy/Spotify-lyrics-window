@@ -72,13 +72,17 @@ class LyricFileManage:
             self.save_json()
 
     def delete_lyric_file(self, track_id: str):
-        title = self.lyric_data_json["id2title"][track_id]
-        self.lyric_data_json["id2title"].pop(track_id)
-        lrc_path = LRC_PATH / (track_id + ".mrc")
-        if lrc_path.exists():
-            lrc_path.unlink()
-        if track_id not in self.lyric_data_json["no_lyric"]:
+        if track_id in self.lyric_data_json["id2title"]:
+            title = self.lyric_data_json["id2title"][track_id]
+            self.lyric_data_json["id2title"].pop(track_id)
             self.set_not_found(track_id, title)
+            lrc_path = LRC_PATH / (track_id + ".mrc")
+            if lrc_path.exists():
+                lrc_path.unlink()
+
+        if track_id in self.lyric_data_json["no_lyric"]:
+            self.lyric_data_json["no_lyric"].pop(track_id)
+            self.save_json()
 
     def get_not_found(self, track_id: str) -> dict:
         return self.lyric_data_json["no_lyric"].get(track_id, None)
