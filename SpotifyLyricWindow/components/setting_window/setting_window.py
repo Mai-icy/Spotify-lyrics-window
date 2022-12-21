@@ -50,11 +50,33 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         index = self.page_listWidget.row(item)
         self.page_stackedWidget.setCurrentIndex(index)
 
+    def set_always_front(self, flag: bool):
+        """
+        设置窗口是否在最上层
+
+        :param flag: True 为 在最上层
+        """
+        if not self.isHidden():
+            self.hide()
+            if flag:
+                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+            else:
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+            self.show()
+        else:
+            if flag:
+                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+            else:
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+
     def show(self) -> None:
         if self.isVisible():
             self.raise_()
+            self.activateWindow()
             return
         # 载入配置
+        self.set_always_front(Config.LyricConfig.is_always_front)
+
         self.lyric_page.load_config()
         self.hotkeys_page.load_config()
         self.common_page.load_config()

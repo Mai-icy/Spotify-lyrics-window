@@ -97,6 +97,9 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
     def load_lyrics_file(self):
         """导入已有的歌词文件，显示在左边"""
+        self.filter_lineEdit.clear()
+        self.lyrics_plainTextEdit.clear()
+
         tracks_id_data = self.lyrics_file_manage.get_tracks_id_data()
         not_found_data = self.lyrics_file_manage.get_not_found_data()
 

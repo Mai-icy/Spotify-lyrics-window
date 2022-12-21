@@ -46,8 +46,9 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def _init_main_window(self):
         """初始化界面控件以及属性"""
+        self.setWindowFlags(Qt.FramelessWindowHint | Qt.SplashScreen)
         self.set_always_front(Config.LyricConfig.is_always_front)
-        # self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.SplashScreen)
+
         self.setAttribute(Qt.WA_TranslucentBackground)
         # self.setAttribute(Qt.WA_DeleteOnClose)
 
@@ -340,15 +341,15 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         if not self.isHidden():
             self.hide()
             if flag:
-                self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.SplashScreen | Qt.FramelessWindowHint)
+                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
             else:
-                self.setWindowFlags(Qt.SplashScreen | Qt.FramelessWindowHint)
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
             self.show()
         else:
             if flag:
-                self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.SplashScreen | Qt.FramelessWindowHint)
+                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
             else:
-                self.setWindowFlags(Qt.SplashScreen | Qt.FramelessWindowHint)
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
 
     def _get_text_width(self, text: str):
         """计算文本的总宽度"""
