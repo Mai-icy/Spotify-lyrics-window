@@ -5,7 +5,8 @@ import asyncio
 import time
 from collections import namedtuple
 from io import BytesIO
-
+from functools import wraps, partial
+from types import MethodType
 
 from winrt.windows.media.control import (
     GlobalSystemMediaTransportControlsSessionManager as MediaManager,
@@ -25,6 +26,37 @@ class NoSpotifyRunning(Exception):
     """Spotify并没有在此台机器运行"""
 
 
+def TimesCallOnce(times):
+    """将多次的函数触发转为一次"""
+    return partial(_TimesCallOnce, times=times)
+
+
+class _TimesCallOnce:
+    def __init__(self, func, times):
+        wraps(func)(self)
+        self.last_time = 0
+        self.ava_times = 0
+
+        self.call_time = times
+
+    def __call__(self, *args, **kwargs):
+        if time.time() - self.last_time < 0.5:
+            self.ava_times += 1
+        else:
+            self.ava_times = 1
+            self.last_time = time.time()
+        if self.ava_times >= self.call_time:
+            self.ava_times = 0
+            self.last_time = 0
+            return self.__wrapped__(*args, **kwargs)
+
+    def __get__(self, instance, cls):
+        if instance is None:
+            return self
+        else:
+            return MethodType(self, instance)
+
+
 class WindowsMediaSession:
     """
     winrt参考：
@@ -36,6 +68,8 @@ class WindowsMediaSession:
 
         self.playback_info_changed_signal = None
         self.media_properties_changed_signal = None
+        self.timeline_properties_changed_signal = None
+
         self._is_connect = False
 
         self.connect_spotify()
@@ -46,6 +80,10 @@ class WindowsMediaSession:
         self.playback_info_changed_token = session.add_playback_info_changed(self._playback_info_changed_func)
         # 切换歌曲的时候触发
         self.media_properties_changed_token = session.add_media_properties_changed(self._media_properties_changed_func)
+        # 时间线变化的时候触发
+        self.timeline_properties_changed_token = session.add_timeline_properties_changed(
+            self._timeline_properties_changed_func)
+
         self._is_connect = True
 
     async def _get_media_session(self) -> MediaSession:
@@ -86,17 +124,24 @@ class WindowsMediaSession:
         """信号对应函数，将会同步触发pyqt的信号并传输当前播放状态"""
         info = self.get_current_playback_info(session)
 
-        print(info)
         if self.playback_info_changed_signal:
             self.playback_info_changed_signal.emit(info)
 
+    @TimesCallOnce(2)
     def _media_properties_changed_func(self, session: MediaSession, event):
         """信号对应函数，将会同步触发pyqt的信号并传输当前播放状态"""
         info = self.get_current_media_properties(session)
 
-        print(info)
         if self.media_properties_changed_signal:
             self.media_properties_changed_signal.emit(info)
+
+    @TimesCallOnce(3)
+    def _timeline_properties_changed_func(self, session: MediaSession, event):
+        """信号对应函数，将会同步触发pyqt的信号并传输当前播放状态"""
+        info = self.get_current_playback_info(session)
+
+        if self.timeline_properties_changed_signal:
+            self.timeline_properties_changed_signal.emit(info)
 
     def get_current_media_properties(self, session=None) -> MediaPropertiesInfo:
         """获取对应 session 的 MediaProperties 并进行重新包装返回"""
@@ -153,7 +198,8 @@ class WindowsMediaSession:
 
     def skip_previous_media(self) -> bool:
         """播放上一首"""
-        asyncio.run(self._media_async_operate("try_skip_previous_async"))
+        if self.get_current_playback_info().position > 3000:
+            asyncio.run(self._media_async_operate("try_skip_previous_async"))
         # 需要操作两次才能回到上一首
         return asyncio.run(self._media_async_operate("try_skip_previous_async"))
 
@@ -182,6 +228,10 @@ class WindowsMediaSession:
     def media_properties_changed_connect(self, signal):
         """绑定pyqt的信号"""
         self.media_properties_changed_signal = signal
+
+    def timeline_properties_changed_connect(self, signal):
+        """绑定pyqt的信号"""
+        self.timeline_properties_changed_signal = signal
 
 
 if __name__ == '__main__':
