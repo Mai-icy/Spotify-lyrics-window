@@ -66,9 +66,9 @@ class WindowsMediaSession:
     def __init__(self):
         self.TARGET_ID = "Spotify.exe"
 
-        self.playback_info_changed_signal = None
-        self.media_properties_changed_signal = None
-        self.timeline_properties_changed_signal = None
+        self.playback_info_changed_func = None
+        self.media_properties_changed_func = None
+        self.timeline_properties_changed_func = None
 
         self._is_connect = False
 
@@ -121,27 +121,24 @@ class WindowsMediaSession:
         readable_stream.read_async(buffer, buffer.capacity, InputStreamOptions.READ_AHEAD)
 
     def _playback_info_changed_func(self, session: MediaSession, event):
-        """信号对应函数，将会同步触发pyqt的信号并传输当前播放状态"""
-        info = self.get_current_playback_info(session)
-
-        if self.playback_info_changed_signal:
-            self.playback_info_changed_signal.emit(info)
+        """信号对应函数，将会同步触发对应函数并传输当前播放状态"""
+        if self.playback_info_changed_func:
+            info = self.get_current_playback_info()
+            self.playback_info_changed_func(info)
 
     @TimesCallOnce(2)
     def _media_properties_changed_func(self, session: MediaSession, event):
-        """信号对应函数，将会同步触发pyqt的信号并传输当前播放状态"""
-        info = self.get_current_media_properties(session)
-
-        if self.media_properties_changed_signal:
-            self.media_properties_changed_signal.emit(info)
+        """信号对应函数，将会同步触发对应函数并传输当前播放状态"""
+        if self.media_properties_changed_func:
+            info = self.get_current_media_properties(session)
+            self.media_properties_changed_func(info)
 
     @TimesCallOnce(3)
     def _timeline_properties_changed_func(self, session: MediaSession, event):
-        """信号对应函数，将会同步触发pyqt的信号并传输当前播放状态"""
-        info = self.get_current_playback_info(session)
-
-        if self.timeline_properties_changed_signal:
-            self.timeline_properties_changed_signal.emit(info)
+        """信号对应函数，将会同步触发对应函数并传输当前播放状态"""
+        if self.timeline_properties_changed_func:
+            info = self.get_current_playback_info()
+            self.timeline_properties_changed_func(info)
 
     def get_current_media_properties(self, session=None) -> MediaPropertiesInfo:
         """获取对应 session 的 MediaProperties 并进行重新包装返回"""
@@ -198,7 +195,7 @@ class WindowsMediaSession:
 
     def skip_previous_media(self) -> bool:
         """播放上一首"""
-        if self.get_current_playback_info().position > 3000:
+        if self.get_current_playback_info().position > 2500:
             asyncio.run(self._media_async_operate("try_skip_previous_async"))
         # 需要操作两次才能回到上一首
         return asyncio.run(self._media_async_operate("try_skip_previous_async"))
@@ -206,6 +203,10 @@ class WindowsMediaSession:
     def play_pause_media(self) -> bool:
         """切换播放状态的 暂停/播放"""
         return asyncio.run(self._media_async_operate("try_toggle_play_pause_async"))
+
+    def seek_to_position_media(self, position):
+        """转到position处进行播放"""
+        return asyncio.run(self._media_async_operate("try_change_playback_position_async", position))
 
     def get_current_thumbnail(self) -> BytesIO:
         """获取当前播放歌曲的缩略图"""
@@ -221,17 +222,17 @@ class WindowsMediaSession:
         pic = BytesIO(bytearray(byte_buffer))
         return pic
 
-    def playback_info_changed_connect(self, signal):
+    def playback_info_changed_connect(self, func):
         """绑定pyqt的信号"""
-        self.playback_info_changed_signal = signal
+        self.playback_info_changed_func = func
 
-    def media_properties_changed_connect(self, signal):
+    def media_properties_changed_connect(self, func):
         """绑定pyqt的信号"""
-        self.media_properties_changed_signal = signal
+        self.media_properties_changed_func = func
 
-    def timeline_properties_changed_connect(self, signal):
+    def timeline_properties_changed_connect(self, func):
         """绑定pyqt的信号"""
-        self.timeline_properties_changed_signal = signal
+        self.timeline_properties_changed_func = func
 
 
 if __name__ == '__main__':

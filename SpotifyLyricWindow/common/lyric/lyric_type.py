@@ -179,11 +179,11 @@ class LrcFile:
         if time_position < time_list[0]:
             return 0
 
-        for order in range(len(time_list)):
+        for order in range(1, len(time_list)):
             if time_position < time_list[order]:
                 return order - 1
         else:
-            return len(time_list)
+            return len(time_list) - 1
 
     def available_trans(self) -> list:
         available_trans_list = [TransType.NON]

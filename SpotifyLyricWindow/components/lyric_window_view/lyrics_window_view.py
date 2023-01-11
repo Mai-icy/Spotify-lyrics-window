@@ -316,7 +316,7 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         if (flag and not self.timer.isActive()) or (not flag and self.timer.isActive()):
             self.set_timer_status_signal.emit(flag)
 
-    def set_lyrics_text(self, rows: int, text: str, *, roll_time: int = 0):
+    def set_lyrics_text(self, rows: int, text: str, roll_time: int = 0):
         """
         设置歌词文本
 

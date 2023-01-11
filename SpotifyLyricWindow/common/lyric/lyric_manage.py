@@ -6,7 +6,6 @@ import weakref
 
 from common.path import LRC_PATH, LYRIC_DATA_FILE_PATH
 from common.lyric.lyric_type import LrcFile, MrcFile, KrcFile
-from common.lyric.lyric_error import NotLyricFound
 
 
 class LyricFileManage:
@@ -61,7 +60,7 @@ class LyricFileManage:
                 elif file.suffix == ".krc":
                     return KrcFile(file)
         else:
-            raise NotLyricFound("未找到歌词文件")
+            return LrcFile()
 
     def save_lyric_file(self, track_id: str, lrc_file: LrcFile):
         lrc_file.save_to_mrc(LRC_PATH / (track_id + ".mrc"))
