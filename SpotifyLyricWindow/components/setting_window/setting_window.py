@@ -75,7 +75,6 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
             self.activateWindow()
             return
         # 载入配置
-        self.set_always_front(Config.LyricConfig.is_always_front)
 
         self.lyric_page.load_config()
         self.hotkeys_page.load_config()

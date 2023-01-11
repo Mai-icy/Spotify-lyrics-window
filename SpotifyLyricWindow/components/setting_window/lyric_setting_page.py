@@ -80,9 +80,13 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         font_family = Config.LyricConfig.font_family
         is_always_front = Config.LyricConfig.is_always_front
         trans_type = Config.LyricConfig.trans_type
+        lyrics_color = Config.LyricConfig.lyric_color
+        shadow_color = Config.LyricConfig.shadow_color
 
         self.enable_front_checkBox.setChecked(is_always_front)
         self.color_comboBox.setCurrentIndex(self.color_list.index(color_style))
+        self._set_label_rgb(self.lyrics_color_label, lyrics_color)
+        self._set_label_rgb(self.shadow_color_label, shadow_color)
         self.font_comboBox.setCurrentIndex(self.font_family_list.index(font_family))
         self.trans_button_group.button(trans_type).setChecked(True)
 
