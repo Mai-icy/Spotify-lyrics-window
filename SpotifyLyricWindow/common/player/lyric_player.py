@@ -78,7 +78,7 @@ class LrcPlayer:
         lrc_file = self.lrc_file
         time_stamp = lrc_file.get_time(lyric_order)
 
-        if not lrc_file.trans_non_dict[time_stamp].strip():
+        if time_stamp == -1 or not lrc_file.trans_non_dict[time_stamp].strip():
             return
 
         if self.output_func:  # self.lyrics_window.text_show_signal.emit
