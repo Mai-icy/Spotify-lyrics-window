@@ -53,13 +53,14 @@ class LrcPlayer:
         return True
 
     def _show_last_lyric(self):
-        order = self.lrc_file.get_order_position(self.get_time())
-        timestamp = self.lrc_file.get_time(order)
-        lyric_text = self.lrc_file.trans_non_dict[timestamp]
+        lrc_file = self.lrc_file
+        order = lrc_file.get_order_position(self.get_time())
+        timestamp = lrc_file.get_time(order)
+        lyric_text = lrc_file.trans_non_dict[timestamp]
         while order != -1 and not lyric_text:
             order -= 1
-            timestamp = self.lrc_file.get_time(order)
-            lyric_text = self.lrc_file.trans_non_dict[timestamp]
+            timestamp = lrc_file.get_time(order)
+            lyric_text = lrc_file.trans_non_dict.get(timestamp)
         if order != -1:
             self.show_content(order, 0)
 
