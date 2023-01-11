@@ -312,6 +312,7 @@ class LyricsWindow(LyricsWindowView):
         return self._refresh_player_track()
 
     def closeEvent(self, event):
+        self.lrc_player.thread_play_lrc.terminate()
         del self.lrc_player
         del self.lyric_file_manage
         self.temp_manage.auto_clean_temp()

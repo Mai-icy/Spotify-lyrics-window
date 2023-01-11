@@ -1,5 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import sys
 import threading
 import time
 import weakref
@@ -144,7 +145,7 @@ class LyricThread(threading.Thread):
     def player(self):
         if not self.player_():
             self.terminate()
-            return None
+            sys.exit(0)
         else:
             return self.player_()
 
