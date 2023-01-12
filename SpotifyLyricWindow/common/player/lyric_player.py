@@ -12,15 +12,17 @@ from common.lyric.lyric_type import LrcFile, TransType
 
 class LrcPlayer:
     def __init__(self, output_func):
-        self.output_func = output_func
+        self.output_func = output_func  # 输出歌词函数  可设置为print利于测试
         self.lyric_file_manage = LyricFileManage()
-        self.timer_start_value: int = int(time.time() * 1000)
+        self.timer_start_value: int = int(time.time() * 1000)  # 计时器实现原理，当前时间减去开始时间
 
+        # 播放相关属性
         self.track_id = ""
         self.duration = float('inf')
         self.is_pause = False
         self.trans_mode = TransType.NON
 
+        # 歌词相关属性
         self.track_offset = 0
         self.global_offset = 0
         self.lrc_file = LrcFile()
@@ -31,12 +33,15 @@ class LrcPlayer:
         self.thread_play_lrc.start()
 
     def get_time(self) -> int:
+        """获取播放进度"""
         return int(time.time() * 1000) - self.timer_start_value + self.track_offset + self.global_offset
 
     def set_pause(self, flag: bool):
+        """设置歌词播放是否暂停"""
         self.is_pause = flag
 
     def set_track(self, track_id: str, duration: int):
+        """设置当前播放的歌曲 duration单位：ms"""
         if self.track_id and self.track_offset:
             self.lyric_file_manage.set_offset_file(self.track_id, self.track_offset)
             self.lyric_file_manage.set_offset_file("api_offset", self.global_offset)
@@ -46,7 +51,7 @@ class LrcPlayer:
         self.lrc_file = self.lyric_file_manage.read_lyric_file(track_id)
 
     def set_trans_mode(self, mode: TransType) -> bool:
-        """set the translation mode of player and refresh the displayed content"""
+        """设置翻译模式"""
         if self.lrc_file.empty(mode):
             return False
         self.trans_mode = mode
@@ -54,6 +59,7 @@ class LrcPlayer:
         return True
 
     def _show_last_lyric(self):
+        """显示上一句非空白的歌词"""
         lrc_file = self.lrc_file
         if lrc_file.empty():
             return
@@ -67,18 +73,22 @@ class LrcPlayer:
         if order != -1:
             self.show_content(order, 0)
 
-    def seek_to_position(self, position):
+    def seek_to_position(self, position: int):
+        """调整歌词播放进度 position单位：ms"""
         self.timer_start_value = int(time.time() * 1000) - position
         self._show_last_lyric()
         self.thread_play_lrc.reset_position()
 
     def modify_offset(self, modify_value: int):
+        """修改单个歌词文件的偏移"""
         self.track_offset += modify_value
 
     def modify_global_offset(self, modify_value: int):
+        """修改全局偏移"""
         self.global_offset += modify_value
 
     def show_content(self, lyric_order, roll_time: int):
+        """输出歌词"""
         lrc_file = self.lrc_file
         time_stamp = lrc_file.get_time(lyric_order)
 
@@ -95,6 +105,7 @@ class LrcPlayer:
                 self.output_func(2, lrc_file.trans_romaji_dict[time_stamp], roll_time)
 
     def play_done_event_connect(self, func):
+        """播放完毕的信号连接"""
         self.play_done_event_func = func
 
 

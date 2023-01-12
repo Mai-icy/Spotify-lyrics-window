@@ -11,9 +11,7 @@ from types import MethodType
 from winrt.windows.media.control import (
     GlobalSystemMediaTransportControlsSessionManager as MediaManager,
     GlobalSystemMediaTransportControlsSession as MediaSession,
-    GlobalSystemMediaTransportControlsSessionMediaProperties as MediaProperties,
-    GlobalSystemMediaTransportControlsSessionPlaybackStatus as PlaybackStatus,
-    PlaybackInfoChangedEventArgs as PlaybackInfoEvent)
+    GlobalSystemMediaTransportControlsSessionMediaProperties as MediaProperties)
 
 from winrt.windows.storage.streams import DataReader, Buffer, InputStreamOptions
 

@@ -55,7 +55,7 @@ class LyricsWindow(LyricsWindowView):
     def __init__(self, parent=None):
         super(LyricsWindow, self).__init__(parent)
 
-        self._manual_skip_flag = False
+        self._manual_skip_flag = True
 
         self._init_common()
         self._init_lrc_player()
@@ -82,6 +82,7 @@ class LyricsWindow(LyricsWindowView):
         self.lrc_player.play_done_event_connect(self.player_done_event)
 
     def _init_lrc_player(self):
+        """初始化歌词播放器"""
         self.lrc_player = LrcPlayer(output_func=self.set_lyrics_text)
 
     def _init_common(self):
@@ -98,6 +99,7 @@ class LyricsWindow(LyricsWindowView):
         self.setting_window = SettingWindow(lyric_window=self)
 
     def _init_media_session(self):
+        """初始化 media session"""
         self.media_session = WindowsMediaSession()
 
         self.media_session.media_properties_changed_connect(self.media_properties_changed)
@@ -105,6 +107,7 @@ class LyricsWindow(LyricsWindowView):
         self.media_session.timeline_properties_changed_connect(self.timeline_properties_changed)
 
     def player_done_event(self):
+        """当前歌曲播放的事件"""
         self._manual_skip_flag = False
 
     def media_properties_changed(self, info):
@@ -116,6 +119,8 @@ class LyricsWindow(LyricsWindowView):
             self.calibration_event()
             self._manual_skip_flag = True
         else:
+            # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
+            time.sleep(0.5)
             self.calibration_event()
 
     def playback_info_changed(self, info):
@@ -127,6 +132,7 @@ class LyricsWindow(LyricsWindowView):
 
     def timeline_properties_changed(self, info):
         if info.position < 500 or self.lrc_player.is_pause:
+            # 由于切换到下一首歌会同时触发timeline和properties的变化信号，利用position<500过滤掉切换歌时候的timeline信号
             return
         self.lrc_player.seek_to_position(info.position)
 
