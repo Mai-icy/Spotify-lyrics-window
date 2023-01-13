@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LyricsWindow</class>
- <widget class="QWidget" name="LyricsWindow">
+ <class>HorizontalLyricsWindow</class>
+ <widget class="QWidget" name="HorizontalLyricsWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
