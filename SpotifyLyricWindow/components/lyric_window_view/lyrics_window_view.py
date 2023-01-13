@@ -78,8 +78,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.font = QtGui.QFont()
         self.font.setFamily(family)
         self.font.setPixelSize(int((height - 30) / 3))
-        self.above_scrollArea.set_font(self.font)
-        self.below_scrollArea.set_font(self.font)
+        self.above_scrollArea.setFont(self.font)
+        self.below_scrollArea.setFont(self.font)
 
     def _init_window_drag_flag(self):
         """拖动相关变量初始化"""
@@ -101,8 +101,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self.background_frame.setMouseTracking(True)
         self.lyrics_frame1.setMouseTracking(True)
         self.lyrics_frame2.setMouseTracking(True)
-        self.above_scrollArea.set_mouse_track()
-        self.below_scrollArea.set_mouse_track()
+        self.above_scrollArea.setMouseTracking(True)
+        self.below_scrollArea.setMouseTracking(True)
         self.buttons_frame.setMouseTracking(True)
 
     def _init_signal(self):
@@ -114,20 +114,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
 
     def _init_window_lock_flag(self):
         """初始化锁定相关变量"""
+        self._time_step = 20  # 刷新时间间隔
+
         self._is_locked = False
         self._time_count_out = 0
         self._time_count_in = 0
-
-    def _init_roll(self):
-        """初始化滚动相关变量"""
-        self._time_step = 20  # 刷新时间间隔
-        self._move_step = 1  # 步长
-        self._roll_time = 0
-        self._roll_time_rate = 0.7
-        self._begin_index = 0
-
-        self._time_count_in = 0
-        self._time_count_out = 0
 
         self.timer = QTimer()
         self.timer.setInterval(self._time_step)
@@ -249,8 +240,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         :param resize_window: 是否由字体大小反向设置窗口大小
         """
         self.font.setPixelSize(size)
-        self.above_scrollArea.set_font(self.font)
-        self.below_scrollArea.set_font(self.font)
+        self.above_scrollArea.setFont(self.font)
+        self.below_scrollArea.setFont(self.font)
         if resize_window:
             height = int(size * 3 + 30)
             self.resize(self.width(), height)
@@ -324,13 +315,13 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         :param text: 需要显示文本
         :param roll_time: 滚动时间
         """
-        width = self._get_text_width(text)
         if rows == 1:
-            self.above_scrollArea.set_text(text, width)
+            self.above_scrollArea.set_text(text)
+            self.above_scrollArea.set_roll_time(roll_time)
             self.update()
         if rows == 2:
-            self.below_scrollArea.set_text(text, width)
-        self._update_rolling_step(roll_time)
+            self.below_scrollArea.set_text(text)
+            self.below_scrollArea.set_roll_time(roll_time)
 
     def set_always_front(self, flag: bool):
         """
@@ -350,11 +341,6 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                 self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
             else:
                 self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
-
-    def _get_text_width(self, text: str):
-        """计算文本的总宽度"""
-        song_font_metrics = QFontMetrics(self.font)
-        return song_font_metrics.width(text)
 
     def enterEvent(self, event: QEvent):
         """定义鼠标移入事件,显示按钮,设置半透明背景"""
@@ -431,8 +417,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             self.set_font_size(int((self.height() - 30) / 3))
 
         # 判断缩放后是否开启滚动并更改文本label大小
-        self.above_scrollArea._resize_label(self._get_text_width(self.above_scrollArea.text))
-        self.below_scrollArea._resize_label(self._get_text_width(self.below_scrollArea.text))
+        self.above_scrollArea.refresh_label_size()
+        self.below_scrollArea.refresh_label_size()
 
         event.accept()
 
@@ -464,18 +450,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
             Config.CommonConfig.PositionConfig.width = self.width()
             Config.CommonConfig.PositionConfig.height = self.height()
 
-    def _update_rolling_step(self, roll_time: int):
-        """更新滚动相关参数"""
-        self._roll_time = roll_time
-        max_width = max(self.above_scrollArea.text_width, self.below_scrollArea.text_width)
-        self._move_step = ceil(2 * (self._time_step * (max_width - self.width()))
-                               / (roll_time * self._roll_time_rate)) if roll_time else 0
-        self._begin_index = (0.5 * (1 - self._roll_time_rate) * self._roll_time) // self._time_step
-
     def _update_index_timer_event(self):
         """更新timer状态"""
-        self.above_scrollArea.update_index(self._begin_index, self._move_step)
-        self.below_scrollArea.update_index(self._begin_index, self._move_step)
         self._time_count_in += 1
         self._time_count_out += 1
         if self._is_locked:
