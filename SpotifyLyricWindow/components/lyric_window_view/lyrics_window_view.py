@@ -33,7 +33,6 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         self._init_window_lock_flag()
         self._init_window_drag_flag()
         self._init_mouse_track()
-        self._init_roll()
         self._init_hotkey()
 
     def _init_lyrics_shadow(self):
@@ -229,8 +228,8 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         :param family: 必须为原有配套字体 例如 “微软雅黑”
         """
         self.font.setFamily(family)
-        self.above_scrollArea.set_font(self.font)
-        self.below_scrollArea.set_font(self.font)
+        self.above_scrollArea.setFont(self.font)
+        self.below_scrollArea.setFont(self.font)
 
     def set_font_size(self, size: int, *, resize_window: bool = False):
         """
