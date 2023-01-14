@@ -9,17 +9,24 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from common.config import Config
-from components.raw_ui.LyricsWindow import Ui_LyricsWindow
+from components.raw_ui.VerticalLyricsWindow import Ui_VerticalLyricsWindow
+from components.raw_ui.HorizontalLyricsWindow import Ui_HorizontalLyricsWindow
 from components.lyric_window_view.text_scroll_area import TextScrollArea
 from components.lyric_window_view.lyric_tray_icon import LyricsTrayIcon
+from components.lyric_window_view.display_mode import DisplayMode
 
 
-class LyricsWindowView(QWidget, Ui_LyricsWindow):
+class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
     set_timer_status_signal = pyqtSignal(bool)
 
     def __init__(self, parent=None):
         super(LyricsWindowView, self).__init__(parent)
-        self.setupUi(self)
+        self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
+        if self.display_mode == DisplayMode.Horizontal:
+            super(LyricsWindowView, self).setupUi(self)
+        else:
+            super(Ui_HorizontalLyricsWindow, self).setupUi(self)
+
         self.installEventFilter(self)  # 初始化事件过滤器
         self.tray_icon = LyricsTrayIcon(self)
 
@@ -52,9 +59,11 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         # self.setAttribute(Qt.WA_DeleteOnClose)
 
         self.above_scrollArea = TextScrollArea(self.lyrics_frame1)
+        self.above_scrollArea.set_mode(self.display_mode)
         self.lyrics_gridLayout1.addWidget(self.above_scrollArea)
 
         self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
+        self.below_scrollArea.set_mode(self.display_mode)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
 
         self.set_button_hide(True)
@@ -73,10 +82,14 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
         # 导入配置
         family = Config.LyricConfig.font_family
         height = Config.CommonConfig.PositionConfig.height
+        width = Config.CommonConfig.PositionConfig.width
 
         self.font = QtGui.QFont()
         self.font.setFamily(family)
-        self.font.setPixelSize(int((height - 30) / 3))
+        if self.display_mode == DisplayMode.Horizontal:
+            self.font.setPixelSize(int((height - 30) / 3))
+        else:
+            self.font.setPixelSize(int((width - 45) / 3))
         self.above_scrollArea.setFont(self.font)
         self.below_scrollArea.setFont(self.font)
 
@@ -413,11 +426,10 @@ class LyricsWindowView(QWidget, Ui_LyricsWindow):
                             self.height() - pos.y())
 
             # 更改字体大小
-            self.set_font_size(int((self.height() - 30) / 3))
-
-        # 判断缩放后是否开启滚动并更改文本label大小
-        self.above_scrollArea.refresh_label_size()
-        self.below_scrollArea.refresh_label_size()
+            if self.display_mode == DisplayMode.Horizontal:
+                self.set_font_size(int((self.height() - 30) / 3))
+            else:
+                self.set_font_size(int((self.width() - 45) / 3))
 
         event.accept()
 

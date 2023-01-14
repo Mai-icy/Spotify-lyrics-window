@@ -32,6 +32,7 @@ class Config:
 
     class LyricConfig:
         trans_type: int = 0
+        display_mode: int = 0  # 0代表水平显示歌词，1代表竖直显示歌词
 
         font_family: str = "微软雅黑"
         font_size: int = 25
