@@ -22,6 +22,7 @@ class TextScrollArea(QScrollArea):
         self._init_scroll_area()
 
     def _init_label(self):
+        """初始化 label"""
         self.horizontal_label = HorizontalLabel()
         self.vertical_label = VerticalLabel()
 
@@ -36,6 +37,7 @@ class TextScrollArea(QScrollArea):
         # setAttribute(Qt.WA_TranslucentBackground, True)
 
     def _init_roll(self):
+        """初始化 滚动相关参数"""
         self.timer_tick_lag = 20  # 刷新时间间隔
         self.roll_time_rate = 0.7  # 滚动速率
 
@@ -56,6 +58,7 @@ class TextScrollArea(QScrollArea):
         self.roll_timer.start()
 
     def _init_scroll_area(self):
+        """初始化 滚动区域"""
         if self.display_mode == DisplayMode.Horizontal:
             self.setWidget(self.horizontal_label)
             self.setMinimumSize(QSize(552, 38))
@@ -72,6 +75,7 @@ class TextScrollArea(QScrollArea):
         self.viewport().setStyleSheet("background-color:transparent;")
 
     def set_text(self, text=''):
+        """设置文本，滚动复位"""
         lyrics_label = self.get_current_label()
         lyrics_label.setText(text)
         self.get_current_scrollbar().setValue(0)  # 滚动条复位
@@ -100,6 +104,7 @@ class TextScrollArea(QScrollArea):
         self.begin_tick = 0.5 * (1 - self.roll_time_rate) * roll_time // self.timer_tick_lag
 
     def set_mode(self, mode: DisplayMode):
+        """目前还不支持动态调整，该函数待完善 TODO """
         self.get_current_scrollbar().setValue(0)
         self.display_mode = mode
         # self.takeWidget()
@@ -109,6 +114,7 @@ class TextScrollArea(QScrollArea):
         #     self.setWidget(self.vertical_label)
 
     def refresh_label_size(self):
+        """刷新文本框大小，防止卡住不动"""
         text_size = self.get_current_label().getTextSize()
 
         if self.display_mode == DisplayMode.Horizontal:
@@ -130,9 +136,11 @@ class TextScrollArea(QScrollArea):
             self.setWidgetResizable(False)
 
     def get_current_label(self) -> QLabel:
+        """获取当前使用的label"""
         return self.widget()
 
     def get_current_scrollbar(self) -> QScrollBar:
+        """获取当前使用的scrollbar"""
         if self.display_mode == DisplayMode.Horizontal:
             return self.horizontal_scrollbar
         else:
@@ -148,10 +156,12 @@ class TextScrollArea(QScrollArea):
         return super(TextScrollArea, self).setFont(font)
 
     def _tick_event(self):
+        """滚动的实现， 作为计时器一次tick的时间值"""
         self.refresh_label_size()
         if self.is_roll:
             self.current_tick += 1
             if self.current_tick > self.begin_tick:
+                # 滚动字幕
                 scrollbar = self.get_current_scrollbar()
                 scrollbar.setValue((self.current_tick - self.begin_tick) * self.move_step)
 

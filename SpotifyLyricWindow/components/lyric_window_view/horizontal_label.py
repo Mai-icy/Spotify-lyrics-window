@@ -11,4 +11,5 @@ class HorizontalLabel(QLabel):
         super(HorizontalLabel, self).__init__(parent)
 
     def getTextSize(self):
+        """满足和竖向label同函数格式"""
         return QFontMetrics(self.font()).width(self.text())

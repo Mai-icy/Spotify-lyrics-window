@@ -21,11 +21,12 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def __init__(self, parent=None):
         super(LyricsWindowView, self).__init__(parent)
+        # 获取设置中的歌词显示模式（竖向或者横向）
         self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
         if self.display_mode == DisplayMode.Horizontal:
-            super(LyricsWindowView, self).setupUi(self)
+            super(LyricsWindowView, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
         else:
-            super(Ui_HorizontalLyricsWindow, self).setupUi(self)
+            super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
 
         self.installEventFilter(self)  # 初始化事件过滤器
         self.tray_icon = LyricsTrayIcon(self)
