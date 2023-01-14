@@ -219,6 +219,8 @@ class Ui_CommonPage(object):
         self.global_offset_doubleSpinBox = QtWidgets.QDoubleSpinBox(self.global_offset_frame)
         self.global_offset_doubleSpinBox.setMinimumSize(QtCore.QSize(100, 32))
         self.global_offset_doubleSpinBox.setMaximumSize(QtCore.QSize(100, 32))
+        self.global_offset_doubleSpinBox.setMinimum(-30.0)
+        self.global_offset_doubleSpinBox.setMaximum(30.0)
         self.global_offset_doubleSpinBox.setSingleStep(0.5)
         self.global_offset_doubleSpinBox.setObjectName("global_offset_doubleSpinBox")
         self.global_offset_gridLayout.addWidget(self.global_offset_doubleSpinBox, 0, 1, 1, 1)
