@@ -171,7 +171,7 @@ class WindowsMediaSession:
     def connect_spotify(self):
         """尝试连接spotify桌面应用"""
         if self._is_connect:
-            return
+            return True
         try:
             asyncio.run(self._get_media_session())
         except NoSpotifyRunning:

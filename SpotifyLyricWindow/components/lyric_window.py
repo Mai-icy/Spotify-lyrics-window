@@ -121,20 +121,29 @@ class LyricsWindow(LyricsWindowView):
 
     def media_properties_changed(self, info: MediaPropertiesInfo):
         self.lrc_player.set_pause(True)
+
+        track_title = f"{info.title} - {info.artist}"
+        track_id = self.lyric_file_manage.get_id(track_title)
+
         if not self._manual_skip_flag:
             # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
             time.sleep(0.7)
             self.media_session.seek_to_position_media(0)
-            self.calibration_event()
             self._manual_skip_flag = True
         else:
             # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
-            time.sleep(0.5)
+            time.sleep(0.5)  # 等待api反应过来
+
+        if track_id:  # 如果可以通过title直接获取id, 则不走api渠道
+            playback_info = self.media_session.get_current_playback_info()
+            self.playback_info_changed(playback_info)
+            self.lrc_player.set_track(track_id, playback_info.duration)
+        else:
             self.calibration_event()
 
     def playback_info_changed(self, info: MediaPlaybackInfo):
         self.lrc_player.seek_to_position(info.position)
-        is_playing = info.playStatus == 4
+        is_playing = info.playStatus == 4  # 4 代表正在播放 实际播放的枚举值为4
         self.lrc_player.set_pause(not is_playing)
         self.set_pause_button_icon(is_playing)
         self.set_lyrics_rolling(is_playing)
@@ -153,14 +162,19 @@ class LyricsWindow(LyricsWindowView):
 
         :param no_text_show: 是否显示 calibrating！ 的 正在校准提示
         """
-        self.media_session.connect_spotify()
-
         if not no_text_show:
             self.set_lyrics_text(1, "calibrating！")
             self.set_lyrics_text(2, " (o゜▽゜)o!")
 
         self.lrc_player.set_pause(True)
         user_current = self.spotify_auth.get_current_playing()
+
+        if self.media_session.connect_spotify():
+            # 连接情况下使用calibration_event 代表 title 对应不到 id 此处做 对应
+            info = self.media_session.get_current_media_properties()
+            track_title = f"{info.title} - {info.artist}"
+            if self.lyric_file_manage.get_title(user_current.track_id) != track_title:
+                self.lyric_file_manage.set_track_id_map(user_current.track_id, track_title)
 
         self.set_pause_button_icon(user_current.is_playing)
         self.set_lyrics_rolling(user_current.is_playing)
@@ -179,7 +193,6 @@ class LyricsWindow(LyricsWindowView):
                 self.lyric_file_manage.set_not_found(user_current.track_id, "")  # 将 不存在 记录撤去
             user_current = self._refresh_player_track(user_current)
 
-        print("开始播放歌词")
         ava_trans = self.lrc_player.lrc_file.available_trans()
 
         self.lrc_player.set_pause(not user_current.is_playing)

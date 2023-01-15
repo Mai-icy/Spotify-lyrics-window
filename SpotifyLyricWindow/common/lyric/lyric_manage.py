@@ -39,6 +39,10 @@ class LyricFileManage:
                 if base_key not in self.lyric_data_json:
                     self.lyric_data_json[base_key] = {}
 
+            self.lyric_data_json["title2id"] = {}
+            for id_, title in self.lyric_data_json["id2title"].items():
+                self.lyric_data_json["title2id"][title] = id_
+
             self._is_init = True
 
     def __del__(self):
@@ -93,11 +97,15 @@ class LyricFileManage:
             self.lyric_data_json["no_lyric"][track_id] = {"track_title": track_title, "last_time": int(time.time())}
         self.save_json()
 
-    def get_title(self, track_id) -> str:
+    def get_id(self, track_title: str):
+        return self.lyric_data_json["title2id"].get(track_title)
+
+    def get_title(self, track_id: str) -> str:
         return self.lyric_data_json["id2title"].get(track_id)
 
-    def set_track_id_map(self, track_id, title):
+    def set_track_id_map(self, track_id: str, title: str):
         self.lyric_data_json["id2title"][track_id] = title
+        self.lyric_data_json["title2id"][title] = track_id
         self.save_json()
 
     def get_offset_file(self, track_id: str) -> int:
@@ -115,7 +123,12 @@ class LyricFileManage:
 
     def save_json(self):
         with LYRIC_DATA_FILE_PATH.open("w", encoding="utf-8") as f:
-            f.write(json.dumps(self.lyric_data_json, indent=4, ensure_ascii=False))
+            keys = ["offset", "no_lyric", "id2title"]
+            save_json = {}
+            for base_key in keys:
+                save_json[base_key] = self.lyric_data_json[base_key]
+
+            f.write(json.dumps(save_json, indent=4, ensure_ascii=False))
 
 
 if __name__ == "__main__":
