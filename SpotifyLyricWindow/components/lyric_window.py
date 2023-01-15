@@ -52,8 +52,8 @@ class LyricsWindow(LyricsWindowView):
     error_msg_show_signal = pyqtSignal(object)
     text_show_signal = pyqtSignal(int, str, int)
 
-    def __init__(self, parent=None):
-        super(LyricsWindow, self).__init__(parent)
+    def __init__(self, parent=None, icon=None):
+        super(LyricsWindow, self).__init__(parent, icon)
 
         self._manual_skip_flag = True
 

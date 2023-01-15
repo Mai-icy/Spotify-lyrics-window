@@ -18,8 +18,9 @@ from components.lyric_window_view.display_mode import DisplayMode
 
 class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
     set_timer_status_signal = pyqtSignal(bool)
+    show_signal = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, icon: LyricsTrayIcon = None):
         super(LyricsWindowView, self).__init__(parent)
         # 获取设置中的歌词显示模式（竖向或者横向）
         self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
@@ -29,7 +30,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
 
         self.installEventFilter(self)  # 初始化事件过滤器
-        self.tray_icon = LyricsTrayIcon(self)
+        self.tray_icon = icon
 
         # 界面相关
         self._init_lyrics_shadow()
@@ -125,6 +126,8 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self.lock_button.clicked.connect(self._lock_event)
         self.set_timer_status_signal.connect(lambda flag: self.timer.start() if flag else self.timer.stop())
 
+        self.show_signal.connect(self.show)
+
     def _init_window_lock_flag(self):
         """初始化锁定相关变量"""
         self._time_step = 20  # 刷新时间间隔
@@ -150,10 +153,39 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             "next_button": self.next_button.clicked,
             "last_button": self.last_button.clicked,
             "pause_button": self.pause_button.clicked,
-            "show_window": self.tray_icon.showAction.triggered
+            "show_window": self.show_signal
         }
         # 导入配置
         self.set_hotkey_enable(True)
+
+    def set_display_mode(self, mode: DisplayMode):
+        """
+        设置显示 竖直 还是 水平
+
+        :param mode: 设置显示的模式
+        """
+        if mode == self.display_mode:
+            return
+
+        Config.LyricConfig.display_mode = mode.value
+        if mode == DisplayMode.Horizontal:
+            default_pos = Config.get_default_dict()["CommonConfig"]["PositionConfig"]
+        else:
+            default_pos = {
+                "pos_x": 1200,
+                "pos_y": 200,
+                "width": 150,
+                "height": 700
+            }
+
+        self.set_hotkey_enable(False)  # 解除绑定所有快捷键
+        self.hide()
+        Config.CommonConfig.PositionConfig.pos_x = default_pos["pos_x"]
+        Config.CommonConfig.PositionConfig.pos_y = default_pos["pos_y"]
+        Config.CommonConfig.PositionConfig.width = default_pos["width"]
+        Config.CommonConfig.PositionConfig.height = default_pos["height"]
+        self.__init__(self.parent(), self.tray_icon)  # 重新初始化
+        self.show()
 
     def set_hotkey_enable(self, flag: bool):
         """
@@ -440,7 +472,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             return
         pos_config = Config.CommonConfig.PositionConfig
         self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
-        self.tray_icon.show()
+        # self.tray_icon.show()
         super(LyricsWindowView, self).show()
 
     def hide(self):
