@@ -4,17 +4,15 @@
 import asyncio
 import time
 from collections import namedtuple
-from io import BytesIO
 from functools import wraps, partial
+from io import BytesIO
 from types import MethodType
 
 from winrt.windows.media.control import (
     GlobalSystemMediaTransportControlsSessionManager as MediaManager,
     GlobalSystemMediaTransportControlsSession as MediaSession,
     GlobalSystemMediaTransportControlsSessionMediaProperties as MediaProperties)
-
 from winrt.windows.storage.streams import DataReader, Buffer, InputStreamOptions
-
 
 MediaPlaybackInfo = namedtuple("MediaPlaybackInfo", ["playStatus", "duration", "position"])
 MediaPropertiesInfo = namedtuple("MediaPropertiesInfo", ["title", "artist", "albumTitle", "albumArtist", "trackNumber"])

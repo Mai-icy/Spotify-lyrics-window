@@ -5,11 +5,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from components.raw_ui.LyricsSettingsPage import Ui_LyricsSettingsPage
-
+from components.raw_ui import Ui_LyricsSettingsPage
+from common.typing import DisplayMode, TransType
 from common.config import Config
-from common.lyric.lyric_type import TransType
-from components.lyric_window_view.display_mode import DisplayMode
 
 
 class LyricPage(QWidget, Ui_LyricsSettingsPage):

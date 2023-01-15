@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from fuzzywuzzy import fuzz
-from common.song_metadata.metadata_type import SongInfo
+from common.typing import SongInfo
 
 
 def __parse_duration(duration_text: str) -> int:

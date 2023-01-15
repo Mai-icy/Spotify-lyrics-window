@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import *
 
 from common.config import Config
 from components.mask_widget import MaskWidget
-from components.raw_ui.SettingsWindow import Ui_SettingsWindow
+from components.raw_ui import Ui_SettingsWindow
 from components.setting_window.lyric_setting_page import LyricPage
 from components.setting_window.hotkey_setting_page import HotkeysPage
 from components.setting_window.common_setting_page import CommonPage

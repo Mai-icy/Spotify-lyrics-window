@@ -7,7 +7,7 @@ from time import localtime
 
 import requests
 
-from common.api.api_error import NoneResultError
+from common.api.exceptions import NoneResultError
 from common.api.lyric_api.base_lyric_api import BaseMusicApi
 from common.lyric.lyric_type import LrcFile, TransType
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo

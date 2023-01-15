@@ -7,12 +7,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from components.raw_ui.LyricsDownloadDialog import Ui_LyricsDownloadDialog
-from components.dialog.warning_dialog import WarningDialog
+from components.raw_ui import Ui_LyricsDownloadDialog
+from components.dialog import WarningDialog
 from components.work_thread import thread_drive
 from common.api.lyric_api import CloudMusicWebApi, KugouApi
+from common.api.exceptions import NoneResultError
 from common.temp_manage import TempFileManage
-from common.api.api_error import NoneResultError
 
 
 class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):

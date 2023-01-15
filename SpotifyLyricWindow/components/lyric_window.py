@@ -9,18 +9,20 @@ from types import MethodType
 import requests
 from PyQt5 import QtCore
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from common.win_utils.media_session import WindowsMediaSession
-from common.api.api_error import UserError, NoPermission
-from common.api.user_api import SpotifyUserApi, UserCurrentPlaying
+from common.api.exceptions import UserError, NoPermission
+from common.api.user_api import SpotifyUserApi
 from common.config import Config
 from common.lyric import LyricFileManage
 from common.lyric.lyric_download import download_lrc
+from common.player import LrcPlayer
 from common.temp_manage import TempFileManage
-from common.player.lyric_player import LrcPlayer, TransType
-from components.lyric_window_view import LyricsWindowView
-from components.setting_window.setting_window import SettingWindow
+from common.typing import TransType, UserCurrentPlaying, MediaPropertiesInfo, MediaPlaybackInfo
+from common.win_utils import WindowsMediaSession
+from components.lyrics_window_view import LyricsWindowView
+from components.setting_window import SettingWindow
 from components.work_thread import thread_drive
 
 
@@ -117,7 +119,7 @@ class LyricsWindow(LyricsWindowView):
         """当前歌曲播放的事件"""
         self._manual_skip_flag = False
 
-    def media_properties_changed(self, info):
+    def media_properties_changed(self, info: MediaPropertiesInfo):
         self.lrc_player.set_pause(True)
         if not self._manual_skip_flag:
             # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
@@ -130,14 +132,14 @@ class LyricsWindow(LyricsWindowView):
             time.sleep(0.5)
             self.calibration_event()
 
-    def playback_info_changed(self, info):
+    def playback_info_changed(self, info: MediaPlaybackInfo):
         self.lrc_player.seek_to_position(info.position)
         is_playing = info.playStatus == 4
         self.lrc_player.set_pause(not is_playing)
         self.set_pause_button_icon(is_playing)
         self.set_lyrics_rolling(is_playing)
 
-    def timeline_properties_changed(self, info):
+    def timeline_properties_changed(self, info: MediaPlaybackInfo):
         if info.position < 500 or self.lrc_player.is_pause:
             # 由于切换到下一首歌会同时触发timeline和properties的变化信号，利用position<500过滤掉切换歌时候的timeline信号
             return
@@ -324,12 +326,13 @@ class LyricsWindow(LyricsWindowView):
 
         return self._refresh_player_track()
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QCloseEvent):
         self.lrc_player.thread_play_lrc.terminate()
         del self.lrc_player
         del self.lyric_file_manage
         self.temp_manage.auto_clean_temp()
         super(LyricsWindow, self).closeEvent(event)
+
 
 
 if __name__ == "__main__":

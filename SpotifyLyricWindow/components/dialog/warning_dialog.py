@@ -4,7 +4,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from components.raw_ui.WarningDialog import Ui_WarningDialog
+from components.raw_ui import Ui_WarningDialog
 from components.mask_widget import MaskWidget
 
 

@@ -5,9 +5,8 @@ import math
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from components.lyric_window_view.vertical_label import VerticalLabel
-from components.lyric_window_view.horizontal_label import HorizontalLabel
-from components.lyric_window_view.display_mode import DisplayMode
+from components.label import VerticalLabel, HorizontalLabel
+from common.typing import DisplayMode
 from common.config import Config
 
 

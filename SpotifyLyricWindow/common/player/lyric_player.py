@@ -7,7 +7,7 @@ import weakref
 
 from common.api import SpotifyUserApi
 from common.lyric import LyricFileManage
-from common.lyric.lyric_type import LrcFile, TransType
+from common.typing import LrcFile, TransType
 
 
 class LrcPlayer:

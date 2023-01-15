@@ -5,7 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from components.raw_ui.HotkeysPage import Ui_HotkeysPage
+from components.raw_ui import Ui_HotkeysPage
 from components.hotkeys_line_edit import HotkeyLineEdit
 
 from common.config import Config

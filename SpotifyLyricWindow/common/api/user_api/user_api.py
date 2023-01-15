@@ -5,7 +5,7 @@ from collections import namedtuple
 
 import requests
 
-from common.api.api_error import *
+from common.api.exceptions import *
 from common.api.user_api.user_auth import SpotifyUserAuth
 
 UserCurrentPlaying = namedtuple("UserCurrentPlaying", ["progress_ms", "artist", "track_name", "is_playing", "track_id",

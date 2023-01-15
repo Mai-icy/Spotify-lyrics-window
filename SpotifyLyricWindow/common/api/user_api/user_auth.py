@@ -10,7 +10,7 @@ import time
 import requests
 
 from common.path import TOKEN_PATH
-from common.api.api_error import NoAuthError
+from common.api.exceptions import NoAuthError
 from common.config import Config
 
 

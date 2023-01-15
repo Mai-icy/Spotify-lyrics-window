@@ -2,7 +2,6 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import components.lyric_window_view.source
 
 
 class Ui_HorizontalLyricsWindow(object):

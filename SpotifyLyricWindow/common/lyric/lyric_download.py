@@ -2,10 +2,11 @@
 # -*- coding:utf-8 -*-
 import requests
 
-from common.api import *
-from common.song_metadata.compare_metadata import compare_song_info
+from common.api.lyric_api import CloudMusicWebApi, KugouApi, SpotifyApi
+from common.api.exceptions import NoneResultError
+from common.song_metadata import compare_song_info
+from common.lyric import LyricFileManage
 from common.path import LRC_PATH
-from common.lyric.lyric_manage import LyricFileManage
 
 cloud_api = CloudMusicWebApi()
 kugou_api = KugouApi()

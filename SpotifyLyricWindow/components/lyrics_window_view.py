@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from math import ceil
 from system_hotkey import SystemHotkey
 
 from PyQt5 import QtGui, QtWidgets
@@ -8,12 +7,11 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from components.raw_ui import Ui_VerticalLyricsWindow, Ui_HorizontalLyricsWindow
+from components.text_scroll_area import TextScrollArea
+from components.lyric_tray_icon import LyricsTrayIcon
+from common.typing import DisplayMode
 from common.config import Config
-from components.raw_ui.VerticalLyricsWindow import Ui_VerticalLyricsWindow
-from components.raw_ui.HorizontalLyricsWindow import Ui_HorizontalLyricsWindow
-from components.lyric_window_view.text_scroll_area import TextScrollArea
-from components.lyric_window_view.lyric_tray_icon import LyricsTrayIcon
-from components.lyric_window_view.display_mode import DisplayMode
 
 
 class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
@@ -82,11 +80,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
     def _init_scroll_area(self):
         """初始化滚动区域"""
         self.above_scrollArea = TextScrollArea(self.lyrics_frame1)
-        self.above_scrollArea.set_mode(self.display_mode)
         self.lyrics_gridLayout1.addWidget(self.above_scrollArea)
 
         self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
-        self.below_scrollArea.set_mode(self.display_mode)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
 
     def _init_color_rgb(self):

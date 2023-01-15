@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from components.lyric_window import LyricsWindow
+import components.source
 
 
 if __name__ == "__main__":

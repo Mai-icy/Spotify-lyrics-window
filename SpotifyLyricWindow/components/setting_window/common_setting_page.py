@@ -2,16 +2,14 @@
 # -*- coding:utf-8 -*-
 import weakref
 
-from components.raw_ui.CommonPage import Ui_CommonPage
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from common.api.user_api import SpotifyUserAuth
 from common.config import Config
-from common.api.user_api.user_auth import SpotifyUserAuth
-from common.path import LRC_PATH, TEMP_PATH, ORI_LRC_PATH, ORI_TEMP_PATH
 from common.lyric import LyricFileManage
+from common.path import LRC_PATH, TEMP_PATH, ORI_LRC_PATH, ORI_TEMP_PATH
 from common.temp_manage import TempFileManage
+from components.raw_ui import Ui_CommonPage
 
 
 class CommonPage(QWidget, Ui_CommonPage):
