@@ -64,6 +64,12 @@ class LyricsWindow(LyricsWindowView):
 
         self.calibration_event()
 
+    def _re_init(self):
+        """重新初始化"""
+        super(LyricsWindow, self)._re_init()
+        self._init_signal()
+        self.calibration_event()
+
     def _init_signal(self):
         """初始化信号"""
         super(LyricsWindow, self)._init_signal()

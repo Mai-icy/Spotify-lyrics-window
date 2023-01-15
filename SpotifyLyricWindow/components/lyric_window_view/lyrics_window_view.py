@@ -18,7 +18,6 @@ from components.lyric_window_view.display_mode import DisplayMode
 
 class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
     set_timer_status_signal = pyqtSignal(bool)
-    show_signal = pyqtSignal()
 
     def __init__(self, parent=None):
         super(LyricsWindowView, self).__init__(parent)
@@ -30,12 +29,12 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
 
         self.installEventFilter(self)  # 初始化事件过滤器
-        if not hasattr(self, "tray_icon"):
-            self.tray_icon = LyricsTrayIcon(self)
+        self.tray_icon = LyricsTrayIcon(self)
 
         # 界面相关
         self._init_lyrics_shadow()
         self._init_main_window()
+        self._init_scroll_area()
         self._init_color_rgb()
         self._init_font()
 
@@ -44,6 +43,25 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self._init_window_drag_flag()
         self._init_mouse_track()
         self._init_hotkey()
+
+    def _re_init(self):
+        """重新初始化布局"""
+        super(LyricsWindowView, self).__init__(self.parent())
+
+        self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
+        if self.display_mode == DisplayMode.Horizontal:
+            super(LyricsWindowView, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
+        else:
+            super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
+
+        self.installEventFilter(self)  # 初始化事件过滤器
+
+        self._init_lyrics_shadow()
+        self._init_main_window()
+        self._init_scroll_area()
+        self._init_color_rgb()
+        self._init_font()
+        self._init_mouse_track()
 
     def _init_lyrics_shadow(self):
         """初始化歌词阴影"""
@@ -57,10 +75,12 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         """初始化界面控件以及属性"""
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.SplashScreen)
         self.set_always_front(Config.LyricConfig.is_always_front)
-
         self.setAttribute(Qt.WA_TranslucentBackground)
-        # self.setAttribute(Qt.WA_DeleteOnClose)
 
+        self.set_button_hide(True)
+
+    def _init_scroll_area(self):
+        """初始化滚动区域"""
         self.above_scrollArea = TextScrollArea(self.lyrics_frame1)
         self.above_scrollArea.set_mode(self.display_mode)
         self.lyrics_gridLayout1.addWidget(self.above_scrollArea)
@@ -68,8 +88,6 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
         self.below_scrollArea.set_mode(self.display_mode)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
-
-        self.set_button_hide(True)
 
     def _init_color_rgb(self):
         """初始化 歌词 以及 阴影 颜色"""
@@ -127,8 +145,6 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self.lock_button.clicked.connect(self._lock_event)
         self.set_timer_status_signal.connect(lambda flag: self.timer.start() if flag else self.timer.stop())
 
-        self.show_signal.connect(self.show)
-
     def _init_window_lock_flag(self):
         """初始化锁定相关变量"""
         self._time_step = 20  # 刷新时间间隔
@@ -144,8 +160,6 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _init_hotkey(self):
         """初始化快捷键"""
-        if hasattr(self, "hotkey"):
-            return
         self.hotkey = SystemHotkey()
 
         self.signal_dic = {
@@ -156,7 +170,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             "next_button": self.next_button.clicked,
             "last_button": self.last_button.clicked,
             "pause_button": self.pause_button.clicked,
-            "show_window": self.show_signal
+            "show_window": self.tray_icon.showAction.triggered
         }
         # 导入配置
         self.set_hotkey_enable(True)
@@ -181,13 +195,12 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
                 "height": 700
             }
 
-        # self.set_hotkey_enable(False)  # 解除绑定所有快捷键
         self.hide()
         Config.CommonConfig.PositionConfig.pos_x = default_pos["pos_x"]
         Config.CommonConfig.PositionConfig.pos_y = default_pos["pos_y"]
         Config.CommonConfig.PositionConfig.width = default_pos["width"]
         Config.CommonConfig.PositionConfig.height = default_pos["height"]
-        self.__init__(self.parent())  # 重新初始化
+        self._re_init()  # 重新初始化
         self.show()
 
     def set_hotkey_enable(self, flag: bool):
