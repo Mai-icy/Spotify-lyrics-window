@@ -9,6 +9,7 @@ from components.raw_ui.LyricsSettingsPage import Ui_LyricsSettingsPage
 
 from common.config import Config
 from common.lyric.lyric_type import TransType
+from components.lyric_window_view.display_mode import DisplayMode
 
 
 class LyricPage(QWidget, Ui_LyricsSettingsPage):
@@ -65,6 +66,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         """初始化信号"""
         self.font_comboBox.currentIndexChanged.connect(self.font_change_event)
         self.color_comboBox.currentIndexChanged.connect(self.color_style_change_event)
+        self.display_mode_comboBox.currentIndexChanged.connect(self.display_mode_change_event)
 
         self.trans_button_group.buttonClicked.connect(self.trans_change_event)
         self.enable_front_checkBox.stateChanged.connect(self.front_change_event)
@@ -82,12 +84,14 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         trans_type = Config.LyricConfig.trans_type
         lyrics_color = Config.LyricConfig.lyric_color
         shadow_color = Config.LyricConfig.shadow_color
+        display_mode = Config.LyricConfig.display_mode
 
         self.enable_front_checkBox.setChecked(is_always_front)
         self.color_comboBox.setCurrentIndex(self.color_list.index(color_style))
         self._set_label_rgb(self.lyrics_color_label, lyrics_color)
         self._set_label_rgb(self.shadow_color_label, shadow_color)
         self.font_comboBox.setCurrentIndex(self.font_family_list.index(font_family))
+        self.display_mode_comboBox.setCurrentIndex(display_mode)
         self.trans_button_group.button(trans_type).setChecked(True)
 
     def set_default_event(self):
@@ -147,6 +151,11 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         setattr(Config.LyricConfig, "rgb_style", color_style)
         setattr(Config.LyricConfig, "lyric_color", self.style_dict[color_style][0])
         setattr(Config.LyricConfig, "shadow_color", self.style_dict[color_style][1])
+
+    def display_mode_change_event(self):
+        mode_value = self.display_mode_comboBox.currentIndex()
+        mode = DisplayMode(mode_value)
+        self.lyric_window.set_display_mode(mode)
 
     def custom_lyrics_color_event(self):
         """自定义歌词颜色事件"""

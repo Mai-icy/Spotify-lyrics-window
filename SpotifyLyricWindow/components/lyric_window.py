@@ -52,8 +52,8 @@ class LyricsWindow(LyricsWindowView):
     error_msg_show_signal = pyqtSignal(object)
     text_show_signal = pyqtSignal(int, str, int)
 
-    def __init__(self, parent=None, icon=None):
-        super(LyricsWindow, self).__init__(parent, icon)
+    def __init__(self, parent=None):
+        super(LyricsWindow, self).__init__(parent)
 
         self._manual_skip_flag = True
 
@@ -96,7 +96,8 @@ class LyricsWindow(LyricsWindowView):
         self.delay_timer = QTimer()
         self.delay_timer.setSingleShot(True)
 
-        self.setting_window = SettingWindow(lyric_window=self)
+        if not hasattr(self, "setting_window"):
+            self.setting_window = SettingWindow(lyric_window=self)
 
     def _init_media_session(self):
         """初始化 media session"""

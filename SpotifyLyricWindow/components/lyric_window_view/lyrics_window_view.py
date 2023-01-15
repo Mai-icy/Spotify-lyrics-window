@@ -20,7 +20,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
     set_timer_status_signal = pyqtSignal(bool)
     show_signal = pyqtSignal()
 
-    def __init__(self, parent=None, icon: LyricsTrayIcon = None):
+    def __init__(self, parent=None):
         super(LyricsWindowView, self).__init__(parent)
         # 获取设置中的歌词显示模式（竖向或者横向）
         self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
@@ -30,7 +30,8 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
 
         self.installEventFilter(self)  # 初始化事件过滤器
-        self.tray_icon = icon
+        if not hasattr(self, "tray_icon"):
+            self.tray_icon = LyricsTrayIcon(self)
 
         # 界面相关
         self._init_lyrics_shadow()
@@ -143,6 +144,8 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _init_hotkey(self):
         """初始化快捷键"""
+        if hasattr(self, "hotkey"):
+            return
         self.hotkey = SystemHotkey()
 
         self.signal_dic = {
@@ -178,13 +181,13 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
                 "height": 700
             }
 
-        self.set_hotkey_enable(False)  # 解除绑定所有快捷键
+        # self.set_hotkey_enable(False)  # 解除绑定所有快捷键
         self.hide()
         Config.CommonConfig.PositionConfig.pos_x = default_pos["pos_x"]
         Config.CommonConfig.PositionConfig.pos_y = default_pos["pos_y"]
         Config.CommonConfig.PositionConfig.width = default_pos["width"]
         Config.CommonConfig.PositionConfig.height = default_pos["height"]
-        self.__init__(self.parent(), self.tray_icon)  # 重新初始化
+        self.__init__(self.parent())  # 重新初始化
         self.show()
 
     def set_hotkey_enable(self, flag: bool):
@@ -472,7 +475,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             return
         pos_config = Config.CommonConfig.PositionConfig
         self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
-        # self.tray_icon.show()
+        self.tray_icon.show()
         super(LyricsWindowView, self).show()
 
     def hide(self):
