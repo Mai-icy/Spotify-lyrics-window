@@ -128,6 +128,9 @@ class SpotifyUserAuth:
             "refresh_token": refresh_token,
         }
         self.user_token_info = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payloads).json()
+        if not self.user_token_info.get("expires_in"):
+            # print(self.user_token_info)  # {'error': 'invalid_grant', 'error_description': 'Refresh token revoked'}
+            raise NoAuthError("请先引导用户完成验证")
         if not self.user_token_info.get("refresh_token"):
             self.user_token_info["refresh_token"] = refresh_token
         self.user_token_info["expires_at"] = int(time.time()) + self.user_token_info["expires_in"]

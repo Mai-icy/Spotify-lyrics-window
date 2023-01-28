@@ -114,6 +114,9 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             self.lyrics_file_items.append(item)
 
         for track_id in tracks_id_data:
+            if track_id in not_found_data:
+                continue
+
             item = FileListWidgetItem(track_id=track_id)
             item.setText(tracks_id_data[track_id])
 

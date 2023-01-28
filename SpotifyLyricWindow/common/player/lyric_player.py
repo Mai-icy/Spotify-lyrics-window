@@ -128,7 +128,8 @@ class LyricThread(threading.Thread):
             lyric_order = self.player.lrc_file.get_order_position(position)
             next_stamp = self.player.lrc_file.get_time(lyric_order + 1)
 
-            if position > self.player.duration - 1000:  # 播放完毕
+            print(position, self.player.duration)
+            if position > self.player.duration - 1100:  # 播放完毕
                 if self.player.play_done_event_func and not self.player.is_pause:
                     self.player.play_done_event_func()  # 发送播放完毕信号
                 self.sleep.wait()
