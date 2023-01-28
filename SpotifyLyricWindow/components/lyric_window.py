@@ -134,7 +134,7 @@ class LyricsWindow(LyricsWindowView):
             # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
             time.sleep(0.5)  # 等待api反应过来
 
-        if track_id:  # 如果可以通过title直接获取id, 则不走api渠道
+        if track_id and not self.lyric_file_manage.get_not_found(track_id):  # 如果可以通过title直接获取id, 则不走api渠道
             playback_info = self.media_session.get_current_playback_info()
             self.playback_info_changed(playback_info)
             self.lrc_player.set_track(track_id, playback_info.duration)
