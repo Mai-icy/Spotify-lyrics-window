@@ -179,11 +179,12 @@ class LyricsWindow(LyricsWindowView):
         self.set_pause_button_icon(user_current.is_playing)
         self.set_lyrics_rolling(user_current.is_playing)
 
-        if user_current.track_name == "ad":  # 正在播放广告
-            self.set_lyrics_text(1, "Advertising！")
+        if not user_current.track_id:  # 正在播放非音乐（track）
+            self.set_lyrics_text(1, user_current.track_name + "!")
             self.set_lyrics_text(2, "o(_ _)ozzZZ")
-            self._refresh_player_track(user_current)
             self.lrc_player.seek_to_position(0)
+            if not self.media_session.is_connected():
+                self._refresh_player_track(user_current)
             return
 
         if not self.lyric_file_manage.is_lyric_exist(user_current.track_id):
@@ -345,7 +346,6 @@ class LyricsWindow(LyricsWindowView):
         del self.lyric_file_manage
         self.temp_manage.auto_clean_temp()
         super(LyricsWindow, self).closeEvent(event)
-
 
 
 if __name__ == "__main__":

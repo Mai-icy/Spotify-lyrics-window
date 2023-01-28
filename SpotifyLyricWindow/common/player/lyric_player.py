@@ -48,7 +48,10 @@ class LrcPlayer:
 
         self.track_id = track_id
         self.duration = duration
-        self.lrc_file = self.lyric_file_manage.read_lyric_file(track_id)
+        if track_id:
+            self.lrc_file = self.lyric_file_manage.read_lyric_file(track_id)
+        else:
+            self.lrc_file = LrcFile()
 
     def set_trans_mode(self, mode: TransType) -> bool:
         """设置翻译模式"""

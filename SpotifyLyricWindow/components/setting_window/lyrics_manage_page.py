@@ -243,7 +243,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             return
         if not self.lyrics_file_manage.is_lyric_exist(item.track_id):
             return
-        self.lyrics_file_manage.delete_lyric_file(item.track_id)
+        title = item.text()
+        self.lyrics_file_manage.set_not_found(item.track_id, title)
         item.set_no_lyric(True)
 
         self.current_lrc = LrcFile()

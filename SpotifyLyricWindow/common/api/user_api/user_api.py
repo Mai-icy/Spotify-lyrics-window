@@ -39,14 +39,15 @@ class SpotifyUserApi:
         progress_ms = res_json["progress_ms"]
         is_playing = res_json["is_playing"]
         timestamp = res_json["timestamp"]
-        if res_json['currently_playing_type'] == "ad":
-            return UserCurrentPlaying(progress_ms, None, "ad", is_playing, None, None, offset)
-        artist = ", ".join(art["name"] for art in res_json["item"]["artists"])
+        if res_json['currently_playing_type'] != "track":
+            return UserCurrentPlaying(progress_ms, None, res_json['currently_playing_type'], is_playing, None, None,
+                                      offset)
         if res_json['item'] is None:
             # 用户还在加载歌曲时，item为None
             time.sleep(0.5)
             return self.get_current_playing()
 
+        artist = ", ".join(art["name"] for art in res_json["item"]["artists"])
         track_name = res_json["item"]["name"]
         track_id = res_json["item"]["id"]
         duration = res_json["item"]["duration_ms"]
