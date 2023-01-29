@@ -42,6 +42,8 @@ class VerticalLabel(QLabel):
 
         self.text_height += 1 * font_metrics.height()  # 经验值 补偿
 
+        super(VerticalLabel, self).paintEvent(a0)
+
     def getTextSize(self):
         """获取当前播放歌词的高度, 可用于计算滚动参数"""
         return self.text_height
