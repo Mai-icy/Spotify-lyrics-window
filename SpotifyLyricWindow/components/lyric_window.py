@@ -199,10 +199,7 @@ class LyricsWindow(LyricsWindowView):
         self.lrc_player.set_pause(not user_current.is_playing)
         self.lrc_player.set_trans_mode(self.user_trans if self.user_trans in ava_trans else TransType.NON)
 
-        if self.media_session.is_connected():
-            playback_info = self.media_session.get_current_playback_info()
-            self.lrc_player.seek_to_position(playback_info.position)
-        else:
+        if not self.media_session.is_connected():
             self.lrc_player.seek_to_position(user_current.progress_ms)
 
     @thread_drive()

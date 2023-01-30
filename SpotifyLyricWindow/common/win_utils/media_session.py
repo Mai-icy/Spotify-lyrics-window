@@ -160,7 +160,7 @@ class WindowsMediaSession:
         info = MediaPlaybackInfo(
             playStatus=playback_info.playback_status,
             duration=timeline_properties.end_time.duration // 10000,
-            position=timeline_properties.position.duration // 10000
+            position=timeline_properties.position.duration // 10000  # position并不会实时更新 而是每过一段时间更新一次 会触发信号
         )
         return info
 
