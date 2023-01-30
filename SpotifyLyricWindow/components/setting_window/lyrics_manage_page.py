@@ -318,6 +318,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
     def _set_modify_mode(self, flag: bool):
         """设置是否进入修改模式"""
+        self.textbuttons_frame.setVisible(flag)
         self.confirm_button.setVisible(flag)
         self.cancel_button.setVisible(flag)
 

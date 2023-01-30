@@ -13,6 +13,7 @@ from components.setting_window.lyric_setting_page import LyricPage
 from components.setting_window.hotkey_setting_page import HotkeysPage
 from components.setting_window.common_setting_page import CommonPage
 from components.setting_window.lyrics_manage_page import LyricsManagePage
+import components.setting_window.lightstyle_rc
 
 
 class SettingWindow(QWidget, Ui_SettingsWindow):
@@ -26,6 +27,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
 
         self._init_page()
         self._init_signal()
+        self._init_style_sheet()
 
     def _init_page(self):
         """初始化设置页面"""
@@ -44,6 +46,11 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
     def _init_signal(self):
         """初始化信号"""
         self.page_listWidget.itemClicked.connect(self.page_click_event)
+
+    def _init_style_sheet(self):
+        with open("resource/ui/lightstyle.qss", "r") as f:
+            style_sheet = f.read()
+        self.setStyleSheet(style_sheet)
 
     def page_click_event(self, item: QListWidgetItem):
         """切换配置页面"""

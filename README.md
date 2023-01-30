@@ -47,6 +47,6 @@ Manage and download Lyrics 管理和下载歌词
 - [x] Download the lyrics file by api  手动下载歌词文件
 - [x] Common settings page 设置常规页面
 - [x] Lyrics displayed vertically 竖向歌词显示
+- [x] Beautify the window 美化窗口
 - [ ] More lyric api 更多的歌词api
-- [ ] Beautify the window 美化窗口
 - [ ] etc.
