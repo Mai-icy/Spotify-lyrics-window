@@ -53,6 +53,9 @@ class LrcPlayer:
         else:
             self.lrc_file = LrcFile()
 
+        if self.trans_mode not in self.lrc_file.available_trans():
+            self.set_trans_mode(TransType.NON)
+
     def set_trans_mode(self, mode: TransType) -> bool:
         """设置翻译模式"""
         if self.lrc_file.empty(mode):
