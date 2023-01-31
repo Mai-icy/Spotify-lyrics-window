@@ -64,7 +64,7 @@ class LyricsWindow(LyricsWindowView):
         self._init_signal()
         self._init_media_session()
 
-        self.calibration_event()
+        self.calibration_event(use_api_position=True)
 
     def _re_init(self):
         """重新初始化"""
@@ -124,21 +124,26 @@ class LyricsWindow(LyricsWindowView):
 
         track_title = f"{info.title} - {info.artist}"
         track_id = self.lyric_file_manage.get_id(track_title)
-
-        if not self._manual_skip_flag:
-            # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
-            time.sleep(0.7)
-            self.media_session.seek_to_position_media(0)
-            self._manual_skip_flag = True
-        else:
-            # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
-            time.sleep(0.5)  # 等待api反应过来
-
         if track_id and not self.lyric_file_manage.get_not_found(track_id):  # 如果可以通过title直接获取id, 则不走api渠道
             playback_info = self.media_session.get_current_playback_info()
-            self.playback_info_changed(playback_info)
             self.lrc_player.set_track(track_id, playback_info.duration)
+            if not self._manual_skip_flag:
+                # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
+                time.sleep(0.7)
+                self.media_session.seek_to_position_media(0)
+                self.lrc_player.seek_to_position(0)
+                self._manual_skip_flag = True
+            self.lrc_player.set_pause(not (playback_info.playStatus == 4))
         else:
+            if not self._manual_skip_flag:
+                # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
+                time.sleep(0.7)
+                self.media_session.seek_to_position_media(0)
+                self.lrc_player.seek_to_position(0)
+                self._manual_skip_flag = True
+            else:
+                # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
+                time.sleep(0.5)  # 等待api反应过来
             self.calibration_event()
 
     def playback_info_changed(self, info: MediaPlaybackInfo):
@@ -149,18 +154,22 @@ class LyricsWindow(LyricsWindowView):
         self.set_lyrics_rolling(is_playing)
 
     def timeline_properties_changed(self, info: MediaPlaybackInfo):
+        if not self._manual_skip_flag:
+            return
         if info.position < 500 or self.lrc_player.is_pause:
             # 由于切换到下一首歌会同时触发timeline和properties的变化信号，利用position<500过滤掉切换歌时候的timeline信号
+            self.lrc_player.seek_to_position(info.position, is_show_last_lyric=False)
             return
         self.lrc_player.seek_to_position(info.position)
 
     @thread_drive()
     @CatchError
-    def calibration_event(self, *_, no_text_show: bool = False):
+    def calibration_event(self, *_, no_text_show: bool = False, use_api_position: bool = False):
         """
         同步歌词
 
         :param no_text_show: 是否显示 calibrating！ 的 正在校准提示
+        :param use_api_position: 是否使用api的时间进行校准
         """
         if not no_text_show:
             self.set_lyrics_text(1, "calibrating！")
@@ -194,12 +203,9 @@ class LyricsWindow(LyricsWindowView):
                 self.lyric_file_manage.set_not_found(user_current.track_id, "")  # 将 不存在 记录撤去
             user_current = self._refresh_player_track(user_current)
 
-        ava_trans = self.lrc_player.lrc_file.available_trans()
-
         self.lrc_player.set_pause(not user_current.is_playing)
-        self.lrc_player.set_trans_mode(self.user_trans if self.user_trans in ava_trans else TransType.NON)
 
-        if not self.media_session.is_connected():
+        if not self.media_session.is_connected() or use_api_position:
             self.lrc_player.seek_to_position(user_current.progress_ms)
 
     @thread_drive()

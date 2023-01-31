@@ -39,6 +39,8 @@ class LrcPlayer:
     def set_pause(self, flag: bool):
         """设置歌词播放是否暂停"""
         self.is_pause = flag
+        if not flag:
+            self.thread_play_lrc.reset_position()
 
     def set_track(self, track_id: str, duration: int):
         """设置当前播放的歌曲 duration单位：ms"""
@@ -54,7 +56,7 @@ class LrcPlayer:
             self.lrc_file = LrcFile()
 
         if self.trans_mode not in self.lrc_file.available_trans():
-            self.set_trans_mode(TransType.NON)
+            self.trans_mode = TransType.NON
 
     def set_trans_mode(self, mode: TransType) -> bool:
         """设置翻译模式"""
@@ -79,11 +81,12 @@ class LrcPlayer:
         if order != -1:
             self.show_content(order, 0)
 
-    def seek_to_position(self, position: int):
+    def seek_to_position(self, position: int, is_show_last_lyric=True):
         """调整歌词播放进度 position单位：ms"""
         self.timer_start_value = int(time.time() * 1000) - position
-        self._show_last_lyric()
-        self.thread_play_lrc.reset_position()
+        if is_show_last_lyric:
+            self._show_last_lyric()
+            self.thread_play_lrc.reset_position()
 
     def modify_offset(self, modify_value: int):
         """修改单个歌词文件的偏移"""
@@ -133,8 +136,7 @@ class LyricThread(threading.Thread):
             position = self.player.get_time()
             lyric_order = self.player.lrc_file.get_order_position(position)
             next_stamp = self.player.lrc_file.get_time(lyric_order + 1)
-
-            if position > self.player.duration - 1100:  # 播放完毕
+            if position > self.player.duration - 1200:  # 播放完毕
                 if self.player.play_done_event_func and not self.player.is_pause:
                     self.player.play_done_event_func()  # 发送播放完毕信号
                 self.sleep.wait()
@@ -142,7 +144,7 @@ class LyricThread(threading.Thread):
             if lyric_order < 0:  # 无歌词
                 self.sleep.wait(0.1)  # 开始检测何时播放完毕
                 continue
-            elif next_stamp < 2:
+            elif next_stamp < 0:
                 next_stamp = self.player.duration
 
             show_time = next_stamp - position
@@ -150,7 +152,9 @@ class LyricThread(threading.Thread):
             if show_time < 0:  # 位置判断变化导致时间错误 重新获取
                 continue
             self.player.show_content(lyric_order, show_time)
-            self.sleep.wait(show_time / 1000)
+
+            if next_stamp != self.player.duration:  # 播放最后一句时不需要等待
+                self.sleep.wait(show_time / 1000)
 
             if self.player.is_pause and self.is_running:
                 self.sleep.wait()
