@@ -84,7 +84,7 @@ class LyricsWindow(LyricsWindowView):
         self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
         self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
         self.translate_button.clicked.connect(self.change_trans_button_event)
-        self.settings_button.clicked.connect(self.setting_window.show)
+        self.settings_button.clicked.connect(self._setting_window_show_event)
 
         self.error_msg_show_signal.connect(self._error_msg_show_event)
         self.lrc_player.play_done_event_connect(self.player_done_event)
@@ -105,7 +105,7 @@ class LyricsWindow(LyricsWindowView):
         self.delay_timer.setSingleShot(True)
 
         if not hasattr(self, "setting_window"):
-            self.setting_window = SettingWindow(lyric_window=self)
+            self.setting_window = None  # 初始化为空，在打开的时候被定义，关闭的时候被释放
 
     def _init_media_session(self):
         """初始化 media session"""
@@ -275,6 +275,19 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth.auth.get_user_access_token()
         self.set_lyrics_text(1, "验证成功！")
         self.calibration_event()
+
+    def _setting_window_destroyed_event(self):
+        """设置窗口关闭连接事件"""
+        # 设置窗口已经关闭释放内存，此时self.setting_window为nullptr，将此处定义为None
+        self.setting_window = None
+
+    def _setting_window_show_event(self):
+        """显示设置窗口事件，新建一个窗口对象"""
+        if self.setting_window is not None:
+            return
+        self.setting_window = SettingWindow(lyric_window=self)
+        self.setting_window.destroyed.connect(self._setting_window_destroyed_event)
+        self.setting_window.show()
 
     def set_trans_mode(self, mode: TransType):
         """

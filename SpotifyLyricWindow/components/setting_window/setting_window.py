@@ -22,7 +22,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
     def __init__(self, parent=None, *, lyric_window=None):
         super(SettingWindow, self).__init__(parent)
         self.lyric_window = lyric_window
-
+        self.setAttribute(Qt.WA_DeleteOnClose, True)  # 在关闭的时候删除对象
         self.setupUi(self)
 
         self._init_page()
@@ -77,12 +77,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
                 self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
 
     def show(self) -> None:
-        if self.isVisible():
-            self.raise_()
-            self.activateWindow()
-            return
         # 载入配置
-
         self.lyric_page.load_config()
         self.hotkeys_page.load_config()
         self.common_page.load_config()
