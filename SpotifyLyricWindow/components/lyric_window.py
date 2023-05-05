@@ -81,8 +81,8 @@ class LyricsWindow(LyricsWindowView):
         self.next_button.clicked.connect(self.set_user_next_event)
         self.last_button.clicked.connect(self.set_user_previous_event)
         self.pause_button.clicked.connect(self.pause_resume_button_event)
-        self.offsetup_button.clicked.connect(lambda: self.lrc_player.modify_offset(500))
-        self.offsetdown_button.clicked.connect(lambda: self.lrc_player.modify_offset(-500))
+        self.offsetup_button.clicked.connect(self.lyric_offset_add_event)
+        self.offsetdown_button.clicked.connect(self.lyric_offset_minus_event)
         self.translate_button.clicked.connect(self.change_trans_button_event)
         self.settings_button.clicked.connect(self._setting_window_show_event)
 
@@ -275,6 +275,14 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth.auth.get_user_access_token()
         self.set_lyrics_text(1, "验证成功！")
         self.calibration_event()
+
+    def lyric_offset_add_event(self):
+        """调整偏移事件  歌词前进"""
+        self.lrc_player.modify_offset(500)
+
+    def lyric_offset_minus_event(self):
+        """调整偏移事件  歌词后退"""
+        self.lrc_player.modify_offset(-500)
 
     def _setting_window_destroyed_event(self):
         """设置窗口关闭连接事件"""

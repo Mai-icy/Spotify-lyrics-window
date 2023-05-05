@@ -136,10 +136,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _init_signal(self):
         """初始化基本信号连接"""
-        self.close_button.clicked.connect(lambda _: self.tray_icon.quit() if Config.CommonConfig.is_quit_on_close else
-                                                    self.hide())
         self.lock_button.clicked.connect(self._lock_event)
-        self.set_timer_status_signal.connect(lambda flag: self.timer.start() if flag else self.timer.stop())
+        self.close_button.clicked.connect(self._close_button_click_event)
+        self.set_timer_status_signal.connect(self._set_timer_status_signal_event)
 
     def _init_window_lock_flag(self):
         """初始化锁定相关变量"""
@@ -497,6 +496,18 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self._renew_pos_config()
         Config.save_config()
         return super(LyricsWindowView, self).close()
+
+    def _close_button_click_event(self):
+        if Config.CommonConfig.is_quit_on_close:
+            self.tray_icon.quit()
+        else:
+            self.hide()
+
+    def _set_timer_status_signal_event(self, flag):
+        if flag:
+            self.timer.start()
+        else:
+            self.timer.stop()
 
     def _renew_pos_config(self):
         """同步配置文件 关于窗口的位置 以至下次打开在原来位置"""

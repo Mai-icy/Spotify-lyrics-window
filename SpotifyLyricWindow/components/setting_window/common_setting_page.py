@@ -46,21 +46,19 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def _init_signal(self):
         """初始化信号"""
-        self.cache_path_button.clicked.connect(lambda _: self.set_path_event(self.cache_path_lineEdit))
-        self.lyrics_path_button.clicked.connect(lambda _: self.set_path_event(self.lyrics_path_lineEdit))
+        self.cache_path_button.clicked.connect(self._cache_path_press_event)
+        self.lyrics_path_button.clicked.connect(self._lyrics_path_press_event)
 
-        self.lyrics_path_lineEdit.textChanged.connect(lambda _: self.path_change_tip_event(self.lyrics_tip_label))
-        self.cache_path_lineEdit.textChanged.connect(lambda _: self.path_change_tip_event(self.cache_tip_label))
+        self.cache_path_lineEdit.textChanged.connect(self._cache_path_text_event)
+        self.lyrics_path_lineEdit.textChanged.connect(self._lyrics_path_text_event)
 
         self.clear_cache_button.clicked.connect(self.temp_file_manage.clean_all_temp)
         self.global_offset_doubleSpinBox.valueChanged.connect(self.set_api_offset_event)
         self.confirm_button.clicked.connect(self.confirm_client_event)
         self.default_button.clicked.connect(self.set_default_event)
 
-        self.quit_on_close_checkBox.stateChanged.connect(
-            lambda _: self.set_check_box_event(self.quit_on_close_checkBox))
-        self.save_position_checkBox.stateChanged.connect(
-            lambda _: self.set_check_box_event(self.save_position_checkBox))
+        self.quit_on_close_checkBox.stateChanged.connect(self._quit_on_close_event)
+        self.save_position_checkBox.stateChanged.connect(self._save_position_event)
 
     def load_config(self):
         """载入配置文件"""
@@ -145,7 +143,26 @@ class CommonPage(QWidget, Ui_CommonPage):
         new_val = self.global_offset_doubleSpinBox.value()
         self.lyrics_file_manage.set_offset_file("api_offset", new_val * 1000)
 
-    def path_change_tip_event(self, tip_label: QLabel):
+    def _cache_path_press_event(self):
+        self.set_path_event(self.cache_path_lineEdit)
+
+    def _lyrics_path_press_event(self):
+        self.set_path_event(self.lyrics_path_lineEdit)
+
+    def _lyrics_path_text_event(self):
+        self.path_change_tip_event(self.lyrics_tip_label)
+
+    def _cache_path_text_event(self):
+        self.path_change_tip_event(self.cache_tip_label)
+
+    def _quit_on_close_event(self):
+        self.set_check_box_event(self.quit_on_close_checkBox)
+
+    def _save_position_event(self):
+        self.set_check_box_event(self.save_position_checkBox)
+
+    @staticmethod
+    def path_change_tip_event(tip_label: QLabel):
         """修改路径事件"""
         tip_label.setText("路径修改将在重启后生效")
 
