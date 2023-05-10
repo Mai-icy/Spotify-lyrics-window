@@ -1,12 +1,10 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from components.raw_ui import Ui_HotkeysPage
-from components.hotkeys_line_edit import HotkeyLineEdit
+from components.line_edit.hotkeys_line_edit import HotkeyLineEdit
 
 from common.config import Config
 

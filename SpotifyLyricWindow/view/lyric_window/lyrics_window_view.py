@@ -8,8 +8,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from components.raw_ui import Ui_VerticalLyricsWindow, Ui_HorizontalLyricsWindow
-from components.text_scroll_area import TextScrollArea
-from components.lyric_tray_icon import LyricsTrayIcon
+from components.scroll_area.text_scroll_area import TextScrollArea
+from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from common.typing import DisplayMode
 from common.config import Config
 

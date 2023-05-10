@@ -21,8 +21,8 @@ from common.player import LrcPlayer
 from common.temp_manage import TempFileManage
 from common.typing import TransType, UserCurrentPlaying, MediaPropertiesInfo, MediaPlaybackInfo
 from common.win_utils import WindowsMediaSession
-from components.lyrics_window_view import LyricsWindowView
-from components.setting_window import SettingWindow
+from view.lyric_window.lyrics_window_view import LyricsWindowView
+from view.setting_window import SettingWindow
 from components.work_thread import thread_drive
 
 

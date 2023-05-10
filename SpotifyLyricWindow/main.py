@@ -6,7 +6,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from components.lyric_window import LyricsWindow
+from view.lyric_window.lyric_window import LyricsWindow
 import components.source
 
 

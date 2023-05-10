@@ -2,10 +2,9 @@
 # -*- coding:utf-8 -*-
 
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
 
 from components.raw_ui import Ui_WarningDialog
-from components.mask_widget import MaskWidget
+from components.widget.mask_widget import MaskWidget
 
 
 class WarningDialog(QDialog, Ui_WarningDialog):

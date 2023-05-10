@@ -1,19 +1,18 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from PyQt5 import QtGui, QtWidgets
+from PyQt5 import QtGui
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from common.config import Config
-from components.mask_widget import MaskWidget
+from components.widget.mask_widget import MaskWidget
 from components.raw_ui import Ui_SettingsWindow
-from components.setting_window.lyric_setting_page import LyricPage
-from components.setting_window.hotkey_setting_page import HotkeysPage
-from components.setting_window.common_setting_page import CommonPage
-from components.setting_window.lyrics_manage_page import LyricsManagePage
-import components.setting_window.lightstyle_rc
+from view.setting_page.lyric_setting_page import LyricPage
+from view.setting_page.hotkey_setting_page import HotkeysPage
+from view.setting_page.common_setting_page import CommonPage
+from view.setting_page.lyrics_manage_page import LyricsManagePage
 
 
 class SettingWindow(QWidget, Ui_SettingsWindow):
