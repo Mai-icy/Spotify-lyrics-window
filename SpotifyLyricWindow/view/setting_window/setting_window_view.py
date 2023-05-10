@@ -14,6 +14,7 @@ from view.setting_page.hotkey_setting_page import HotkeysPage
 from view.setting_page.common_setting_page import CommonPage
 from view.setting_page.lyrics_manage_page import LyricsManagePage
 
+import view.setting_window.lightstyle_rc
 
 class SettingWindow(QWidget, Ui_SettingsWindow):
     close_signal = pyqtSignal(object)
