@@ -9,25 +9,27 @@ from PyQt5.QtWidgets import *
 
 from components.raw_ui import Ui_VerticalLyricsWindow, Ui_HorizontalLyricsWindow
 from components.scroll_area.text_scroll_area import TextScrollArea
-from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from common.typing import DisplayMode
 from common.config import Config
 
 
-class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
+class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
     set_timer_status_signal = pyqtSignal(bool)
 
+    setting_window_show_signal = pyqtSignal()
+    lyric_window_show_signal = pyqtSignal()
+    quit_signal = pyqtSignal()
+
     def __init__(self, parent=None):
-        super(LyricsWindowView, self).__init__(parent)
+        super(LyricsWindowInterface, self).__init__(parent)
         # 获取设置中的歌词显示模式（竖向或者横向）
         self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
         if self.display_mode == DisplayMode.Horizontal:
-            super(LyricsWindowView, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
+            super(LyricsWindowInterface, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
         else:
             super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
 
         self.installEventFilter(self)  # 初始化事件过滤器
-        self.tray_icon = LyricsTrayIcon(self)
 
         # 界面相关
         self._init_lyrics_shadow()
@@ -44,11 +46,11 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _re_init(self):
         """重新初始化布局"""
-        super(LyricsWindowView, self).__init__(self.parent())
+        super(LyricsWindowInterface, self).__init__(self.parent())
 
         self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
         if self.display_mode == DisplayMode.Horizontal:
-            super(LyricsWindowView, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
+            super(LyricsWindowInterface, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
         else:
             super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
 
@@ -137,7 +139,6 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
     def _init_signal(self):
         """初始化基本信号连接"""
         self.lock_button.clicked.connect(self._lock_event)
-        self.close_button.clicked.connect(self._close_button_click_event)
         self.set_timer_status_signal.connect(self._set_timer_status_signal_event)
 
     def _init_window_lock_flag(self):
@@ -165,13 +166,14 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             "next_button": self.next_button.clicked,
             "last_button": self.last_button.clicked,
             "pause_button": self.pause_button.clicked,
-            "show_window": self.tray_icon.showAction.triggered
+            "show_window": self.lyric_window_show_signal
         }
         # 导入配置
-        self.set_hotkey_enable(True)
+        # self.set_hotkey_enable(True)
 
     def set_display_mode(self, mode: DisplayMode):
         """
+        NOT AVAILABLE
         设置显示 竖直 还是 水平
 
         :param mode: 设置显示的模式
@@ -483,25 +485,18 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             return
         pos_config = Config.CommonConfig.PositionConfig
         self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
-        self.tray_icon.show()
-        super(LyricsWindowView, self).show()
+        super(LyricsWindowInterface, self).show()
 
     def hide(self):
         """从显示状态到隐藏状态"""
         self._renew_pos_config()
-        return super(LyricsWindowView, self).hide()
+        return super(LyricsWindowInterface, self).hide()
 
     def close(self):
         """结束程序"""
         self._renew_pos_config()
         Config.save_config()
-        return super(LyricsWindowView, self).close()
-
-    def _close_button_click_event(self):
-        if Config.CommonConfig.is_quit_on_close:
-            self.tray_icon.quit()
-        else:
-            self.hide()
+        return super(LyricsWindowInterface, self).close()
 
     def _set_timer_status_signal_event(self, flag):
         if flag:

@@ -21,8 +21,8 @@ from common.player import LrcPlayer
 from common.temp_manage import TempFileManage
 from common.typing import TransType, UserCurrentPlaying, MediaPropertiesInfo, MediaPlaybackInfo
 from common.win_utils import WindowsMediaSession
-from view.lyric_window.lyrics_window_view import LyricsWindowView
-from view.setting_window import SettingWindow
+from view.lyric_window.lyrics_window_interface import LyricsWindowInterface
+from view.setting_window import SettingWindowView
 from components.work_thread import thread_drive
 
 
@@ -50,12 +50,16 @@ class CatchError:
             return MethodType(self, instance)
 
 
-class LyricsWindow(LyricsWindowView):
+class LyricsWindowView(LyricsWindowInterface):
     error_msg_show_signal = pyqtSignal(object)
     text_show_signal = pyqtSignal(int, str, int)
 
+    setting_window_show_signal = pyqtSignal()
+    lyric_window_show_signal = pyqtSignal()
+    quit_signal = pyqtSignal()
+
     def __init__(self, parent=None):
-        super(LyricsWindow, self).__init__(parent)
+        super(LyricsWindowView, self).__init__(parent)
 
         self._manual_skip_flag = True
 
@@ -66,16 +70,11 @@ class LyricsWindow(LyricsWindowView):
 
         self.calibration_event(use_api_position=True)
 
-    def _re_init(self):
-        """重新初始化"""
-        super(LyricsWindow, self)._re_init()
-        self._init_signal()
-        self.calibration_event()
-
     def _init_signal(self):
         """初始化信号"""
-        super(LyricsWindow, self)._init_signal()
+        super(LyricsWindowView, self)._init_signal()
 
+        self.close_button.clicked.connect(self.close_button_click_event)
         self.account_button.clicked.connect(self.user_auth_button_event)
         self.calibrate_button.clicked.connect(self.calibration_event)
         self.next_button.clicked.connect(self.set_user_next_event)
@@ -84,7 +83,7 @@ class LyricsWindow(LyricsWindowView):
         self.offsetup_button.clicked.connect(self.lyric_offset_add_event)
         self.offsetdown_button.clicked.connect(self.lyric_offset_minus_event)
         self.translate_button.clicked.connect(self.change_trans_button_event)
-        self.settings_button.clicked.connect(self._setting_window_show_event)
+        self.settings_button.clicked.connect(self.setting_window_show_event)
 
         self.error_msg_show_signal.connect(self._error_msg_show_event)
         self.lrc_player.play_done_event_connect(self.player_done_event)
@@ -103,9 +102,6 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth = SpotifyUserApi()
         self.delay_timer = QTimer()
         self.delay_timer.setSingleShot(True)
-
-        if not hasattr(self, "setting_window"):
-            self.setting_window = None  # 初始化为空，在打开的时候被定义，关闭的时候被释放
 
     def _init_media_session(self):
         """初始化 media session"""
@@ -284,18 +280,14 @@ class LyricsWindow(LyricsWindowView):
         """调整偏移事件  歌词后退"""
         self.lrc_player.modify_offset(-500)
 
-    def _setting_window_destroyed_event(self):
-        """设置窗口关闭连接事件"""
-        # 设置窗口已经关闭释放内存，此时self.setting_window为nullptr，将此处定义为None
-        self.setting_window = None
+    def setting_window_show_event(self):
+        self.setting_window_show_signal.emit()
 
-    def _setting_window_show_event(self):
-        """显示设置窗口事件，新建一个窗口对象"""
-        if self.setting_window is not None:
-            return
-        self.setting_window = SettingWindow(lyric_window=self)
-        self.setting_window.destroyed.connect(self._setting_window_destroyed_event)
-        self.setting_window.show()
+    def close_button_click_event(self):
+        if Config.CommonConfig.is_quit_on_close:
+            self.quit_signal.emit()
+        else:
+            self.hide()
 
     def set_trans_mode(self, mode: TransType):
         """
@@ -368,14 +360,15 @@ class LyricsWindow(LyricsWindowView):
         self.lrc_player.thread_play_lrc.terminate()
         del self.lrc_player
         del self.lyric_file_manage
+        self.media_session.dis_connect()
         self.temp_manage.auto_clean_temp()
-        super(LyricsWindow, self).closeEvent(event)
+        super(LyricsWindowView, self).closeEvent(event)
 
 
 if __name__ == "__main__":
     # 适配2k等高分辨率屏幕,低分辨率屏幕可以缺省
     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
-    myWin = LyricsWindow()
+    myWin = LyricsWindowView()
     myWin.show()
     sys.exit(app.exec_())

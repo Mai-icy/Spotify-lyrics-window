@@ -230,6 +230,12 @@ class WindowsMediaSession:
         """绑定pyqt的信号"""
         self.timeline_properties_changed_func = func
 
+    def dis_connect(self):
+        """所有信号解除绑定"""
+        self.playback_info_changed_func = None
+        self.media_properties_changed_func = None
+        self.timeline_properties_changed_func = None
+
 
 if __name__ == '__main__':
     test_manage = WindowsMediaSession()

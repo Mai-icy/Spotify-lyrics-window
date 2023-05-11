@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 
 from fuzzywuzzy import fuzz
-from common.typing import SongInfo
+# from common.typing import SongInfo
 
 
 def __parse_duration(duration_text: str) -> int:
@@ -12,7 +12,7 @@ def __parse_duration(duration_text: str) -> int:
     return time
 
 
-def compare_song_info(song_info_1: SongInfo, song_info_2: SongInfo) -> int:
+def compare_song_info(song_info_1, song_info_2) -> int:
     """对比两个歌曲元数据，返回相似度评分"""
     if not song_info_1 or not song_info_2:
         return 0

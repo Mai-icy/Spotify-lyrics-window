@@ -7,36 +7,49 @@ from PyQt5.QtWidgets import *
 
 
 class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
-    def __init__(self, MainWindow, parent=None):
+    setting_window_show_signal = pyqtSignal()
+    lyric_window_show_signal = pyqtSignal()
+    quit_signal = pyqtSignal()
+
+    def __init__(self, parent=None):
         super(LyricsTrayIcon, self).__init__(parent)
-        self.main_window = MainWindow
-        self._createMenu()
-        self.activated.connect(self.clicked)
-
-    def _createMenu(self):
-        self.menu = QtWidgets.QMenu()
-
-        self.showAction = QtWidgets.QAction("Show(&S)", self, triggered=self.main_window.show)
-        self.settingsAction = QtWidgets.QAction("Settings(&P)", self, triggered=self.show_settings)
-        self.quitAction = QtWidgets.QAction("Quit(&X)", self, triggered=self.quit)
-        self.menu.addAction(self.showAction)
-        self.menu.addAction(self.settingsAction)
-        self.menu.addSeparator()
-        self.menu.addAction(self.quitAction)
-        self.setContextMenu(self.menu)
+        self._init_menu()
+        self._init_signal()
 
         self.setIcon(QtGui.QIcon(u":/pic/images/LyricsIcon.png"))
-        self.icon = self.MessageIcon()
 
-    def clicked(self, reason):
+    def _init_menu(self):
+        self.menu = QtWidgets.QMenu()
+
+        self.quit_action = QtWidgets.QAction("Quit(&X)", self)
+        self.show_action = QtWidgets.QAction("Show(&S)", self)
+        self.setting_action = QtWidgets.QAction("Settings(&P)", self)
+
+        self.menu.addAction(self.show_action)
+        self.menu.addAction(self.setting_action)
+        self.menu.addSeparator()
+        self.menu.addAction(self.quit_action)
+        self.setContextMenu(self.menu)
+
+    def _init_signal(self):
+        self.quit_action.triggered.connect(self.quit_event)
+        self.show_action.triggered.connect(self.show_lyric_window_event)
+        self.setting_action.triggered.connect(self.show_setting_window_event)
+
+        self.activated.connect(self.clicked_event)
+
+    def clicked_event(self, reason):
         """1 right click, 2 double left click，3 left click，4 middle click"""
         if reason == 2:
-            self.main_window.show()
+            self.show_lyric_window_event()
 
-    def show_settings(self):
-        self.main_window.settings_button.clicked.emit(True)
+    def show_lyric_window_event(self):
+        self.lyric_window_show_signal.emit()
 
-    def quit(self):
-        self.main_window.close()
+    def show_setting_window_event(self):
+        self.setting_window_show_signal.emit()
+
+    def quit_event(self):
+        self.quit_signal.emit()
         # QtWidgets.qApp.quit()
         QtCore.QCoreApplication.exit(0)

@@ -13,9 +13,8 @@ from components.raw_ui import Ui_CommonPage
 
 
 class CommonPage(QWidget, Ui_CommonPage):
-    def __init__(self, parent=None, lyric_window=None, setting_window=None):
+    def __init__(self, parent=None, setting_window=None):
         super(CommonPage, self).__init__(parent)
-        self.lyric_window = lyric_window
         self.setting_window = setting_window
         self.setupUi(self)
         self._init_common()
@@ -54,7 +53,7 @@ class CommonPage(QWidget, Ui_CommonPage):
 
         self.clear_cache_button.clicked.connect(self.temp_file_manage.clean_all_temp)
         self.global_offset_doubleSpinBox.valueChanged.connect(self.set_api_offset_event)
-        self.confirm_button.clicked.connect(self.confirm_client_event)
+        self.confirm_button.clicked.connect(self.setting_window.create_sender(self.confirm_client_event))
         self.default_button.clicked.connect(self.set_default_event)
 
         self.quit_on_close_checkBox.stateChanged.connect(self._quit_on_close_event)
@@ -85,18 +84,18 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.cache_tip_label.setText("")
         self.lyrics_tip_label.setText("")
 
-    def confirm_client_event(self):
+    def confirm_client_event(self, *, lyric_window):
         """确认输入的client事件"""
         Config.CommonConfig.ClientConfig.client_id = self.id_lineEdit.text()
         Config.CommonConfig.ClientConfig.client_secret = self.secret_lineEdit.text()
         try:
             self.auth.load_client_config()
         except NotImplementedError as e:
-            self.lyric_window.error_msg_show_signal.emit(e)
+            lyric_window.error_msg_show_signal.emit(e)
             return
-        self.lyric_window.text_show_signal.emit(1, "成功设置client配置！", 0)
-        self.lyric_window.text_show_signal.emit(2, "♪(^∇^*)", 0)
-        self.lyric_window.delay_calibration()
+        lyric_window.text_show_signal.emit(1, "成功设置client配置！", 0)
+        lyric_window.text_show_signal.emit(2, "♪(^∇^*)", 0)
+        lyric_window.delay_calibration()
 
     def set_default_event(self):
         """设置初始化按钮事件"""

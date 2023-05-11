@@ -16,12 +16,15 @@ from view.setting_page.lyrics_manage_page import LyricsManagePage
 
 import view.setting_window.lightstyle_rc
 
-class SettingWindow(QWidget, Ui_SettingsWindow):
-    close_signal = pyqtSignal(object)
 
-    def __init__(self, parent=None, *, lyric_window=None):
-        super(SettingWindow, self).__init__(parent)
-        self.lyric_window = lyric_window
+class SettingWindowView(QWidget, Ui_SettingsWindow):
+
+    execute_lyric_window_signal = pyqtSignal(object, object)  # (function, args)
+    rebuild_lyric_window_signal = pyqtSignal()
+    set_hotkey_signal = pyqtSignal(bool)
+
+    def __init__(self, parent=None):
+        super(SettingWindowView, self).__init__(parent)
         self.setAttribute(Qt.WA_DeleteOnClose, True)  # 在关闭的时候删除对象
         self.setupUi(self)
 
@@ -33,8 +36,8 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         """初始化设置页面"""
         self.mask_ = MaskWidget(self)
 
-        self.common_page = CommonPage(lyric_window=self.lyric_window, setting_window=self)
-        self.lyric_page = LyricPage(lyric_window=self.lyric_window, setting_window=self)
+        self.common_page = CommonPage(setting_window=self)
+        self.lyric_page = LyricPage(setting_window=self)
         self.hotkeys_page = HotkeysPage(self)
         self.lyric_manage_page = LyricsManagePage(setting_window=self)
 
@@ -84,18 +87,26 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
 
         self.lyric_manage_page.load_lyrics_file()
 
-        self.lyric_window.set_hotkey_enable(False)
+        self.set_hotkey_signal.emit(False)
 
-        super(SettingWindow, self).show()
+        super(SettingWindowView, self).show()
 
     def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
         """关闭设置窗口"""
         # 歌词窗口 配置 始终和配置同步 快捷键需要先被关闭再打开
-        self.lyric_window.set_hotkey_enable(True)
+        self.set_hotkey_signal.emit(True)
         # 保存配置
         Config.save_config()
 
-        super(SettingWindow, self).closeEvent(a0)
+        super(SettingWindowView, self).closeEvent(a0)
+
+    def create_sender(self, func, args=()):
+        signal = self.execute_lyric_window_signal
+
+        def sender():
+            signal.emit(func, args)
+
+        return sender
 
 
 if __name__ == "__main__":
@@ -103,6 +114,6 @@ if __name__ == "__main__":
 
     QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
-    myWin = SettingWindow()
+    myWin = SettingWindowView()
     myWin.show()
     sys.exit(app.exec_())

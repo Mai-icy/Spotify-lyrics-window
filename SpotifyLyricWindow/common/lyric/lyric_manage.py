@@ -46,6 +46,8 @@ class LyricFileManage:
             self._is_init = True
 
     def __del__(self):
+        LyricFileManage._instance = None
+        LyricFileManage._init = False
         self.save_json()
 
     @staticmethod
