@@ -1,3 +1,3 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from .setting_window_view import SettingWindowView
+from .new_setting_window_view import SettingWindowView

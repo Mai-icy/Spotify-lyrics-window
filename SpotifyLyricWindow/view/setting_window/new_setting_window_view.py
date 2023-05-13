@@ -29,7 +29,9 @@ class SettingWindowView(FramelessWindow):
     lin2 = LyricFileManage()
 
     def __init__(self):
-        super().__init__()
+        super(SettingWindowView, self).__init__()
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
+
         self.setTitleBar(StandardTitleBar(self))
         self.hBoxLayout = QHBoxLayout(self)
         self.navigationInterface = NavigationInterface(self, showMenuButton=True)
