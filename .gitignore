@@ -1,6 +1,6 @@
 /SpotifyLyricWindow/resource/setting.toml
 /SpotifyLyricWindow/resource/token
 /SpotifyLyricWindow/download/
-*/.idea/
-*/.vs/
-*/__pycache__
+**/.idea
+**/.vs
+**/__pycache__
