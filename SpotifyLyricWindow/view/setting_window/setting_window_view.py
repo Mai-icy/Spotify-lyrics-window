@@ -101,6 +101,7 @@ class SettingWindowView(QWidget, Ui_SettingsWindow):
         super(SettingWindowView, self).closeEvent(a0)
 
     def create_sender(self, func, args=()):
+        """将所有要操作歌词窗口的函数上传到最上级"""
         signal = self.execute_lyric_window_signal
 
         def sender():

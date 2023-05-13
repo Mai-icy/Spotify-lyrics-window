@@ -19,12 +19,14 @@ class MainObject(QObject):
 
         self.tray_icon = LyricsTrayIcon()
         self.lyric_window = LyricsWindowView()
-        self.lyric_window.set_hotkey_enable(True)
         self.setting_window = None
+
+        self.lyric_window.set_hotkey_enable(True)
 
         self._init_signal()
 
     def _init_signal(self):
+        """初始化信号连接"""
         self.tray_icon.quit_signal.connect(self.quit_event)
         self.tray_icon.setting_window_show_signal.connect(self.setting_window_show_event)
         self.tray_icon.lyric_window_show_signal.connect(self.lyric_window_show_event)
@@ -34,6 +36,7 @@ class MainObject(QObject):
         self.lyric_window.quit_signal.connect(self.quit_event)
 
     def execute_lyric_window_event(self, func, args):
+        """设置窗口对歌词窗口的所有修改将被信号传递到最上级执行"""
         func(*args, lyric_window=self.lyric_window)
 
     def lyric_window_show_event(self):

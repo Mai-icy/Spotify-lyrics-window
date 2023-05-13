@@ -39,7 +39,7 @@ class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
         self.activated.connect(self.clicked_event)
 
     def clicked_event(self, reason):
-        """1 right click, 2 double left click，3 left click，4 middle click"""
+        """1 右键, 2 左键双击，3 左键，4 中键点击"""
         if reason == 2:
             self.show_lyric_window_event()
 
