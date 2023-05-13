@@ -193,7 +193,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
     def download_lyric_dialog_show_event(self):
         """下载对话框打开事件"""
-        self.setting_window.mask_.show()
+        # self.setting_window.mask_.show()
         self.download_dialog.show()
 
         item = self.lyrics_listWidget.currentItem()
@@ -204,7 +204,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
     def download_lyric_dialog_done_event(self, lrc: LrcFile = None):
         """下载歌词窗口关闭事件，直接关闭 以及 下载后自动关闭"""
         if not lrc:  # 直接关闭窗口不下载
-            self.setting_window.mask_.hide()
+            # self.setting_window.mask_.hide()
             return
 
         item = self.lyrics_listWidget.currentItem()
@@ -225,10 +225,10 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         title = item.text()
 
         file_name = re.sub(r'[\\/:*?"<>|]', '-', title)
-        self.setting_window.mask_.show()
+        # self.setting_window.mask_.show()
 
         file_path = QFileDialog.getSaveFileName(self, "save file", file_name, "Lyric (*.lrc);;Text files (*.txt)")
-        self.setting_window.mask_.hide()
+        # self.setting_window.mask_.hide()
         if not file_path[0]:
             return
 

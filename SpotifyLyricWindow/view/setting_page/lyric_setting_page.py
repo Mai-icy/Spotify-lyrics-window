@@ -167,9 +167,9 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         lyric_rgb = Config.LyricConfig.lyric_color
         now_color = QColor(*lyric_rgb)
 
-        self.setting_window.mask_.show()
+        # self.setting_window.mask_.show()
         new_color = self.color_dialog.getColor(now_color)
-        self.setting_window.mask_.hide()
+        # self.setting_window.mask_.hide()
 
         color = (new_color.red(), new_color.green(), new_color.blue())
         lyric_window.set_lyrics_rgb(color)
@@ -185,9 +185,9 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         shadow_color = Config.LyricConfig.shadow_color
         now_color = QColor(*shadow_color)
 
-        self.setting_window.mask_.show()
+        # self.setting_window.mask_.show()
         new_color = self.color_dialog.getColor(now_color)
-        self.setting_window.mask_.hide()
+        # self.setting_window.mask_.hide()
 
         color = (new_color.red(), new_color.green(), new_color.blue())
         lyric_window.set_shadow_rgb(color)

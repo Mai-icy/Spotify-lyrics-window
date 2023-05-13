@@ -68,7 +68,7 @@
        </spacer>
       </item>
       <item>
-       <widget class="QPushButton" name="download_button">
+       <widget class="PushButton" name="download_button">
         <property name="minimumSize">
          <size>
           <width>80</width>
@@ -87,7 +87,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="cancel_button">
+       <widget class="PushButton" name="cancel_button">
         <property name="minimumSize">
          <size>
           <width>80</width>
@@ -109,7 +109,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QPushButton" name="search_button">
+    <widget class="PushButton" name="search_button">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -128,7 +128,7 @@
     </widget>
    </item>
    <item row="0" column="0">
-    <widget class="QLineEdit" name="search_lineEdit">
+    <widget class="LineEdit" name="search_lineEdit">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -208,7 +208,7 @@
        </widget>
       </item>
       <item row="0" column="0" rowspan="2">
-       <widget class="QLabel" name="image_label">
+       <widget class="PixmapLabel" name="image_label">
         <property name="minimumSize">
          <size>
           <width>64</width>
@@ -249,10 +249,32 @@
     </widget>
    </item>
    <item row="1" column="0" colspan="2">
-    <widget class="QTableWidget" name="search_tableWidget"/>
+    <widget class="TableWidget" name="search_tableWidget"/>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PushButton</class>
+   <extends>QPushButton</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TableWidget</class>
+   <extends>QTableWidget</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PixmapLabel</class>
+   <extends>QLabel</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../source.qrc"/>
  </resources>

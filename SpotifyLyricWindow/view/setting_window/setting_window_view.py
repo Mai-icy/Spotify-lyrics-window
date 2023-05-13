@@ -53,7 +53,7 @@ class SettingWindowView(QWidget, Ui_SettingsWindow):
     def _init_style_sheet(self):
         with open("resource/ui/lightstyle.qss", "r") as f:
             style_sheet = f.read()
-        self.setStyleSheet(style_sheet)
+        # self.setStyleSheet(style_sheet)
 
     def page_click_event(self, item: QListWidgetItem):
         """切换配置页面"""

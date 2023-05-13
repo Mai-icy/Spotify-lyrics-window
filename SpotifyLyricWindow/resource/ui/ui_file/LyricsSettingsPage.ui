@@ -71,7 +71,7 @@
        </widget>
       </item>
       <item row="1" column="4">
-       <widget class="QPushButton" name="lyrics_default_button">
+       <widget class="PushButton" name="lyrics_default_button">
         <property name="minimumSize">
          <size>
           <width>100</width>
@@ -139,7 +139,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="shadow_color_button">
+          <widget class="PushButton" name="shadow_color_button">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -210,7 +210,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="lyrics_color_button">
+          <widget class="PushButton" name="lyrics_color_button">
            <property name="minimumSize">
             <size>
              <width>100</width>
@@ -232,7 +232,7 @@
        </widget>
       </item>
       <item row="1" column="0">
-       <widget class="QComboBox" name="color_comboBox">
+       <widget class="ComboBox" name="color_comboBox">
         <property name="minimumSize">
          <size>
           <width>100</width>
@@ -276,21 +276,21 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="non_trans_radioButton">
+       <widget class="RadioButton" name="non_trans_radioButton">
         <property name="text">
          <string>不显示翻译</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="trans_radioButton">
+       <widget class="RadioButton" name="trans_radioButton">
         <property name="text">
          <string>显示中文翻译</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="romaji_radioButton">
+       <widget class="RadioButton" name="romaji_radioButton">
         <property name="text">
          <string>显示罗马音译</string>
         </property>
@@ -322,7 +322,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="font_comboBox">
+       <widget class="ComboBox" name="font_comboBox">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -366,7 +366,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="enable_front_checkBox">
+       <widget class="CheckBox" name="enable_front_checkBox">
         <property name="text">
          <string>启用总在最前</string>
         </property>
@@ -392,7 +392,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="display_mode_comboBox">
+       <widget class="ComboBox" name="display_mode_comboBox">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -422,6 +422,28 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PushButton</class>
+   <extends>QPushButton</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ComboBox</class>
+   <extends>QComboBox</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>RadioButton</class>
+   <extends>QRadioButton</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

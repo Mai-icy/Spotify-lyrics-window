@@ -10,7 +10,7 @@ from common.config import Config
 from common.typing import DisplayMode
 from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from view.lyric_window.lyric_window_view import LyricsWindowView
-from view.setting_window.setting_window_view import SettingWindowView
+from view.setting_window.new_setting_window_view import SettingWindowView
 
 
 class MainObject(QObject):

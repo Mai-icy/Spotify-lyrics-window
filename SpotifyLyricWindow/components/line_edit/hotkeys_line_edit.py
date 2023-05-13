@@ -6,9 +6,10 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
 from common.config import Config
+from qfluentwidgets import LineEdit
 
 
-class HotkeyLineEdit(QLineEdit):
+class HotkeyLineEdit(LineEdit):
     hotkeys_conflict_signal = pyqtSignal(str)
 
     def __init__(self, signal_key, parent=None):
