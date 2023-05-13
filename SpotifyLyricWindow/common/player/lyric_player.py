@@ -141,8 +141,12 @@ class LyricThread(threading.Thread):
                     self.player.play_done_event_func()  # 发送播放完毕信号
                 self.sleep.wait()
                 continue
+            if next_stamp == -2:
+                self.sleep.wait(0.5)
+                continue
+
             if lyric_order < 0:  # 无歌词
-                self.sleep.wait(0.1)  # 开始检测何时播放完毕
+                self.sleep.wait(0.5)  # 开始检测何时播放完毕
                 continue
             elif next_stamp < 0:
                 next_stamp = self.player.duration
