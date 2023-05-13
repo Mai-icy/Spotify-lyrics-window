@@ -87,11 +87,12 @@ class LyricsWindow(LyricsWindowView):
         self.settings_button.clicked.connect(self._setting_window_show_event)
 
         self.error_msg_show_signal.connect(self._error_msg_show_event)
+        self.text_show_signal.connect(self.set_lyrics_text)
         self.lrc_player.play_done_event_connect(self.player_done_event)
 
     def _init_lrc_player(self):
         """初始化歌词播放器"""
-        self.lrc_player = LrcPlayer(output_func=self.set_lyrics_text)
+        self.lrc_player = LrcPlayer(output_func=self.text_show_signal.emit)
 
     def _init_common(self):
         """初始化其他辅助部件"""

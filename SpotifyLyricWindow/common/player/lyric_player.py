@@ -107,7 +107,7 @@ class LrcPlayer:
         if self.output_func:  # self.lyrics_window.text_show_signal.emit
             self.output_func(1, lrc_file.trans_non_dict[time_stamp], roll_time)
             if lrc_file.empty(self.trans_mode) or self.trans_mode == TransType.NON:
-                self.output_func(2, "")
+                self.output_func(2, "", 0)
             elif self.trans_mode == TransType.CHINESE:
                 self.output_func(2, lrc_file.trans_chinese_dict[time_stamp], roll_time)
             elif self.trans_mode == TransType.ROMAJI:
