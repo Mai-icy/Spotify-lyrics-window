@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>929</width>
-    <height>483</height>
+    <width>920</width>
+    <height>524</height>
    </rect>
   </property>
   <property name="font">
@@ -135,7 +135,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>32</height>
+       <height>40</height>
       </size>
      </property>
      <layout class="QGridLayout" name="global_offset_gridLayout">
@@ -159,13 +159,13 @@
        <widget class="DoubleSpinBox" name="global_offset_doubleSpinBox">
         <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>150</width>
           <height>32</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>100</width>
+          <width>150</width>
           <height>32</height>
          </size>
         </property>
@@ -201,13 +201,13 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>32</height>
+       <height>45</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>32</height>
+       <height>45</height>
       </size>
      </property>
      <layout class="QGridLayout" name="cache_path_gridLayout">
@@ -237,13 +237,13 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>32</height>
+            <height>40</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>32</height>
+            <height>40</height>
            </size>
           </property>
          </widget>
@@ -330,6 +330,18 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
      <layout class="QGridLayout" name="client_setting_gridLayout">
       <property name="leftMargin">
        <number>0</number>
@@ -407,6 +419,12 @@
       </item>
       <item row="0" column="1">
        <widget class="QFrame" name="client_lineEdit_frame">
+        <property name="font">
+         <font>
+          <family>微软雅黑</family>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
         <property name="frameShape">
          <enum>QFrame::StyledPanel</enum>
         </property>
@@ -434,13 +452,13 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>32</height>
+             <height>40</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>32</height>
+             <height>40</height>
             </size>
            </property>
           </widget>
@@ -450,13 +468,13 @@
            <property name="minimumSize">
             <size>
              <width>0</width>
-             <height>32</height>
+             <height>40</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>16777215</width>
-             <height>32</height>
+             <height>40</height>
             </size>
            </property>
           </widget>
@@ -483,24 +501,9 @@
           <number>0</number>
          </property>
          <item>
-          <widget class="QLabel" name="register_label">
-           <property name="minimumSize">
-            <size>
-             <width>100</width>
-             <height>32</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>100</width>
-             <height>32</height>
-            </size>
-           </property>
+          <widget class="HyperlinkButton" name="register_button">
            <property name="text">
-            <string>注册client</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+            <string>注册</string>
            </property>
           </widget>
          </item>
@@ -509,13 +512,13 @@
            <property name="minimumSize">
             <size>
              <width>100</width>
-             <height>32</height>
+             <height>40</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>100</width>
-             <height>32</height>
+             <height>40</height>
             </size>
            </property>
            <property name="text">
@@ -534,13 +537,13 @@
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>32</height>
+       <height>45</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>32</height>
+       <height>45</height>
       </size>
      </property>
      <layout class="QGridLayout" name="lyrics_path_gridLayout">
@@ -570,13 +573,13 @@
           <property name="minimumSize">
            <size>
             <width>0</width>
-            <height>32</height>
+            <height>40</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>32</height>
+            <height>40</height>
            </size>
           </property>
          </widget>
@@ -675,6 +678,11 @@
   </customwidget>
   <customwidget>
    <class>PushButton</class>
+   <extends>QPushButton</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HyperlinkButton</class>
    <extends>QPushButton</extends>
    <header>qfluentwidgets.h</header>
   </customwidget>

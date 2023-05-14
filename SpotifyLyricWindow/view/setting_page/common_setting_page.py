@@ -30,8 +30,7 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def _init_label(self):
         """初始化标签属性"""
-        self.register_label.setOpenExternalLinks(True)
-        self.register_label.setText('<a href="https://developer.spotify.com/dashboard/">注册client</a>')
+        self.register_button.setUrl("https://developer.spotify.com/dashboard/")
 
         self.cache_tip_label.setText("")
         self.lyrics_tip_label.setText("")
@@ -116,9 +115,9 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def set_path_event(self, line_edit: QLineEdit):
         """设置路径事件"""
-        self.setting_window.mask_.show()
+        # self.setting_window.mask_.show()
         file_path = QFileDialog.getExistingDirectory(self, "选择一个目录", "./", QFileDialog.ShowDirsOnly)
-        self.setting_window.mask_.hide()
+        # self.setting_window.mask_.hide()
         if not file_path:
             return
         else:

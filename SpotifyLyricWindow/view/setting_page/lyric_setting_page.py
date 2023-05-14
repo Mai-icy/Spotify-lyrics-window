@@ -69,8 +69,8 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         self.trans_button_group.buttonClicked.connect(self.create_sender(self.trans_change_event))
         self.enable_front_checkBox.stateChanged.connect(self.create_sender(self.front_change_event))
 
-        self.lyrics_color_button.clicked.connect(self.create_sender(self.custom_lyrics_color_event))
-        self.shadow_color_button.clicked.connect(self.create_sender(self.custom_shadow_color_event))
+        self.lyrics_color_button.colorChanged.connect(self.create_sender(self.custom_lyrics_color_event))
+        self.shadow_color_button.colorChanged.connect(self.create_sender(self.custom_shadow_color_event))
 
         self.lyrics_default_button.clicked.connect(self.create_sender(self.set_default_event))
 
@@ -86,8 +86,10 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
 
         self.enable_front_checkBox.setChecked(is_always_front)
         self.color_comboBox.setCurrentIndex(self.color_list.index(color_style))
-        self._set_label_rgb(self.lyrics_color_label, lyrics_color)
-        self._set_label_rgb(self.shadow_color_label, shadow_color)
+
+        self.lyrics_color_button.setColor(QColor(*lyrics_color))
+        self.shadow_color_button.setColor(QColor(*shadow_color))
+
         self.font_comboBox.setCurrentIndex(self.font_family_list.index(font_family))
         self.display_mode_comboBox.setCurrentIndex(display_mode)
         self.trans_button_group.button(trans_type).setChecked(True)
@@ -135,16 +137,17 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         if color_style == "other":
             lyrics_color = Config.LyricConfig.lyric_color
             shadow_color = Config.LyricConfig.shadow_color
-            self._set_label_rgb(self.lyrics_color_label, lyrics_color)
-            self._set_label_rgb(self.shadow_color_label, shadow_color)
+            self.lyrics_color_button.setColor(QColor(*lyrics_color))
+            self.shadow_color_button.setColor(QColor(*shadow_color))
 
             setattr(Config.LyricConfig, "rgb_style", "other")
             return
 
         # 同步到歌词窗口
         lyric_window.set_rgb_style(color_style)
-        self._set_label_rgb(self.lyrics_color_label, self.style_dict[color_style][0])
-        self._set_label_rgb(self.shadow_color_label, self.style_dict[color_style][1])
+
+        self.lyrics_color_button.setColor(QColor(*self.style_dict[color_style][0]))
+        self.shadow_color_button.setColor(QColor(*self.style_dict[color_style][1]))
 
         setattr(Config.LyricConfig, "rgb_style", color_style)
         setattr(Config.LyricConfig, "lyric_color", self.style_dict[color_style][0])
@@ -164,46 +167,22 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         if self.color_comboBox.currentText() != "other":
             self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
 
-        lyric_rgb = Config.LyricConfig.lyric_color
-        now_color = QColor(*lyric_rgb)
+        color = self.lyrics_color_button.color
+        new_color = (color.red(), color.green(), color.blue())
+        lyric_window.set_lyrics_rgb(new_color)
 
-        # self.setting_window.mask_.show()
-        new_color = self.color_dialog.getColor(now_color)
-        # self.setting_window.mask_.hide()
-
-        color = (new_color.red(), new_color.green(), new_color.blue())
-        lyric_window.set_lyrics_rgb(color)
-
-        self._set_label_rgb(self.lyrics_color_label, color)
-        setattr(Config.LyricConfig, "lyric_color", color)
+        setattr(Config.LyricConfig, "lyric_color", new_color)
 
     def custom_shadow_color_event(self, *, lyric_window):
         """自定义阴影颜色事件"""
         if self.color_comboBox.currentText() != "other":
             self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
 
-        shadow_color = Config.LyricConfig.shadow_color
-        now_color = QColor(*shadow_color)
+        color = self.shadow_color_button.color
+        new_color = (color.red(), color.green(), color.blue())
+        lyric_window.set_shadow_rgb(new_color)
 
-        # self.setting_window.mask_.show()
-        new_color = self.color_dialog.getColor(now_color)
-        # self.setting_window.mask_.hide()
-
-        color = (new_color.red(), new_color.green(), new_color.blue())
-        lyric_window.set_shadow_rgb(color)
-
-        self._set_label_rgb(self.shadow_color_label, color)
-        setattr(Config.LyricConfig, "shadow_color", color)
-
-    @staticmethod
-    def _set_label_rgb(label: QLabel, rgb: tuple):
-        """
-        为label设置颜色
-
-        :param rgb: 对应的rgb颜色值 例如 (237, 178, 209)
-        """
-        stylesheet = f"background:rgb({rgb[0]}, {rgb[1]}, {rgb[2]})"
-        label.setStyleSheet(stylesheet)
+        setattr(Config.LyricConfig, "shadow_color", new_color)
 
 
 
