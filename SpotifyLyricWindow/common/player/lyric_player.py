@@ -107,7 +107,7 @@ class LrcPlayer:
         if self.output_func:  # self.lyrics_window.text_show_signal.emit
             self.output_func(1, lrc_file.trans_non_dict[time_stamp], roll_time)
             if lrc_file.empty(self.trans_mode) or self.trans_mode == TransType.NON:
-                self.output_func(2, "")
+                self.output_func(2, "", 0)
             elif self.trans_mode == TransType.CHINESE:
                 self.output_func(2, lrc_file.trans_chinese_dict[time_stamp], roll_time)
             elif self.trans_mode == TransType.ROMAJI:
@@ -141,8 +141,12 @@ class LyricThread(threading.Thread):
                     self.player.play_done_event_func()  # 发送播放完毕信号
                 self.sleep.wait()
                 continue
+            if next_stamp == -2:
+                self.sleep.wait(0.5)
+                continue
+
             if lyric_order < 0:  # 无歌词
-                self.sleep.wait(0.1)  # 开始检测何时播放完毕
+                self.sleep.wait(0.5)  # 开始检测何时播放完毕
                 continue
             elif next_stamp < 0:
                 next_stamp = self.player.duration
