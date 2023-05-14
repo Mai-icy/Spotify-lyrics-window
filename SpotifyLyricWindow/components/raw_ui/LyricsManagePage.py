@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_LyricsManage(object):
     def setupUi(self, LyricsManage):
         LyricsManage.setObjectName("LyricsManage")
-        LyricsManage.resize(862, 579)
+        LyricsManage.resize(881, 579)
         font = QtGui.QFont()
         font.setFamily("微软雅黑")
         font.setPointSize(12)
@@ -86,7 +86,7 @@ class Ui_LyricsManage(object):
         self.textbuttons_frame.raise_()
         self.show_comboBox.raise_()
         self.managebuttons_frame = QtWidgets.QFrame(self.splitter)
-        self.managebuttons_frame.setMaximumSize(QtCore.QSize(106, 16777215))
+        self.managebuttons_frame.setMaximumSize(QtCore.QSize(100, 16777215))
         self.managebuttons_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.managebuttons_frame.setFrameShadow(QtWidgets.QFrame.Raised)
         self.managebuttons_frame.setObjectName("managebuttons_frame")
@@ -103,7 +103,7 @@ class Ui_LyricsManage(object):
         self.offset_label.setObjectName("offset_label")
         self.offset_verticalLayout.addWidget(self.offset_label)
         self.offset_doubleSpinBox = DoubleSpinBox(self.offset_frame)
-        self.offset_doubleSpinBox.setMinimumSize(QtCore.QSize(80, 32))
+        self.offset_doubleSpinBox.setMinimumSize(QtCore.QSize(80, 20))
         self.offset_doubleSpinBox.setMaximumSize(QtCore.QSize(80, 32))
         self.offset_doubleSpinBox.setMinimum(-1000.0)
         self.offset_doubleSpinBox.setMaximum(1000.0)
@@ -157,7 +157,7 @@ class Ui_LyricsManage(object):
         self.singer_label.setText("")
         self.singer_label.setObjectName("singer_label")
         self.music_gridLayout.addWidget(self.singer_label, 1, 1, 1, 1)
-        self.image_label = PixmapLabel(self.music_frame)
+        self.image_label = QtWidgets.QLabel(self.music_frame)
         self.image_label.setMinimumSize(QtCore.QSize(64, 64))
         self.image_label.setMaximumSize(QtCore.QSize(64, 64))
         self.image_label.setText("")
@@ -181,4 +181,4 @@ class Ui_LyricsManage(object):
         self.modify_button.setText(_translate("LyricsManage", "修改歌词"))
         self.export_button.setText(_translate("LyricsManage", "导出歌词"))
         self.download_button.setText(_translate("LyricsManage", "下载歌词"))
-from qfluentwidgets import ComboBox, DoubleSpinBox, LineEdit, ListWidget, PixmapLabel, PlainTextEdit, PushButton
+from qfluentwidgets import ComboBox, DoubleSpinBox, LineEdit, ListWidget, PlainTextEdit, PushButton

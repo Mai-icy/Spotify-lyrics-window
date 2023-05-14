@@ -9,6 +9,8 @@ from components.raw_ui import Ui_LyricsSettingsPage
 from common.typing import DisplayMode, TransType
 from common.config import Config
 
+from qfluentwidgets import InfoBar, InfoBarPosition
+
 
 class LyricPage(QWidget, Ui_LyricsSettingsPage):
     def __init__(self, parent=None, *, setting_window=None):
@@ -116,6 +118,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         trans_type = TransType(trans_val)
         # 同步到歌词窗口
         lyric_window.set_trans_mode(trans_type)
+        self._create_success_infoBar()
 
     def front_change_event(self, *, lyric_window):
         """修改置顶事件"""
@@ -130,6 +133,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         # 同步到歌词窗口
         lyric_window.set_font_family(font_family)
         setattr(Config.LyricConfig, "font_family", font_family)
+        self._create_success_infoBar()
 
     def color_style_change_event(self, *, lyric_window):
         """修改歌词颜色方案事件"""
@@ -152,6 +156,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         setattr(Config.LyricConfig, "rgb_style", color_style)
         setattr(Config.LyricConfig, "lyric_color", self.style_dict[color_style][0])
         setattr(Config.LyricConfig, "shadow_color", self.style_dict[color_style][1])
+        self._create_success_infoBar()
 
     def display_mode_change_event(self):
         mode_value = self.display_mode_comboBox.currentIndex()
@@ -166,23 +171,38 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         """自定义歌词颜色事件"""
         if self.color_comboBox.currentText() != "other":
             self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
+            setattr(Config.LyricConfig, "rgb_style", "other")
 
         color = self.lyrics_color_button.color
         new_color = (color.red(), color.green(), color.blue())
         lyric_window.set_lyrics_rgb(new_color)
 
         setattr(Config.LyricConfig, "lyric_color", new_color)
+        self._create_success_infoBar()
 
     def custom_shadow_color_event(self, *, lyric_window):
         """自定义阴影颜色事件"""
         if self.color_comboBox.currentText() != "other":
             self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
+            setattr(Config.LyricConfig, "rgb_style", "other")
 
         color = self.shadow_color_button.color
         new_color = (color.red(), color.green(), color.blue())
         lyric_window.set_shadow_rgb(new_color)
 
         setattr(Config.LyricConfig, "shadow_color", new_color)
+        self._create_success_infoBar()
+
+    def _create_success_infoBar(self):
+        InfoBar.success(
+            title='Successful',
+            content="成功设置并保存",
+            orient=Qt.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.TOP,
+            duration=2000,
+            parent=self
+        )
 
 
 

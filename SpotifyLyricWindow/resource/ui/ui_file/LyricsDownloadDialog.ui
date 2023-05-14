@@ -208,7 +208,7 @@
        </widget>
       </item>
       <item row="0" column="0" rowspan="2">
-       <widget class="PixmapLabel" name="image_label">
+       <widget class="QLabel" name="image_label">
         <property name="minimumSize">
          <size>
           <width>64</width>
@@ -267,11 +267,6 @@
   <customwidget>
    <class>TableWidget</class>
    <extends>QTableWidget</extends>
-   <header>qfluentwidgets.h</header>
-  </customwidget>
-  <customwidget>
-   <class>PixmapLabel</class>
-   <extends>QLabel</extends>
    <header>qfluentwidgets.h</header>
   </customwidget>
  </customwidgets>

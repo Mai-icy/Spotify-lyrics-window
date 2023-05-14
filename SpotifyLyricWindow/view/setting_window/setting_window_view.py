@@ -1,83 +1,109 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import sys
+from PyQt5.QtCore import Qt, QRect, pyqtSignal
+from PyQt5.QtGui import QIcon, QPainter, QImage, QBrush, QColor, QFont
+from PyQt5.QtWidgets import QApplication, QFrame, QStackedWidget, QHBoxLayout, QLabel
 
-from PyQt5 import QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from qfluentwidgets import (NavigationInterface, NavigationItemPosition, NavigationWidget, MessageBox,
+                            isDarkTheme, setTheme, Theme, setThemeColor)
+from qfluentwidgets import FluentIcon as FIF
+from qframelesswindow import FramelessWindow, StandardTitleBar
 
 from common.config import Config
-from components.widget.mask_widget import MaskWidget
-from components.raw_ui import Ui_SettingsWindow
 from view.setting_page.lyric_setting_page import LyricPage
 from view.setting_page.hotkey_setting_page import HotkeysPage
 from view.setting_page.common_setting_page import CommonPage
 from view.setting_page.lyrics_manage_page import LyricsManagePage
 
-import view.setting_window.lightstyle_rc
+from common.temp_manage import TempFileManage
+from common.lyric import LyricFileManage
 
 
-class SettingWindowView(QWidget, Ui_SettingsWindow):
-
+class SettingWindowView(FramelessWindow):
     execute_lyric_window_signal = pyqtSignal(object, object)  # (function, args)
     rebuild_lyric_window_signal = pyqtSignal()
     set_hotkey_signal = pyqtSignal(bool)
 
-    def __init__(self, parent=None):
-        super(SettingWindowView, self).__init__(parent)
-        self.setAttribute(Qt.WA_DeleteOnClose, True)  # 在关闭的时候删除对象
-        self.setupUi(self)
+    lin = TempFileManage()
+    lin2 = LyricFileManage()
 
-        self._init_page()
-        self._init_signal()
-        self._init_style_sheet()
+    def __init__(self):
+        super(SettingWindowView, self).__init__()
+        self.setAttribute(Qt.WA_DeleteOnClose, True)
 
-    def _init_page(self):
-        """初始化设置页面"""
-        self.mask_ = MaskWidget(self)
+        self.setTitleBar(StandardTitleBar(self))
+        self.hBoxLayout = QHBoxLayout(self)
+        self.navigationInterface = NavigationInterface(self, showMenuButton=True)
+        self.stackWidget = QStackedWidget(self)
 
         self.common_page = CommonPage(setting_window=self)
         self.lyric_page = LyricPage(setting_window=self)
         self.hotkeys_page = HotkeysPage(self)
         self.lyric_manage_page = LyricsManagePage(setting_window=self)
 
-        self.page_stackedWidget.addWidget(self.common_page)
-        self.page_stackedWidget.addWidget(self.hotkeys_page)
-        self.page_stackedWidget.addWidget(self.lyric_page)
-        self.page_stackedWidget.addWidget(self.lyric_manage_page)
+        self.initLayout()
+        self.initNavigation()
+        self.initWindow()
 
-    def _init_signal(self):
-        """初始化信号"""
-        self.page_listWidget.itemClicked.connect(self.page_click_event)
+    def initLayout(self):
+        self.hBoxLayout.setSpacing(0)
+        self.hBoxLayout.setContentsMargins(0, self.titleBar.height(), 0, 0)
+        self.hBoxLayout.addWidget(self.navigationInterface)
+        self.hBoxLayout.addWidget(self.stackWidget)
+        self.hBoxLayout.setStretchFactor(self.stackWidget, 1)
 
-    def _init_style_sheet(self):
-        with open("resource/ui/lightstyle.qss", "r") as f:
-            style_sheet = f.read()
-        # self.setStyleSheet(style_sheet)
+    def initNavigation(self):
+        self.addSubInterface(self.common_page, FIF.BOOK_SHELF, '常规')
+        self.addSubInterface(self.hotkeys_page, FIF.ALBUM, '快捷键')
+        self.addSubInterface(self.lyric_page, FIF.FONT, '歌词设置')
 
-    def page_click_event(self, item: QListWidgetItem):
-        """切换配置页面"""
-        index = self.page_listWidget.row(item)
-        self.page_stackedWidget.setCurrentIndex(index)
+        self.navigationInterface.addSeparator()
 
-    def set_always_front(self, flag: bool):
-        """
-        设置窗口是否在最上层
+        self.addSubInterface(self.lyric_manage_page, FIF.MUSIC, '歌词管理', NavigationItemPosition.SCROLL)
 
-        :param flag: True 为 在最上层
-        """
-        if not self.isHidden():
-            self.hide()
-            if flag:
-                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
-            else:
-                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
-            self.show()
-        else:
-            if flag:
-                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
-            else:
-                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+        self.stackWidget.currentChanged.connect(self.onCurrentInterfaceChanged)
+        self.stackWidget.setCurrentIndex(1)
+
+    def initWindow(self):
+        self.resize(900, 700)
+        self.setWindowIcon(QIcon('resource/logo.png'))
+        self.setWindowTitle('Setting')
+        self.titleBar.setAttribute(Qt.WA_StyledBackground)
+
+        desktop = QApplication.desktop().availableGeometry()
+        w, h = desktop.width(), desktop.height()
+        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
+
+        # self.setQss()
+
+    def addSubInterface(self, interface, icon, text: str, position=NavigationItemPosition.TOP):
+        """ add sub interface """
+        self.stackWidget.addWidget(interface)
+        self.navigationInterface.addItem(
+            routeKey=interface.objectName(),
+            icon=icon,
+            text=text,
+            onClick=lambda: self.switchTo(interface),
+            position=position,
+            tooltip=text
+        )
+
+    def setQss(self):
+        color = 'dark' if isDarkTheme() else 'light'
+        with open(f'resource/{color}/demo.qss', encoding='utf-8') as f:
+            self.setStyleSheet(f.read())
+
+    def switchTo(self, widget):
+        self.stackWidget.setCurrentWidget(widget)
+
+    def onCurrentInterfaceChanged(self, index):
+        widget = self.stackWidget.widget(index)
+        self.navigationInterface.setCurrentItem(widget.objectName())
+
+    def showMessageBox(self):
+        w = MessageBox("test", self)
+        w.exec()
 
     def show(self) -> None:
         # 载入配置
@@ -91,7 +117,7 @@ class SettingWindowView(QWidget, Ui_SettingsWindow):
 
         super(SettingWindowView, self).show()
 
-    def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
+    def closeEvent(self, a0) -> None:
         """关闭设置窗口"""
         # 歌词窗口 配置 始终和配置同步 快捷键需要先被关闭再打开
         self.set_hotkey_signal.emit(True)
@@ -110,11 +136,13 @@ class SettingWindowView(QWidget, Ui_SettingsWindow):
         return sender
 
 
-if __name__ == "__main__":
-    import sys
+if __name__ == '__main__':
+    QApplication.setHighDpiScaleFactorRoundingPolicy(
+        Qt.HighDpiScaleFactorRoundingPolicy.PassThrough)
+    QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+    QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
-    myWin = SettingWindowView()
-    myWin.show()
-    sys.exit(app.exec_())
+    w = SettingWindowView()
+    w.show()
+    app.exec_()

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>862</width>
+    <width>881</width>
     <height>579</height>
    </rect>
   </property>
@@ -240,7 +240,7 @@
      <widget class="QFrame" name="managebuttons_frame">
       <property name="maximumSize">
        <size>
-        <width>106</width>
+        <width>100</width>
         <height>16777215</height>
        </size>
       </property>
@@ -284,7 +284,7 @@
             <property name="minimumSize">
              <size>
               <width>80</width>
-              <height>32</height>
+              <height>20</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -478,7 +478,7 @@
        </widget>
       </item>
       <item row="0" column="0" rowspan="2">
-       <widget class="PixmapLabel" name="image_label">
+       <widget class="QLabel" name="image_label">
         <property name="minimumSize">
          <size>
           <width>64</width>
@@ -530,11 +530,6 @@
   <customwidget>
    <class>ComboBox</class>
    <extends>QComboBox</extends>
-   <header>qfluentwidgets.h</header>
-  </customwidget>
-  <customwidget>
-   <class>PixmapLabel</class>
-   <extends>QLabel</extends>
    <header>qfluentwidgets.h</header>
   </customwidget>
  </customwidgets>

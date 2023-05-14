@@ -246,6 +246,12 @@
             <height>40</height>
            </size>
           </property>
+          <property name="font">
+           <font>
+            <family>微软雅黑</family>
+            <pointsize>14</pointsize>
+           </font>
+          </property>
          </widget>
         </item>
         <item>
@@ -461,6 +467,12 @@
              <height>40</height>
             </size>
            </property>
+           <property name="font">
+            <font>
+             <family>微软雅黑</family>
+             <pointsize>14</pointsize>
+            </font>
+           </property>
           </widget>
          </item>
          <item>
@@ -476,6 +488,12 @@
              <width>16777215</width>
              <height>40</height>
             </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>微软雅黑</family>
+             <pointsize>14</pointsize>
+            </font>
            </property>
           </widget>
          </item>
@@ -581,6 +599,12 @@
             <width>16777215</width>
             <height>40</height>
            </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>微软雅黑</family>
+            <pointsize>14</pointsize>
+           </font>
           </property>
          </widget>
         </item>

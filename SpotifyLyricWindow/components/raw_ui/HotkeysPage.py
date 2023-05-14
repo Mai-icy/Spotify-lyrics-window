@@ -22,7 +22,7 @@ class Ui_HotkeysPage(object):
         self.hotkeyspage_gridLayout = QtWidgets.QGridLayout(HotkeysPage)
         self.hotkeyspage_gridLayout.setContentsMargins(50, 20, 30, 40)
         self.hotkeyspage_gridLayout.setObjectName("hotkeyspage_gridLayout")
-        self.hotkeys_default_button = QtWidgets.QPushButton(HotkeysPage)
+        self.hotkeys_default_button = PushButton(HotkeysPage)
         self.hotkeys_default_button.setMinimumSize(QtCore.QSize(100, 32))
         self.hotkeys_default_button.setMaximumSize(QtCore.QSize(100, 32))
         self.hotkeys_default_button.setObjectName("hotkeys_default_button")
@@ -117,4 +117,4 @@ class Ui_HotkeysPage(object):
         self.trans_hotkey_label.setText(_translate("HotkeysPage", "切换翻译"))
         self.show_hotkey_label.setText(_translate("HotkeysPage", "显示"))
         self.close_hotkey_label.setText(_translate("HotkeysPage", "关闭"))
-from qfluentwidgets import CheckBox
+from qfluentwidgets import CheckBox, PushButton

@@ -10,7 +10,7 @@ from common.config import Config
 from common.typing import DisplayMode
 from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from view.lyric_window.lyric_window_view import LyricsWindowView
-from view.setting_window.new_setting_window_view import SettingWindowView
+from view.setting_window.setting_window_view import SettingWindowView
 
 
 class MainObject(QObject):
@@ -73,6 +73,7 @@ class MainObject(QObject):
     def setting_window_show_event(self):
         """显示设置窗口事件，新建一个窗口对象"""
         if self.setting_window is not None:
+            self.setting_window.raise_()
             return
         self.setting_window = SettingWindowView()
 

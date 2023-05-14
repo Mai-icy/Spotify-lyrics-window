@@ -8,6 +8,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
+from qfluentwidgets import RoundMenu, Action
+from qfluentwidgets import FluentIcon as FIF
+
 from common.api.lyric_api import SpotifyApi
 from common.lyric.lyric_manage import LyricFileManage
 from common.typing import TransType, LrcFile
@@ -94,6 +97,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.lyrics_listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
 
         self.lyrics_listWidget.customContextMenuRequested.connect(self.menu_show_event)
+
+        self.show_comboBox.setCurrentIndex(0)
 
     def load_lyrics_file(self):
         """导入已有的歌词文件，显示在左边"""
@@ -294,9 +299,10 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         """item右键菜单栏事件"""
         if not self.lyrics_listWidget.itemAt(position):
             return
-        list_widget_menu = QMenu()
-        del_item_action = QAction("删除歌词", self)
+        list_widget_menu = RoundMenu()
+        del_item_action = Action(FIF.DELETE, "删除歌词")
         list_widget_menu.addAction(del_item_action)
+
         del_item_action.triggered.connect(self.menu_delete_item)
 
         list_widget_menu.exec_(self.lyrics_listWidget.mapToGlobal(position))

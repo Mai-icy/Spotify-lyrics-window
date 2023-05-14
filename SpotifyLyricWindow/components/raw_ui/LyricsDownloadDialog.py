@@ -79,7 +79,7 @@ class Ui_LyricsDownloadDialog(object):
         self.singer_label.setText("")
         self.singer_label.setObjectName("singer_label")
         self.music_gridLayout.addWidget(self.singer_label, 1, 1, 1, 1)
-        self.image_label = PixmapLabel(self.music_frame)
+        self.image_label = QtWidgets.QLabel(self.music_frame)
         self.image_label.setMinimumSize(QtCore.QSize(64, 64))
         self.image_label.setMaximumSize(QtCore.QSize(64, 64))
         self.image_label.setText("")
@@ -107,4 +107,4 @@ class Ui_LyricsDownloadDialog(object):
         self.download_button.setText(_translate("LyricsDownloadDialog", "下载"))
         self.cancel_button.setText(_translate("LyricsDownloadDialog", "取消"))
         self.search_button.setText(_translate("LyricsDownloadDialog", "搜索"))
-from qfluentwidgets import LineEdit, PixmapLabel, PushButton, TableWidget
+from qfluentwidgets import LineEdit, PushButton, TableWidget
