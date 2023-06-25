@@ -17,12 +17,10 @@ from common.api.user_api import SpotifyUserApi
 from common.config import Config
 from common.lyric import LyricFileManage
 from common.lyric.lyric_download import download_lrc
-from common.player import LrcPlayer
-from common.temp_manage import TempFileManage
+from common.player import LrcPlayer, PlayerState
 from common.typing import TransType, UserCurrentPlaying, MediaPropertiesInfo, MediaPlaybackInfo
 from common.win_utils import WindowsMediaSession
 from view.lyric_window.lyrics_window_interface import LyricsWindowInterface
-from view.setting_window import SettingWindowView
 from components.work_thread import thread_drive
 
 
@@ -63,6 +61,9 @@ class LyricsWindowView(LyricsWindowInterface):
 
         self._manual_skip_flag = True
 
+        self.user_trans = TransType(Config.LyricConfig.trans_type)
+        self.current_track_id = ""
+
         self._init_common()
         self._init_lrc_player()
         self._init_signal()
@@ -96,11 +97,9 @@ class LyricsWindowView(LyricsWindowInterface):
     def _init_common(self):
         """初始化其他辅助部件"""
         self.lyric_file_manage = LyricFileManage()
-        self.temp_manage = TempFileManage()
-
-        self.user_trans = TransType(Config.LyricConfig.trans_type)
 
         self.spotify_auth = SpotifyUserApi()
+
         self.delay_timer = QTimer()
         self.delay_timer.setSingleShot(True)
 
@@ -117,26 +116,32 @@ class LyricsWindowView(LyricsWindowInterface):
         self._manual_skip_flag = False
 
     def media_properties_changed(self, info: MediaPropertiesInfo):
-        self.lrc_player.set_pause(True)
-
         track_title = f"{info.title} - {info.artist}"
         track_id = self.lyric_file_manage.get_id(track_title)
+
         if track_id and not self.lyric_file_manage.get_not_found(track_id):  # 如果可以通过title直接获取id, 则不走api渠道
             playback_info = self.media_session.get_current_playback_info()
-            self.lrc_player.set_track(track_id, playback_info.duration)
+
+            self.set_track(track_id, playback_info.duration)
+
             if not self._manual_skip_flag:
                 # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
                 time.sleep(0.7)
                 self.media_session.seek_to_position_media(0)
-                self.lrc_player.seek_to_position(0)
+                self.lrc_player.set_position(0)
                 self._manual_skip_flag = True
-            self.lrc_player.set_pause(not (playback_info.playStatus == 4))
+
+            if playback_info.playStatus == 4:
+                self.lrc_player.play()
+            else:
+                self.lrc_player.stop()
+
         else:
             if not self._manual_skip_flag:
                 # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
                 time.sleep(0.7)
                 self.media_session.seek_to_position_media(0)
-                self.lrc_player.seek_to_position(0)
+                self.lrc_player.set_position(0)
                 self._manual_skip_flag = True
             else:
                 # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
@@ -144,20 +149,25 @@ class LyricsWindowView(LyricsWindowInterface):
             self.calibration_event()
 
     def playback_info_changed(self, info: MediaPlaybackInfo):
-        self.lrc_player.seek_to_position(info.position)
-        is_playing = info.playStatus == 4  # 4 代表正在播放 实际播放的枚举值为4
-        self.lrc_player.set_pause(not is_playing)
+        self.lrc_player.set_position(info.position)
+
+        is_playing = info.playStatus == 4   # 4 代表正在播放 实际播放的枚举值为4
+
+        if is_playing:
+            self.lrc_player.play()
+        else:
+            self.lrc_player.stop()
         self.set_pause_button_icon(is_playing)
         self.set_lyrics_rolling(is_playing)
 
     def timeline_properties_changed(self, info: MediaPlaybackInfo):
         if not self._manual_skip_flag:
             return
-        if info.position < 500 or self.lrc_player.is_pause:
+        if info.position < 500 or self.lrc_player.state == PlayerState.PlayingState:
             # 由于切换到下一首歌会同时触发timeline和properties的变化信号，利用position<500过滤掉切换歌时候的timeline信号
-            self.lrc_player.seek_to_position(info.position, is_show_last_lyric=False)
+            self.lrc_player.set_position(info.position, is_show_last_lyric=False)
             return
-        self.lrc_player.seek_to_position(info.position)
+        self.lrc_player.set_position(info.position)
 
     @thread_drive()
     @CatchError
@@ -172,7 +182,7 @@ class LyricsWindowView(LyricsWindowInterface):
             self.set_lyrics_text(1, "calibrating！")
             self.set_lyrics_text(2, " (o゜▽゜)o!")
 
-        self.lrc_player.set_pause(True)
+        self.lrc_player.pause()
         user_current = self.spotify_auth.get_current_playing()
 
         if self.media_session.connect_spotify():
@@ -188,7 +198,7 @@ class LyricsWindowView(LyricsWindowInterface):
         if not user_current.track_id:  # 正在播放非音乐（track）
             self.set_lyrics_text(1, user_current.track_name + "!")
             self.set_lyrics_text(2, "o(_ _)ozzZZ")
-            self.lrc_player.seek_to_position(0)
+            self.lrc_player.set_position(0)
             if not self.media_session.is_connected():
                 self._refresh_player_track(user_current)
             return
@@ -200,10 +210,13 @@ class LyricsWindowView(LyricsWindowInterface):
                 self.lyric_file_manage.set_not_found(user_current.track_id, "")  # 将 不存在 记录撤去
             user_current = self._refresh_player_track(user_current)
 
-        self.lrc_player.set_pause(not user_current.is_playing)
+        if user_current.is_playing:
+            self.lrc_player.play()
+        else:
+            self.lrc_player.stop()
 
         if not self.media_session.is_connected() or use_api_position:
-            self.lrc_player.seek_to_position(user_current.progress_ms)
+            self.lrc_player.set_position(user_current.progress_ms)
 
     @thread_drive()
     @CatchError
@@ -247,7 +260,7 @@ class LyricsWindowView(LyricsWindowInterface):
     @CatchError
     def change_trans_button_event(self, *_):
         """更改当前的翻译为下一个 可用的 翻译"""
-        ava_trans = self.lrc_player.lrc_file.available_trans()
+        ava_trans = self.lrc_player.current_lyric().available_trans()
         if len(ava_trans) > 1:
             index_ = (ava_trans.index(self.lrc_player.trans_mode) + 1) % len(ava_trans)
             self.set_trans_mode(ava_trans[index_])
@@ -275,11 +288,17 @@ class LyricsWindowView(LyricsWindowInterface):
 
     def lyric_offset_add_event(self):
         """调整偏移事件  歌词前进"""
-        self.lrc_player.modify_offset(500)
+        offset = self.lrc_player.lyric_offset
+        offset += 500
+        self.lrc_player.set_offset(offset)
+        self.lyric_file_manage.set_offset_file(self.current_track_id, offset)
 
     def lyric_offset_minus_event(self):
         """调整偏移事件  歌词后退"""
-        self.lrc_player.modify_offset(-500)
+        offset = self.lrc_player.lyric_offset
+        offset -= 500
+        self.lrc_player.set_offset(offset)
+        self.lyric_file_manage.set_offset_file(self.current_track_id, offset)
 
     def setting_window_show_event(self):
         self.setting_window_show_signal.emit()
@@ -289,6 +308,14 @@ class LyricsWindowView(LyricsWindowInterface):
             self.quit_signal.emit()
         else:
             self.hide()
+
+    def set_track(self, track_id, duration):
+        self.current_track_id = track_id
+
+        current_lrc = self.lyric_file_manage.read_lyric_file(track_id)
+        offset = self.lyric_file_manage.get_offset_file(track_id)
+        self.lrc_player.set_lyric(current_lrc, duration)
+        self.lrc_player.set_offset(offset)
 
     def set_trans_mode(self, mode: TransType):
         """
@@ -306,7 +333,7 @@ class LyricsWindowView(LyricsWindowInterface):
 
         :param error: 引发的错误实例
         """
-        self.lrc_player.is_pause = True
+        self.lrc_player.pause()
         self.set_lyrics_text(1, str(error))
         self.set_lyrics_text(2, "Σっ°Д°;)っ!")
         if isinstance(error, NoPermission):
@@ -328,7 +355,7 @@ class LyricsWindowView(LyricsWindowInterface):
             user_current = self.spotify_auth.get_current_playing()
         pos, track_id = user_current.progress_ms, user_current.track_id
         duration = user_current.duration if user_current.duration else 10 * 1000
-        self.lrc_player.set_track(track_id, duration)
+        self.set_track(track_id, duration)
         return user_current
 
     def _download_lyric(self, user_current: UserCurrentPlaying) -> UserCurrentPlaying:
@@ -358,11 +385,10 @@ class LyricsWindowView(LyricsWindowInterface):
         return self._refresh_player_track()
 
     def closeEvent(self, event: QCloseEvent):
-        self.lrc_player.thread_play_lrc.terminate()
+        self.lrc_player.close()
         del self.lrc_player
         del self.lyric_file_manage
         self.media_session.dis_connect()
-        self.temp_manage.auto_clean_temp()
         super(LyricsWindowView, self).closeEvent(event)
 
 

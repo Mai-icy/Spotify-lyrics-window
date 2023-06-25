@@ -14,7 +14,7 @@ from qfluentwidgets import FluentIcon as FIF
 from common.api.lyric_api import SpotifyApi
 from common.lyric.lyric_manage import LyricFileManage
 from common.typing import TransType, LrcFile
-from common.temp_manage import TempFileManage
+from common.image.temp_manage import TempFileManage
 from components.dialog.lyrics_download_dialog import LyricsDownloadDialog
 from components.work_thread import thread_drive
 from components.raw_ui import Ui_LyricsManage

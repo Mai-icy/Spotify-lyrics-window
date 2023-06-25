@@ -8,7 +8,7 @@ from common.api.user_api import SpotifyUserAuth
 from common.config import Config
 from common.lyric import LyricFileManage
 from common.path import LRC_PATH, TEMP_PATH, ORI_LRC_PATH, ORI_TEMP_PATH
-from common.temp_manage import TempFileManage
+from common.image.temp_manage import TempFileManage
 from components.raw_ui import Ui_CommonPage
 
 

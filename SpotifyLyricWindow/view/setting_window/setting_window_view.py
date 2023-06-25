@@ -1,12 +1,12 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import sys
-from PyQt5.QtCore import Qt, QRect, pyqtSignal
-from PyQt5.QtGui import QIcon, QPainter, QImage, QBrush, QColor, QFont
-from PyQt5.QtWidgets import QApplication, QFrame, QStackedWidget, QHBoxLayout, QLabel
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QApplication, QStackedWidget, QHBoxLayout
 
-from qfluentwidgets import (NavigationInterface, NavigationItemPosition, NavigationWidget, MessageBox,
-                            isDarkTheme, setTheme, Theme, setThemeColor)
+from qfluentwidgets import (NavigationInterface, NavigationItemPosition, MessageBox,
+                            isDarkTheme)
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
@@ -16,7 +16,7 @@ from view.setting_page.hotkey_setting_page import HotkeysPage
 from view.setting_page.common_setting_page import CommonPage
 from view.setting_page.lyrics_manage_page import LyricsManagePage
 
-from common.temp_manage import TempFileManage
+from common.image.temp_manage import TempFileManage
 from common.lyric import LyricFileManage
 
 
