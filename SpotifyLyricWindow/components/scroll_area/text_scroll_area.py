@@ -6,15 +6,14 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from components.label import VerticalLabel, HorizontalLabel
-from common.typing import DisplayMode
-from common.config import Config
+from common.config import DisplayMode
 
 
 class TextScrollArea(QScrollArea):
-    def __init__(self, parent=None):
+    def __init__(self, display_mode: DisplayMode, parent=None):
         super(TextScrollArea, self).__init__(parent)
 
-        self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
+        self.display_mode = display_mode
 
         self._init_roll()
         self._init_label()

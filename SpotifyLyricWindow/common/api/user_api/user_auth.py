@@ -11,7 +11,7 @@ import requests
 
 from common.path import TOKEN_PATH
 from common.api.exceptions import NoAuthError
-from common.config import Config
+from common.config import cfg
 
 
 class SpotifyUserAuth:
@@ -32,8 +32,8 @@ class SpotifyUserAuth:
             self.client_token_info = None
             self.state = None
             self.auth_code = None
-            self.client_id = Config.CommonConfig.ClientConfig.client_id
-            self.client_secret = Config.CommonConfig.ClientConfig.client_secret
+            self.client_id = cfg.get(cfg.client_id)
+            self.client_secret = cfg.get(cfg.client_secret)
             auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
             self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
             if TOKEN_PATH.exists():
@@ -43,8 +43,8 @@ class SpotifyUserAuth:
             self._is_init = True
 
     def load_client_config(self):
-        self.client_id = Config.CommonConfig.ClientConfig.client_id
-        self.client_secret = Config.CommonConfig.ClientConfig.client_secret
+        self.client_id = cfg.get(cfg.client_id)
+        self.client_secret = cfg.get(cfg.client_secret)
         auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
         self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
         try:

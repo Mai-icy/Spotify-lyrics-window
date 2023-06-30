@@ -1,0 +1,33 @@
+<RCC>
+  <qresource>
+    <file>images/svg/Folder_black.svg</file>
+    <file>images/svg/Folder_white.svg</file>
+    <file>images/svg/Keyboard_black.svg</file>
+    <file>images/svg/Keyboard_white.svg</file>
+    <file>images/svg/LightBulb_black.svg</file>
+    <file>images/svg/LightBulb_white.svg</file>
+    <file>images/svg/Pen_black.svg</file>
+    <file>images/svg/Pen_white.svg</file>
+    <file>images/svg/Person_black.svg</file>
+    <file>images/svg/Person_white.svg</file>
+    <file>images/svg/Translate_black.svg</file>
+    <file>images/svg/Translate_white.svg</file>
+    <file>images/svg/WindowApps_black.svg</file>
+    <file>images/svg/WindowApps_white.svg</file>
+    <file>images/png/account.png</file>
+    <file>images/png/calibrate.png</file>
+    <file>images/png/close.png</file>
+    <file>images/png/continue.png</file>
+    <file>images/png/last.png</file>
+    <file>images/png/lock.png</file>
+    <file>images/png/lockopen.png</file>
+    <file>images/png/LyricsIcon.png</file>
+    <file>images/png/next.png</file>
+    <file>images/png/pause.png</file>
+    <file>images/png/setoffdown.png</file>
+    <file>images/png/setoffup.png</file>
+    <file>images/png/settings.png</file>
+    <file>images/png/translate.png</file>
+    <file>images/png/translucent.png</file>
+  </qresource>
+</RCC>

@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import *
 
 from common.api.exceptions import UserError, NoPermission
 from common.api.user_api import SpotifyUserApi
-from common.config import Config
+from common.config import cfg, DisplayMode
 from common.lyric import LyricFileManage
 from common.lyric.lyric_download import download_lrc
 from common.player import LrcPlayer, PlayerState
@@ -56,12 +56,12 @@ class LyricsWindowView(LyricsWindowInterface):
     lyric_window_show_signal = pyqtSignal()
     quit_signal = pyqtSignal()
 
-    def __init__(self, parent=None):
-        super(LyricsWindowView, self).__init__(parent)
+    def __init__(self, display_mode, parent=None):
+        super(LyricsWindowView, self).__init__(display_mode, parent)
 
         self._manual_skip_flag = True
 
-        self.user_trans = TransType(Config.LyricConfig.trans_type)
+        self.user_trans = TransType(cfg.get(cfg.trans_mode).value)
         self.current_track_id = ""
 
         self._init_common()
@@ -304,7 +304,7 @@ class LyricsWindowView(LyricsWindowInterface):
         self.setting_window_show_signal.emit()
 
     def close_button_click_event(self):
-        if Config.CommonConfig.is_quit_on_close:
+        if not cfg.get(cfg.minimize_to_tray):
             self.quit_signal.emit()
         else:
             self.hide()
@@ -325,7 +325,7 @@ class LyricsWindowView(LyricsWindowInterface):
         """
         self.lrc_player.set_trans_mode(mode)
         self.user_trans = self.lrc_player.trans_mode
-        Config.LyricConfig.trans_type = self.user_trans.value
+        cfg.set(cfg.trans_mode, self.user_trans)
 
     def _error_msg_show_event(self, error: Exception):
         """
@@ -396,6 +396,6 @@ if __name__ == "__main__":
     # 适配2k等高分辨率屏幕,低分辨率屏幕可以缺省
     QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
-    myWin = LyricsWindowView()
+    myWin = LyricsWindowView(DisplayMode.Horizontal)
     myWin.show()
     sys.exit(app.exec_())

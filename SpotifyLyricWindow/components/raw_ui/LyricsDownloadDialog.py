@@ -20,7 +20,7 @@ class Ui_LyricsDownloadDialog(object):
         font.setPointSize(12)
         LyricsDownloadDialog.setFont(font)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap(":/pic/images/LyricsIcon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap(":/images/png/LyricsIcon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         LyricsDownloadDialog.setWindowIcon(icon)
         LyricsDownloadDialog.setSizeGripEnabled(True)
         LyricsDownloadDialog.setModal(True)

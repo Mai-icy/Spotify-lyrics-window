@@ -4,3 +4,5 @@
 **/.idea
 **/.vs
 **/__pycache__
+/SpotifyLyricWindow/config/config.json
+/SpotifyLyricWindow/config/

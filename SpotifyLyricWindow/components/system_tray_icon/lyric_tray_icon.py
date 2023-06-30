@@ -16,7 +16,7 @@ class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
         self._init_menu()
         self._init_signal()
 
-        self.setIcon(QtGui.QIcon(u":/pic/images/LyricsIcon.png"))
+        self.setIcon(QtGui.QIcon(u":/images/png/LyricsIcon.png"))
 
     def _init_menu(self):
         self.menu = QtWidgets.QMenu()

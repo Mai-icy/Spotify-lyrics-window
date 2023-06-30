@@ -3,23 +3,15 @@
 import json
 from pathlib import Path
 
-from common.config import Config
+from common.config import cfg
 
 BASE_PATH = Path(__file__).parent.parent
 
 ORI_LRC_PATH = BASE_PATH / Path(r"download/lyrics")
 ORI_TEMP_PATH = BASE_PATH / Path(r"download/temp")
 
-path_config = Config.CommonConfig.PathConfig
-if path_config.lyrics_file_path:
-    LRC_PATH = Path(path_config.lyrics_file_path)
-else:
-    LRC_PATH = ORI_LRC_PATH
-
-if path_config.temp_file_path:
-    TEMP_PATH = Path(path_config.temp_file_path)
-else:
-    TEMP_PATH = ORI_TEMP_PATH
+LRC_PATH = Path(cfg.get(cfg.lyric_folders))
+TEMP_PATH = Path(cfg.get(cfg.temp_folder))
 
 TEMP_IMAGE_PATH = TEMP_PATH / "image"
 
