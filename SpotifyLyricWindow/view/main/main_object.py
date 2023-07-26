@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from common.config import cfg, DisplayMode
+from common.hotkeys.hotkeys_manager import HotkeysManager
 from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from view.lyric_window.lyric_window_view import LyricsWindowView
 from view.setting_window.setting_window_view import SettingWindowView
@@ -20,19 +21,16 @@ class MainObject(QObject):
         hotkey_item_names = ["pause_hotkey", "last_song_hotkey", "next_song_hotkey",
                              "lock_hotkey", "calibrate_hotkey", "translate_hotkey",
                              "show_window_hotkey", "close_window_hotkey", "open_tool_hotkey"]
-        # hotkey_signal_dict = {
-        #     "pause_hotkey": self
-        # }
+        self.hotkeys_system = HotkeysManager(hotkey_item_names)
+        self.hotkeys_system.hotkey_connect("show_window_hotkey", self.lyric_window_show_event)
+        self.hotkeys_system.hotkey_connect("open_tool_hotkey", self.lyric_manager_window_show_event)
 
-        # self.hotkeys_system =
-
+        # UI相关的初始化
         self.tray_icon = LyricsTrayIcon()
-        self.lyric_window = LyricsWindowView(cfg.get(cfg.display_mode))
+        self.lyric_window = None
         self.setting_window = None
         self.lyric_manager_window = None
 
-        # self.lyric_window.set_hotkey_enable(True)
-        self._init_lyric_window_signal()
         self._init_tray_icon_signal()
 
     def _init_tray_icon_signal(self):
@@ -50,9 +48,19 @@ class MainObject(QObject):
         self.setting_window.show_lyric_manager_signal.connect(self.lyric_manager_window_show_event)
 
     def _init_lyric_window_signal(self):
+        self.lyric_window: LyricsWindowView
+
         self.lyric_window.lyric_window_show_signal.connect(self.lyric_window_show_event)
         self.lyric_window.setting_window_show_signal.connect(self.setting_window_show_event)
         self.lyric_window.quit_signal.connect(self.quit_event)
+
+        self.hotkeys_system.hotkey_connect("pause_hotkey", self.lyric_window.pause_button.clicked)
+        self.hotkeys_system.hotkey_connect("last_song_hotkey", self.lyric_window.last_button.clicked)
+        self.hotkeys_system.hotkey_connect("next_song_hotkey", self.lyric_window.next_button.clicked)
+        self.hotkeys_system.hotkey_connect("lock_hotkey", self.lyric_window.lock_button.clicked)
+        self.hotkeys_system.hotkey_connect("calibrate_hotkey", self.lyric_window.calibrate_button.clicked)
+        self.hotkeys_system.hotkey_connect("translate_hotkey", self.lyric_window.translate_button.clicked)
+        self.hotkeys_system.hotkey_connect("close_window_hotkey", self.lyric_window.hide)
 
     def _init_lyric_manager_signal(self):
         ...
@@ -61,6 +69,15 @@ class MainObject(QObject):
         """重新构建歌词窗口（运用于切换歌词窗口横竖模式）"""
         self.lyric_window.close()
         self.lyric_window.deleteLater()
+
+        self.lyric_window_show_event()
+
+    def lyric_window_show_event(self):
+        if self.lyric_window is not None:
+            if not self.lyric_window.isVisible():
+                self.lyric_window.show()
+            self.lyric_window.raise_()
+            return
 
         mode = cfg.get(cfg.display_mode)
         if mode == DisplayMode.Horizontal:
@@ -85,9 +102,9 @@ class MainObject(QObject):
 
         self.lyric_window = LyricsWindowView(mode)
         self._init_lyric_window_signal()
-        self.lyric_window.show()
 
-    def lyric_window_show_event(self):
+        self.lyric_window.destroyed.connect(self.lyric_window_destroyed_event)
+        self._init_lyric_window_signal()
         self.lyric_window.show()
 
     def setting_window_show_event(self):
@@ -110,6 +127,23 @@ class MainObject(QObject):
         self.lyric_manager_window.destroyed.connect(self.lyric_manager_window_destroyed_event)
         self.lyric_manager_window.show()
 
+    def lyric_window_destroyed_event(self):
+        if self.lyric_window is None:
+            return
+
+        self.hotkeys_system.hotkey_disconnect("pause_hotkey")
+        self.hotkeys_system.hotkey_disconnect("last_song_hotkey")
+        self.hotkeys_system.hotkey_disconnect("next_song_hotkey")
+        self.hotkeys_system.hotkey_disconnect("lock_hotkey")
+        self.hotkeys_system.hotkey_disconnect("calibrate_hotkey")
+        self.hotkeys_system.hotkey_disconnect("translate_hotkey")
+        self.hotkeys_system.hotkey_disconnect("close_window_hotkey")
+
+        self.lyric_window.close()
+        self.lyric_window.deleteLater()
+
+        self.lyric_window = None
+
     def setting_window_destroyed_event(self):
         """设置窗口关闭连接事件"""
         # 设置窗口已经关闭释放内存，此时self.setting_window为nullptr，将此处定义为None
@@ -124,6 +158,6 @@ class MainObject(QObject):
         QtCore.QCoreApplication.exit(0)
 
     def show(self):
-        self.lyric_window.show()
+        self.lyric_window_show_event()
         self.tray_icon.show()
 
