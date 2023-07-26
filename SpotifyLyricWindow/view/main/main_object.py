@@ -54,12 +54,12 @@ class MainObject(QObject):
         self.lyric_window.setting_window_show_signal.connect(self.setting_window_show_event)
         self.lyric_window.quit_signal.connect(self.quit_event)
 
-        self.hotkeys_system.hotkey_connect("pause_hotkey", self.lyric_window.pause_button.clicked)
-        self.hotkeys_system.hotkey_connect("last_song_hotkey", self.lyric_window.last_button.clicked)
-        self.hotkeys_system.hotkey_connect("next_song_hotkey", self.lyric_window.next_button.clicked)
-        self.hotkeys_system.hotkey_connect("lock_hotkey", self.lyric_window.lock_button.clicked)
-        self.hotkeys_system.hotkey_connect("calibrate_hotkey", self.lyric_window.calibrate_button.clicked)
-        self.hotkeys_system.hotkey_connect("translate_hotkey", self.lyric_window.translate_button.clicked)
+        self.hotkeys_system.hotkey_connect("pause_hotkey", self.lyric_window.pause_button.click)
+        self.hotkeys_system.hotkey_connect("last_song_hotkey", self.lyric_window.last_button.click)
+        self.hotkeys_system.hotkey_connect("next_song_hotkey", self.lyric_window.next_button.click)
+        self.hotkeys_system.hotkey_connect("lock_hotkey", self.lyric_window.lock_button.click)
+        self.hotkeys_system.hotkey_connect("calibrate_hotkey", self.lyric_window.calibrate_button.click)
+        self.hotkeys_system.hotkey_connect("translate_hotkey", self.lyric_window.translate_button.click)
         self.hotkeys_system.hotkey_connect("close_window_hotkey", self.lyric_window.hide)
 
     def _init_lyric_manager_signal(self):

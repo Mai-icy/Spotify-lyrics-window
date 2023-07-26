@@ -14,6 +14,16 @@ class HotkeysManager(QObject):
 
     hotkey_conflict_signal = pyqtSignal(list)
 
+    pause_hotkey = pyqtSignal(object)
+    last_song_hotkey = pyqtSignal()
+    next_song_hotkey = pyqtSignal()
+    lock_hotkey = pyqtSignal()
+    calibrate_hotkey = pyqtSignal()
+    translate_hotkey = pyqtSignal()
+    show_window_hotkey = pyqtSignal()
+    close_window_hotkey = pyqtSignal()
+    open_tool_hotkey = pyqtSignal()
+
     def __init__(self, hotkey_item_names: list):
         super().__init__()
         self.hotkeys_system = SystemHotkey()
@@ -21,7 +31,7 @@ class HotkeysManager(QObject):
         self.item_name_hotkeys_dict = {}
 
         for item_name in hotkey_item_names:
-            setattr(self, item_name, pyqtSignal())
+            # setattr(HotkeysManager, item_name, pyqtSignal())
             item = getattr(cfg, item_name)
             self.item_name_hotkeys_dict[item_name] = cfg.get(item)
 
