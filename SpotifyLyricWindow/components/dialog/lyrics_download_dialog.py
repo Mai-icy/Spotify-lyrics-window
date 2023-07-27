@@ -12,7 +12,7 @@ from components.dialog import WarningDialog
 from components.work_thread import thread_drive
 from common.api.lyric_api import CloudMusicWebApi, KugouApi
 from common.api.exceptions import NoneResultError
-from common.temp_manage import TempFileManage
+from common.image.temp_manage import TempFileManage
 
 
 class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):

@@ -33,7 +33,7 @@
     <number>40</number>
    </property>
    <item row="1" column="2">
-    <widget class="QPushButton" name="hotkeys_default_button">
+    <widget class="PushButton" name="hotkeys_default_button">
      <property name="minimumSize">
       <size>
        <width>100</width>
@@ -52,7 +52,7 @@
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="QCheckBox" name="enable_hotkeys_checkBox">
+    <widget class="CheckBox" name="enable_hotkeys_checkBox">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -300,6 +300,18 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CheckBox</class>
+   <extends>QCheckBox</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+  <customwidget>
+   <class>PushButton</class>
+   <extends>QPushButton</extends>
+   <header>qfluentwidgets.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

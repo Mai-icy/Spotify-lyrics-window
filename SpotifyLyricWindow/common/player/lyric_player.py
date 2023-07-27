@@ -5,73 +5,102 @@ import threading
 import time
 import weakref
 
-from common.api import SpotifyUserApi
-from common.lyric import LyricFileManage
-from common.typing import LrcFile, TransType
+from enum import Enum
+from common.typing import LrcFile, TransType, MrcFile
+
+
+class PlayerState(Enum):
+    StoppedState = 0
+    PlayingState = 1
+    PausedState = 2
 
 
 class LrcPlayer:
-    def __init__(self, output_func):
-        self.output_func = output_func  # 输出歌词函数  可设置为print利于测试
-        self.lyric_file_manage = LyricFileManage()
-        self.timer_start_value: int = int(time.time() * 1000)  # 计时器实现原理，当前时间减去开始时间
+    def __init__(self, output_func=None):
+        self._output_func = output_func
 
-        # 播放相关属性
-        self.track_id = ""
-        self.duration = float('inf')
-        self.is_pause = False
+        self._lyric = LrcFile()
+        self._duration = float("INF")
+        self._state = PlayerState.StoppedState
+
+        self._timer_start_value: int = int(time.time() * 1000)  # 计时器实现原理，当前时间减去开始时间
+
+        self._lyric_offset = 0
+        self._global_offset = 0
         self.trans_mode = TransType.NON
-
-        # 歌词相关属性
-        self.track_offset = 0
-        self.global_offset = 0
-        self.lrc_file = LrcFile()
 
         self.play_done_event_func = None
 
         self.thread_play_lrc = LyricThread(self)
         self.thread_play_lrc.start()
 
-    def get_time(self) -> int:
-        """获取播放进度"""
-        return int(time.time() * 1000) - self.timer_start_value + self.track_offset + self.global_offset
+    def current_lyric(self) -> LrcFile:
+        return self._lyric
 
-    def set_pause(self, flag: bool):
-        """设置歌词播放是否暂停"""
-        self.is_pause = flag
-        if not flag:
-            self.thread_play_lrc.reset_position()
+    @property
+    def duration(self):
+        return self._duration
 
-    def set_track(self, track_id: str, duration: int):
-        """设置当前播放的歌曲 duration单位：ms"""
-        if self.track_id and self.track_offset:
-            self.lyric_file_manage.set_offset_file(self.track_id, self.track_offset)
-            self.lyric_file_manage.set_offset_file("api_offset", self.global_offset)
+    @property
+    def state(self):
+        return self._state
 
-        self.track_id = track_id
-        self.duration = duration
-        if track_id:
-            self.lrc_file = self.lyric_file_manage.read_lyric_file(track_id)
-        else:
-            self.lrc_file = LrcFile()
+    @property
+    def position(self):
+        return int(time.time() * 1000) - self._timer_start_value + self._lyric_offset + self._global_offset
 
-        if self.trans_mode not in self.lrc_file.available_trans():
-            self.trans_mode = TransType.NON
+    @property
+    def lyric_offset(self):
+        return self._lyric_offset
 
-    def set_trans_mode(self, mode: TransType) -> bool:
-        """设置翻译模式"""
-        if self.lrc_file.empty(mode):
-            return False
+    @property
+    def global_offset(self):
+        return self._global_offset
+
+    def set_trans_mode(self, mode: TransType):
         self.trans_mode = mode
         self._show_last_lyric()
-        return True
+
+    def set_position(self, position: int, *, is_show_last_lyric=True):
+        self._timer_start_value = int(time.time() * 1000) - position
+
+        if is_show_last_lyric:
+            self._show_last_lyric()
+
+        self.thread_play_lrc.reset_position()
+
+    def set_lyric(self, lrc: LrcFile, duration: int):
+        self._lyric_offset = 0
+        self._state = PlayerState.StoppedState
+        self._lyric = lrc
+        self._duration = duration
+        # self._timer_start_value = int(time.time() * 1000)
+        self.thread_play_lrc.reset_position()
+
+    def set_offset(self, offset: int):
+        self._lyric_offset = offset
+
+    def set_global_offset(self, offset: int):
+        self._global_offset = offset
+
+    def pause(self):
+        self._state = PlayerState.PausedState
+
+    def play(self):
+        self._state = PlayerState.PlayingState
+
+    def stop(self):
+        self._state = PlayerState.StoppedState
+
+    def close(self):
+        self.thread_play_lrc.terminate()
 
     def _show_last_lyric(self):
         """显示上一句非空白的歌词"""
-        lrc_file = self.lrc_file
+        lrc_file = self.current_lyric()
         if lrc_file.empty():
             return
-        order = lrc_file.get_order_position(self.get_time())
+        order = lrc_file.get_order_position(self.position)
         timestamp = lrc_file.get_time(order)
         lyric_text = lrc_file.trans_non_dict[timestamp]
         while order != -1 and not lyric_text:
@@ -79,39 +108,26 @@ class LrcPlayer:
             timestamp = lrc_file.get_time(order)
             lyric_text = lrc_file.trans_non_dict.get(timestamp)
         if order != -1:
-            self.show_content(order, 0)
+            self.output_event(order, 0)
 
-    def seek_to_position(self, position: int, is_show_last_lyric=True):
-        """调整歌词播放进度 position单位：ms"""
-        self.timer_start_value = int(time.time() * 1000) - position
-        if is_show_last_lyric:
-            self._show_last_lyric()
-            self.thread_play_lrc.reset_position()
-
-    def modify_offset(self, modify_value: int):
-        """修改单个歌词文件的偏移"""
-        self.track_offset += modify_value
-
-    def modify_global_offset(self, modify_value: int):
-        """修改全局偏移"""
-        self.global_offset += modify_value
-
-    def show_content(self, lyric_order, roll_time: int):
+    def output_event(self, lyric_order, roll_time):
         """输出歌词"""
-        lrc_file = self.lrc_file
+        print("output")
+        lrc_file = self.current_lyric()
         time_stamp = lrc_file.get_time(lyric_order)
 
         if time_stamp == -1 or not lrc_file.trans_non_dict[time_stamp].strip():
             return
 
-        if self.output_func:  # self.lyrics_window.text_show_signal.emit
-            self.output_func(1, lrc_file.trans_non_dict[time_stamp], roll_time)
+        output_func = self._output_func
+        if output_func:  # self.lyrics_window.text_show_signal.emit
+            output_func(1, lrc_file.trans_non_dict[time_stamp], roll_time)
             if lrc_file.empty(self.trans_mode) or self.trans_mode == TransType.NON:
-                self.output_func(2, "")
+                output_func(2, "", 0)
             elif self.trans_mode == TransType.CHINESE:
-                self.output_func(2, lrc_file.trans_chinese_dict[time_stamp], roll_time)
+                output_func(2, lrc_file.trans_chinese_dict[time_stamp], roll_time)
             elif self.trans_mode == TransType.ROMAJI:
-                self.output_func(2, lrc_file.trans_romaji_dict[time_stamp], roll_time)
+                output_func(2, lrc_file.trans_romaji_dict[time_stamp], roll_time)
 
     def play_done_event_connect(self, func):
         """播放完毕的信号连接"""
@@ -122,6 +138,7 @@ class LyricThread(threading.Thread):
     def __init__(self, player: LrcPlayer):
         super(LyricThread, self).__init__(target=self._play_lyric_thread)
         self.sleep = threading.Event()
+        self.sleep.is_set()
 
         self.player_ = weakref.ref(player)
         self.is_running = True
@@ -131,32 +148,35 @@ class LyricThread(threading.Thread):
 
     def _play_lyric_thread(self):
         while self.is_running:
-            if self.sleep.isSet() and self.is_running:
+            if self.sleep.is_set() and self.is_running:
                 self.sleep.clear()
-            position = self.player.get_time()
-            lyric_order = self.player.lrc_file.get_order_position(position)
-            next_stamp = self.player.lrc_file.get_time(lyric_order + 1)
-            if position > self.player.duration - 1200:  # 播放完毕
-                if self.player.play_done_event_func and not self.player.is_pause:
-                    self.player.play_done_event_func()  # 发送播放完毕信号
+
+            position = self.player.position
+            lrc_file = self.player.current_lyric()
+
+            lyric_order = lrc_file.get_order_position(position)
+            next_stamp = lrc_file.get_time(lyric_order + 1)
+
+            if position > self.player.duration - 1000:  # 播放完毕
+                if self.player.state == PlayerState.PlayingState:
+                    self.player.stop()
+                    if self.player.play_done_event_func:
+                        self.player.play_done_event_func()  # 发送播放完毕信号
                 self.sleep.wait()
                 continue
-            if lyric_order < 0:  # 无歌词
+
+            if next_stamp < 0 or lyric_order < 0:  # 无歌词
                 self.sleep.wait(0.1)  # 开始检测何时播放完毕
                 continue
-            elif next_stamp < 0:
-                next_stamp = self.player.duration
 
             show_time = next_stamp - position
 
             if show_time < 0:  # 位置判断变化导致时间错误 重新获取
                 continue
-            self.player.show_content(lyric_order, show_time)
+            self.player.output_event(lyric_order, show_time)
+            self.sleep.wait(show_time / 1000)
 
-            if next_stamp != self.player.duration:  # 播放最后一句时不需要等待
-                self.sleep.wait(show_time / 1000)
-
-            if self.player.is_pause and self.is_running:
+            if self.player.state != PlayerState.PlayingState and self.is_running:
                 self.sleep.wait()
                 continue
 
@@ -174,13 +194,9 @@ class LyricThread(threading.Thread):
 
 
 if __name__ == '__main__':
+    player = LrcPlayer(print)
 
-    auth = SpotifyUserApi()
-    user_current_playing = auth.get_current_playing()
-    lrc = LrcPlayer(print)
-    lrc.set_track(user_current_playing.track_id, user_current_playing.duration)
-    lrc.seek_to_position(user_current_playing.progress_ms)
+    lrc_ = MrcFile(f"../../download/lyrics/0loZ1KfQSLJxYR0Y7dImKN.mrc")
 
-    while True:
-        time.sleep(1)
-        print(lrc.get_time())
+    player.set_lyric(lrc_, 9999999)
+    player.play()

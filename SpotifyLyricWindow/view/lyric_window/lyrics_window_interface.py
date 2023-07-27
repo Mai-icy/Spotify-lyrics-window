@@ -1,7 +1,5 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from system_hotkey import SystemHotkey
-
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -9,8 +7,7 @@ from PyQt5.QtWidgets import *
 
 from components.raw_ui import Ui_VerticalLyricsWindow, Ui_HorizontalLyricsWindow
 from components.scroll_area.text_scroll_area import TextScrollArea
-from common.typing import DisplayMode
-from common.config import Config
+from common.config import cfg, DisplayMode
 
 
 class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
@@ -20,10 +17,10 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
     lyric_window_show_signal = pyqtSignal()
     quit_signal = pyqtSignal()
 
-    def __init__(self, parent=None):
+    def __init__(self, display_mode: DisplayMode, parent=None):
         super(LyricsWindowInterface, self).__init__(parent)
         # 获取设置中的歌词显示模式（竖向或者横向）
-        self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
+        self.display_mode = display_mode
         if self.display_mode == DisplayMode.Horizontal:
             super(LyricsWindowInterface, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
         else:
@@ -42,26 +39,6 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
         self._init_window_lock_flag()
         self._init_window_drag_flag()
         self._init_mouse_track()
-        self._init_hotkey()
-
-    def _re_init(self):
-        """重新初始化布局"""
-        super(LyricsWindowInterface, self).__init__(self.parent())
-
-        self.display_mode = DisplayMode(Config.LyricConfig.display_mode)
-        if self.display_mode == DisplayMode.Horizontal:
-            super(LyricsWindowInterface, self).setupUi(self)  # 会运行 HorizontalLyricsWindow 的 setupUi
-        else:
-            super(Ui_HorizontalLyricsWindow, self).setupUi(self)  # 会运行 VerticalLyricsWindow 的 setupUi
-
-        self.installEventFilter(self)  # 初始化事件过滤器
-
-        self._init_lyrics_shadow()
-        self._init_main_window()
-        self._init_scroll_area()
-        self._init_color_rgb()
-        self._init_font()
-        self._init_mouse_track()
 
     def _init_lyrics_shadow(self):
         """初始化歌词阴影"""
@@ -74,34 +51,31 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
     def _init_main_window(self):
         """初始化界面控件以及属性"""
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.SplashScreen)
-        self.set_always_front(Config.LyricConfig.is_always_front)
+        self.set_always_front(cfg.get(cfg.enable_always_front))
         self.setAttribute(Qt.WA_TranslucentBackground)
 
         self.set_button_hide(True)
 
     def _init_scroll_area(self):
         """初始化滚动区域"""
-        self.above_scrollArea = TextScrollArea(self.lyrics_frame1)
+        self.above_scrollArea = TextScrollArea(self.display_mode, self.lyrics_frame1)
         self.lyrics_gridLayout1.addWidget(self.above_scrollArea)
 
-        self.below_scrollArea = TextScrollArea(self.lyrics_frame2)
+        self.below_scrollArea = TextScrollArea(self.display_mode, self.lyrics_frame2)
         self.lyrics_gridLayout2.addWidget(self.below_scrollArea)
 
     def _init_color_rgb(self):
         """初始化 歌词 以及 阴影 颜色"""
         # 导入配置
-        if Config.LyricConfig.rgb_style != "other":
-            self.set_rgb_style(Config.LyricConfig.rgb_style)
-        else:
-            self.set_lyrics_rgb(Config.LyricConfig.lyric_color)
-            self.set_shadow_rgb(Config.LyricConfig.shadow_color)
+        self.set_lyrics_rgb(QColor(cfg.get(cfg.lyric_color)))
+        self.set_shadow_rgb(QColor(cfg.get(cfg.shadow_color)))
 
     def _init_font(self):
         """初始化字体 字体类型 以及 大小"""
         # 导入配置
-        family = Config.LyricConfig.font_family
-        height = Config.CommonConfig.PositionConfig.height
-        width = Config.CommonConfig.PositionConfig.width
+        family = cfg.get(cfg.lyric_font_family)
+        height = cfg.get(cfg.height)
+        width = cfg.get(cfg.width)
 
         self.font = QtGui.QFont()
         self.font.setFamily(family)
@@ -154,131 +128,20 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
         self.timer.timeout.connect(self._update_index_timer_event)
         self.timer.start()
 
-    def _init_hotkey(self):
-        """初始化快捷键"""
-        self.hotkey = SystemHotkey()
-
-        self.signal_dic = {
-            "calibrate_button": self.calibrate_button.clicked,
-            "lock_button": self.lock_button.clicked,
-            "close_button": self.close_button.clicked,
-            "translate_button": self.translate_button.clicked,
-            "next_button": self.next_button.clicked,
-            "last_button": self.last_button.clicked,
-            "pause_button": self.pause_button.clicked,
-            "show_window": self.lyric_window_show_signal
-        }
-        # 导入配置
-        # self.set_hotkey_enable(True)
-
-    def set_display_mode(self, mode: DisplayMode):
-        """
-        NOT AVAILABLE
-        设置显示 竖直 还是 水平
-
-        :param mode: 设置显示的模式
-        """
-        if mode == self.display_mode:
-            return
-
-        Config.LyricConfig.display_mode = mode.value
-        if mode == DisplayMode.Horizontal:
-            default_pos = Config.get_default_dict()["CommonConfig"]["PositionConfig"]
-        else:
-            default_pos = {
-                "pos_x": 1200,
-                "pos_y": 200,
-                "width": 150,
-                "height": 700
-            }
-
-        self.hide()
-        Config.CommonConfig.PositionConfig.pos_x = default_pos["pos_x"]
-        Config.CommonConfig.PositionConfig.pos_y = default_pos["pos_y"]
-        Config.CommonConfig.PositionConfig.width = default_pos["width"]
-        Config.CommonConfig.PositionConfig.height = default_pos["height"]
-        self._re_init()  # 重新初始化
-        self.show()
-
-    def set_hotkey_enable(self, flag: bool):
-        """
-        设置全局快捷键是否打开
-
-        :param flag: 是否 打开
-        """
-        for key in self.signal_dic.keys():
-            hotkeys = getattr(Config.HotkeyConfig, key)
-            if hotkeys and hotkeys != "null":
-                if flag and Config.HotkeyConfig.is_enable:
-                    self.hotkey.register(hotkeys,
-                                         callback=self.get_emit_func(self.signal_dic[key]))
-                else:
-                    self.hotkey.unregister(hotkeys)
-
-    def set_signal_hotkey(self, signal_key: str, hotkeys: tuple):
-        """
-        设置绑定 快捷键 以触发 对应信号
-
-        :param signal_key: 代表对应信号的键  请使用self.signal_dic内的key
-        :param hotkeys: 对应快捷键 例如 ("alt", "r")
-        """
-        # 解除旧的绑定
-        old_hotkey = getattr(Config.HotkeyConfig, signal_key)
-        if old_hotkey:
-            self.hotkey.unregister(old_hotkey)
-
-        # 进行新的的绑定
-        if hotkeys:
-            self.hotkey.register(hotkeys, callback=self.get_emit_func(self.signal_dic[signal_key]))
-
-        # 同步到配置
-        setattr(Config.HotkeyConfig, signal_key, hotkeys)
-
-    def set_lyrics_rgb(self, rgb: tuple):
+    def set_lyrics_rgb(self, color: QColor):
         """
         为歌词设置颜色
 
-        :param rgb: 对应的rgb颜色值 例如 (237, 178, 209)
         """
-        stylesheet = f"color:rgb({rgb[0]}, {rgb[1]}, {rgb[2]})"
+        stylesheet = f"color:rgb({color.red()}, {color.green()}, {color.blue()})"
         self.above_scrollArea.set_label_stylesheet(stylesheet)
         self.below_scrollArea.set_label_stylesheet(stylesheet)
-        # 同步到配置
-        Config.LyricConfig.lyric_color = rgb
 
-    def set_shadow_rgb(self, rgb: tuple):
+    def set_shadow_rgb(self, color: QColor):
         """
         为歌词阴影设置颜色
-
-        :param rgb: 对应的rgb颜色值 例如 (114, 514, 191)
         """
-        color = QColor(*rgb)
         self.effect_shadow.setColor(color)
-        # 同步到配置
-        Config.LyricConfig.shadow_color = rgb
-
-    def set_rgb_style(self, color: str):
-        """
-        使用预设的 9 种颜色方案。会同时设置歌词颜色以及歌词阴影颜色
-
-        :param color: 仅能为 "blue", "red", "violet", "green", "orange", "yellow", "brown", "cyan", "pink" 其中之一
-        """
-        style_dict = {
-            # color   lyrics_color    shadow_color
-            "blue": ((86, 152, 195), (120, 120, 120)),
-            "red": ((255, 77, 109), (120, 120, 120)),
-            "violet": ((153, 111, 214), (120, 120, 120)),
-            "green": ((152, 201, 163), (150, 150, 150)),
-            "orange": ((255, 119, 61), (120, 120, 120)),
-            "yellow": ((255, 225, 80), (150, 150, 150)),
-            "brown": ((176, 137, 104), (150, 150, 150)),
-            "cyan": ((61, 204, 199), (120, 120, 120)),
-            "pink": ((237, 178, 209), (120, 120, 120))
-        }
-        self.set_lyrics_rgb(style_dict[color][0])
-        self.set_shadow_rgb(style_dict[color][1])
-
-        Config.LyricConfig.rgb_style = color
 
     def set_font_family(self, family: str):
         """
@@ -354,7 +217,7 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
         :param flag: True 为暂停图标
         """
         icon = "pause.png" if flag else "continue.png"
-        self.pause_button.setIcon(QtGui.QIcon(f":/pic/images/{icon}"))
+        self.pause_button.setIcon(QtGui.QIcon(f":/images/png/{icon}"))
 
     def set_lyrics_rolling(self, flag: bool):
         """
@@ -483,8 +346,20 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
         """从隐藏状态到显示状态"""
         if self.isVisible():
             return
-        pos_config = Config.CommonConfig.PositionConfig
-        self.setGeometry(pos_config.pos_x, pos_config.pos_y, pos_config.width, pos_config.height)
+        pos_x = cfg.get(cfg.pos_x)
+        pos_y = cfg.get(cfg.pos_y)
+        width = cfg.get(cfg.width)
+        height = cfg.get(cfg.height)
+
+        desktop = QApplication.desktop().availableGeometry()
+        w, h = desktop.width(), desktop.height()
+        if pos_y + height > h:
+            pos_y = h - height
+        if pos_x + width > w:
+            pos_x = w - width
+
+        self.setGeometry(pos_x, pos_y, width, height)
+
         super(LyricsWindowInterface, self).show()
 
     def hide(self):
@@ -493,9 +368,7 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
         return super(LyricsWindowInterface, self).hide()
 
     def close(self):
-        """结束程序"""
         self._renew_pos_config()
-        Config.save_config()
         return super(LyricsWindowInterface, self).close()
 
     def _set_timer_status_signal_event(self, flag):
@@ -506,11 +379,11 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
 
     def _renew_pos_config(self):
         """同步配置文件 关于窗口的位置 以至下次打开在原来位置"""
-        if Config.CommonConfig.is_save_position:
-            Config.CommonConfig.PositionConfig.pos_x = self.pos().x()
-            Config.CommonConfig.PositionConfig.pos_y = self.pos().y()
-            Config.CommonConfig.PositionConfig.width = self.width()
-            Config.CommonConfig.PositionConfig.height = self.height()
+        cfg.set(cfg.pos_x, self.pos().x())
+        cfg.set(cfg.pos_y, self.pos().y())
+        cfg.set(cfg.width, self.width())
+        cfg.set(cfg.height, self.height())
+        cfg.save()
 
     def _update_index_timer_event(self):
         """更新timer状态"""
@@ -555,11 +428,11 @@ class LyricsWindowInterface(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyric
         """上锁按钮事件"""
         if self._is_locked:
             self._is_locked = False
-            self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lock.png"))
+            self.lock_button.setIcon(QtGui.QIcon(u":/images/png/lock.png"))
             self.set_transparent(False)
         else:
             self._is_locked = True
-            self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lockopen.png"))
+            self.lock_button.setIcon(QtGui.QIcon(u":/images/png/lockopen.png"))
             self.set_transparent(True)
             self.lock_button.setHidden(False)
             self.calibrate_button.setHidden(False)
