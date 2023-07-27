@@ -202,7 +202,7 @@ class SettingInterface(ScrollArea):
             EFI.KEYBOARD,
             "Lock",
             "Lock the lyrics window so that it cannot be dragged",
-            cfg.next_song_hotkey,
+            cfg.lock_hotkey,
             self.hotkeys_group
             )
         self.calibration_hotkey_card = HotkeySettingCard(
@@ -216,7 +216,7 @@ class SettingInterface(ScrollArea):
             EFI.KEYBOARD,
             "Switch translation",
             "Toggle the translation mode of lyrics",
-            cfg.calibrate_hotkey,
+            cfg.translate_hotkey,
             self.hotkeys_group
             )
         self.show_hotkey_card = HotkeySettingCard(

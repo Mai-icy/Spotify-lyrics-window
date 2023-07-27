@@ -15,20 +15,21 @@ class HotkeysManager(QObject):
     hotkey_conflict_signal = pyqtSignal(list)
 
     pause_hotkey = pyqtSignal(object)
-    last_song_hotkey = pyqtSignal()
-    next_song_hotkey = pyqtSignal()
-    lock_hotkey = pyqtSignal()
-    calibrate_hotkey = pyqtSignal()
-    translate_hotkey = pyqtSignal()
-    show_window_hotkey = pyqtSignal()
-    close_window_hotkey = pyqtSignal()
-    open_tool_hotkey = pyqtSignal()
+    last_song_hotkey = pyqtSignal(object)
+    next_song_hotkey = pyqtSignal(object)
+    lock_hotkey = pyqtSignal(object)
+    calibrate_hotkey = pyqtSignal(object)
+    translate_hotkey = pyqtSignal(object)
+    show_window_hotkey = pyqtSignal(object)
+    close_window_hotkey = pyqtSignal(object)
+    open_tool_hotkey = pyqtSignal(object)
 
     def __init__(self, hotkey_item_names: list):
         super().__init__()
         self.hotkeys_system = SystemHotkey()
         self.hotkey_item_names = hotkey_item_names
         self.item_name_hotkeys_dict = {}
+        self.hotkeys_is_open = False
 
         for item_name in hotkey_item_names:
             # setattr(HotkeysManager, item_name, pyqtSignal())
@@ -49,9 +50,15 @@ class HotkeysManager(QObject):
             self.hotkeys_system.unregister(hotkey)
 
     def set_hotkey_enable(self, flag: bool):
+        if self.hotkeys_is_open == flag:
+            return
+
+        self.hotkeys_is_open = flag
         if flag:
-            for item_name in self.item_name_func_dict.keys():
+            for item_name in self.hotkey_item_names:
                 hotkey = self.item_name_hotkeys_dict[item_name]
+                if not hotkey:
+                    continue
                 func = getattr(self, item_name).emit
                 try:
                     self.hotkeys_system.register(hotkey, callback=func)

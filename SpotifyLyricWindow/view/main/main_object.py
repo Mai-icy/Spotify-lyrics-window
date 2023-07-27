@@ -32,6 +32,8 @@ class MainObject(QObject):
         self.lyric_manager_window = None
 
         self._init_tray_icon_signal()
+        hotkey_flag = cfg.get(cfg.enable_hotkeys)
+        self.hotkeys_system.set_hotkey_enable(hotkey_flag)
 
     def _init_tray_icon_signal(self):
         self.tray_icon.quit_signal.connect(self.quit_event)
@@ -101,7 +103,6 @@ class MainObject(QObject):
         cfg.set(cfg.height, default_pos["height"])
 
         self.lyric_window = LyricsWindowView(mode)
-        self._init_lyric_window_signal()
 
         self.lyric_window.destroyed.connect(self.lyric_window_destroyed_event)
         self._init_lyric_window_signal()
@@ -116,6 +117,7 @@ class MainObject(QObject):
 
         self.setting_window.destroyed.connect(self.setting_window_destroyed_event)
         self._init_setting_window_signal()
+        self.hotkeys_system.set_hotkey_enable(False)
         self.setting_window.show()
 
     def lyric_manager_window_show_event(self):
@@ -148,6 +150,9 @@ class MainObject(QObject):
         """设置窗口关闭连接事件"""
         # 设置窗口已经关闭释放内存，此时self.setting_window为nullptr，将此处定义为None
         self.setting_window = None
+
+        hotkey_flag = cfg.get(cfg.enable_hotkeys)
+        self.hotkeys_system.set_hotkey_enable(hotkey_flag)
 
     def lyric_manager_window_destroyed_event(self):
         self.lyric_manager_window = None
