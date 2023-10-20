@@ -90,11 +90,15 @@ class HotkeyLineEdit(LineEdit):
         if modifiers and not key:
             self.setText(" + ".join(modify.capitalize() for modify in modifiers))
             self.unvalidated = True
-        if modifiers and key:
+        if modifiers and key and "ctrl" not in modifiers:  # 使用的热键第三方库不支持ctrl
             self.set_hotkey(modifiers + [key])
             self.unvalidated = False
 
         if event.key() == Qt.Key_Escape:
+            self.unvalidated = True
+
+        # 使用的热键第三方库不支持ctrl
+        if "ctrl" in modifiers:
             self.unvalidated = True
 
         super(HotkeyLineEdit, self).keyPressEvent(event)

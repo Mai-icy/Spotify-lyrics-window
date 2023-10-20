@@ -5,6 +5,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from qfluentwidgets import InfoBar, InfoBarPosition
 
 from common.config import cfg, DisplayMode
 from common.hotkeys.hotkeys_manager import HotkeysManager
@@ -12,7 +13,6 @@ from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from view.lyric_window.lyric_window_view import LyricsWindowView
 from view.setting_window.setting_window_view import SettingWindowView
 from view.lyric_manager_window.lyric_manager_view import LyricManagerView
-
 
 class MainObject(QObject):
     def __init__(self, parent=None):
@@ -22,6 +22,9 @@ class MainObject(QObject):
                              "lock_hotkey", "calibrate_hotkey", "translate_hotkey",
                              "show_window_hotkey", "close_window_hotkey", "open_tool_hotkey"]
         self.hotkeys_system = HotkeysManager(hotkey_item_names)
+
+        self.hotkeys_system.hotkey_conflict_signal.connect(self.system_hotkey_conflict_event)
+
         self.hotkeys_system.hotkey_connect("show_window_hotkey", self.lyric_window_show_event)
         self.hotkeys_system.hotkey_connect("open_tool_hotkey", self.lyric_manager_window_show_event)
 
@@ -67,6 +70,17 @@ class MainObject(QObject):
 
     def _init_lyric_manager_signal(self):
         ...
+
+    def system_hotkey_conflict_event(self, hotkey_item_names: list):
+        InfoBar.error(
+            title='Hotkey error!',
+            content="hotkey conflict!!",
+            orient=Qt.Horizontal,
+            isClosable=True,
+            position=InfoBarPosition.BOTTOM_RIGHT,
+            duration=-1,    # won't disappear automatically
+            parent=self.setting_window
+        )
 
     def lyric_window_rebuild_event(self):
         """重新构建歌词窗口（运用于切换歌词窗口横竖模式）"""
@@ -148,6 +162,7 @@ class MainObject(QObject):
         if self._is_rebuild:
             self.lyric_window_show_event()
             self._is_rebuild = False
+            self._init_setting_window_signal()
 
     def setting_window_destroyed_event(self):
         """设置窗口关闭连接事件"""

@@ -24,6 +24,8 @@ class HotkeysManager(QObject):
     close_window_hotkey = pyqtSignal(object)
     open_tool_hotkey = pyqtSignal(object)
 
+    connected_slots = {}
+
     def __init__(self, hotkey_item_names: list):
         super().__init__()
         self.hotkeys_system = SystemHotkey()
@@ -36,16 +38,26 @@ class HotkeysManager(QObject):
             item = getattr(cfg, item_name)
             self.item_name_hotkeys_dict[item_name] = cfg.get(item)
 
-            item.valueChanged.connect(partial(self.item_change_event, item))
+            item.valueChanged.connect(partial(self._item_change_event, item_name))
 
-    def item_change_event(self, item: str, hotkey: list):
-        self.item_name_hotkeys_dict[item] = hotkey
+    def _item_change_event(self, item_name: str, hotkey: list):
+        self.item_name_hotkeys_dict[item_name] = hotkey
+        if not hotkey:
+            return
+
         try:  # 测试是否存在热键冲突
             self.hotkeys_system.register(hotkey, callback=lambda _: None)
+            for o_item_name, o_item_hotkey in self.item_name_hotkeys_dict.items():
+                if o_item_name != item_name and o_item_hotkey == hotkey:
+                    raise SystemRegisterError
+
         except SystemRegisterError:
             conflict_item_names = [item_name for item_name in self.item_name_hotkeys_dict.keys()
                                    if self.item_name_hotkeys_dict[item_name] == hotkey]
             self.hotkey_conflict_signal.emit(conflict_item_names)
+
+            item = getattr(cfg, item_name)
+            cfg.set(item, [])
         finally:
             self.hotkeys_system.unregister(hotkey)
 
@@ -70,11 +82,12 @@ class HotkeysManager(QObject):
 
     def hotkey_connect(self, item_name, func):
         signal = getattr(self, item_name)
+        self.connected_slots[item_name] = func
         signal.connect(func)
 
     def hotkey_disconnect(self, item_name):
         signal = getattr(self, item_name)
-        signal.disconnect()
+        signal.disconnect(self.connected_slots[item_name])
 
 
 if __name__ == "__main__":
