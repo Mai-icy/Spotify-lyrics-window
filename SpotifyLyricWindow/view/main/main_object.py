@@ -25,6 +25,7 @@ class MainObject(QObject):
         self.hotkeys_system.hotkey_connect("show_window_hotkey", self.lyric_window_show_event)
         self.hotkeys_system.hotkey_connect("open_tool_hotkey", self.lyric_manager_window_show_event)
 
+        self._is_rebuild = False
         # UI相关的初始化
         self.tray_icon = LyricsTrayIcon()
         self.lyric_window = None
@@ -71,8 +72,9 @@ class MainObject(QObject):
         """重新构建歌词窗口（运用于切换歌词窗口横竖模式）"""
         self.lyric_window.close()
         self.lyric_window.deleteLater()
-
-        self.lyric_window_show_event()
+        # 会在之后自行触发destroy事件，运行lyric_window_destroyed_event
+        self._is_rebuild = True
+        # self._is_rebuild让运行lyric_window_destroyed_event的时候再次lyric_window_show_event()
 
     def lyric_window_show_event(self):
         if self.lyric_window is not None:
@@ -141,10 +143,11 @@ class MainObject(QObject):
         self.hotkeys_system.hotkey_disconnect("translate_hotkey")
         self.hotkeys_system.hotkey_disconnect("close_window_hotkey")
 
-        self.lyric_window.close()
-        self.lyric_window.deleteLater()
-
         self.lyric_window = None
+
+        if self._is_rebuild:
+            self.lyric_window_show_event()
+            self._is_rebuild = False
 
     def setting_window_destroyed_event(self):
         """设置窗口关闭连接事件"""

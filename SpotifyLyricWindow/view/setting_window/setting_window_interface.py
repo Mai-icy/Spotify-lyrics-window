@@ -96,7 +96,7 @@ class SettingInterface(ScrollArea):
             self.tr('Display mode'),
             self.tr("Change the lyric display mode, vertical or horizontal"),
             texts=[
-                self.tr('Vertical'), self.tr('Horizontal'),
+                self.tr('Horizontal'), self.tr('Vertical'),
             ],
             parent=self.lyric_personal_group
         )
