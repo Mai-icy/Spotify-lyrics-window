@@ -7,6 +7,7 @@ import requests
 
 from common.api.exceptions import *
 from common.api.user_api.user_auth import SpotifyUserAuth
+from common.config import Config
 
 UserCurrentPlaying = namedtuple("UserCurrentPlaying", ["progress_ms", "artist", "track_name", "is_playing", "track_id",
                                                        "duration", "api_offset"])
@@ -84,7 +85,9 @@ class SpotifyUserApi:
             self.load_client_id_secret()
         url = self.USER_PLAYER_URL + url_suffix
         func = getattr(requests, method)
-        res = func(url, headers=self._get_auth_header(), params=kwargs)
+        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+        proxy = {"https": proxy_ip} if proxy_ip else {}
+        res = func(url, headers=self._get_auth_header(), params=kwargs, proxies=proxy)
         if res.status_code == 204 and url_suffix == "currently-playing":
             raise NoActiveUser("no user active")
         if res.status_code == 200:

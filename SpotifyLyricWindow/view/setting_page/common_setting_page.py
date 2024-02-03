@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 import weakref
 
+from requests.exceptions import ProxyError
 from PyQt5.QtWidgets import *
 
 from common.api.user_api import SpotifyUserAuth
@@ -93,6 +94,10 @@ class CommonPage(QWidget, Ui_CommonPage):
             self.auth.load_client_config()
         except NotImplementedError as e:
             self.lyric_window.error_msg_show_signal.emit(e)
+            return
+        except ProxyError:
+            error = ProxyError("代理错误 请在配置文件检查代理并重启")
+            self.lyric_window.error_msg_show_signal.emit(error)
             return
         self.lyric_window.text_show_signal.emit(1, "成功设置client配置！", 0)
         self.lyric_window.text_show_signal.emit(2, "♪(^∇^*)", 0)

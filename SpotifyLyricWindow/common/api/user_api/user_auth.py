@@ -34,6 +34,8 @@ class SpotifyUserAuth:
             self.auth_code = None
             self.client_id = Config.CommonConfig.ClientConfig.client_id
             self.client_secret = Config.CommonConfig.ClientConfig.client_secret
+            self.proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+            self.proxy = {"https": self.proxy_ip} if self.proxy_ip else {}
             auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
             self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
             if TOKEN_PATH.exists():
@@ -45,6 +47,9 @@ class SpotifyUserAuth:
     def load_client_config(self):
         self.client_id = Config.CommonConfig.ClientConfig.client_id
         self.client_secret = Config.CommonConfig.ClientConfig.client_secret
+        self.proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+        self.proxy = {"https": self.proxy_ip} if self.proxy_ip else {}
+
         auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
         self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
         try:
@@ -81,7 +86,7 @@ class SpotifyUserAuth:
             'state': self.state
         }
         # suffix_url = "?" + "&".join(f"{it[0]}={it[1]}" for it in url_param.items())
-        auth_code = requests.get(self.AUTH_AUTHORIZE_URL, url_param)
+        auth_code = requests.get(self.AUTH_AUTHORIZE_URL, url_param, proxies=self.proxy)
         return auth_code.url
 
     def receive_user_auth_code(self) -> str:
@@ -117,7 +122,7 @@ class SpotifyUserAuth:
             "redirect_uri": "http://localhost:8888/callback",
             "grant_type": 'authorization_code'
         }
-        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, data=form, headers=self.auth_client_header).json()
+        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, data=form, headers=self.auth_client_header, proxies=self.proxy).json()
         self.user_token_info["expires_at"] = int(time.time()) + self.user_token_info["expires_in"]
         self.save_token()
 
@@ -127,7 +132,7 @@ class SpotifyUserAuth:
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
         }
-        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payloads).json()
+        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payloads, proxies=self.proxy).json()
         if not self.user_token_info.get("expires_in"):
             # print(self.user_token_info)  # {'error': 'invalid_grant', 'error_description': 'Refresh token revoked'}
             raise NoAuthError("请先引导用户完成验证")
@@ -164,7 +169,7 @@ class SpotifyUserAuth:
     def _fetch_client_access_token(self):
         """获取token"""
         payload = {"grant_type": "client_credentials"}
-        response = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payload)
+        response = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payload, proxies=self.proxy)
         if response.json().get("error") == 'invalid_client':
             raise NotImplementedError("请在设置输入您的client_id以及client_secret")
         response.raise_for_status()

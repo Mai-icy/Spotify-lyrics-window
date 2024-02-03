@@ -19,6 +19,7 @@ class Config:
         class ClientConfig:
             client_id: str = ""
             client_secret: str = ""
+            proxy_ip: str = ""
 
         class PathConfig:
             temp_file_path: str = ""

@@ -8,6 +8,7 @@ import requests
 from common.api.user_api.user_auth import SpotifyUserAuth
 from common.api.lyric_api.base_lyric_api import BaseMusicApi
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
+from common.config import Config
 
 
 class SpotifyApi(BaseMusicApi):
@@ -23,7 +24,10 @@ class SpotifyApi(BaseMusicApi):
 
         url = self._SEARCH_SONG_ID_URL.format(keyword, (page - 1) * 10)
 
-        res_json = requests.get(url, headers=self._get_token()).json()
+        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+        proxy = {"https": proxy_ip} if proxy_ip else {}
+
+        res_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
         song_info_list = []
         for data in res_json['tracks']['items']:
             artists_list = [info["name"] for info in data["artists"]]
@@ -39,7 +43,9 @@ class SpotifyApi(BaseMusicApi):
 
     def search_song_info(self, song_id: str, *, download_pic: bool = False, pic_size: int = 0):
         url = self._SEARCH_SONG_INFO_URL.format(song_id)
-        song_json = requests.get(url, headers=self._get_token()).json()
+        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+        proxy = {"https": proxy_ip} if proxy_ip else {}
+        song_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
 
         duration = int(song_json["duration_ms"]) // 1000
 
@@ -51,7 +57,9 @@ class SpotifyApi(BaseMusicApi):
             if pic_jsons:
                 pic_json = pic_jsons[0]
                 pic_url = pic_json["url"]
-                pic_data = requests.get(pic_url, timeout=10).content
+                proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+                proxy = {"https": proxy_ip} if proxy_ip else {}
+                pic_data = requests.get(pic_url, timeout=10, proxies=proxy).content
                 pic_buffer = io.BytesIO(pic_data)
             else:
                 pic_buffer = None
