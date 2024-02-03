@@ -51,6 +51,9 @@ class Config(QConfig):
     client_secret = ConfigItem(
         "Account", "ClientSecret", "")
 
+    proxy_ip = ConfigItem(
+        "Proxy", "ProxyIP", None)
+
     pos_x = ConfigItem(
         "Position", "Pos_x", 500)
     pos_y = ConfigItem(
