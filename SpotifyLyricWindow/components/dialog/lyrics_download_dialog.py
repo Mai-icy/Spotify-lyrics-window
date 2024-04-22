@@ -9,8 +9,7 @@ from PyQt5.QtWidgets import *
 from components.raw_ui import Ui_LyricsDownloadDialog
 from components.dialog import WarningDialog
 from components.work_thread import thread_drive
-from common.api.lyric_api import CloudMusicWebApi, KugouApi
-from common.api.exceptions import NoneResultError
+from common.api.lyric_api import CloudMusicWebApi, KugouApi, SpotifyApi
 from common.api.exceptions import NoneResultError, NetworkError
 from common.temp_manage import TempFileManage
 
@@ -149,6 +148,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
     @thread_drive()
     def result_click_event(self, item):
         """点击搜索结果事件"""
+        self.search_tableWidget.setEnabled(False)
         title = self.search_tableWidget.item(item.row(), 0).text()
         singer = self.search_tableWidget.item(item.row(), 1).text()
         api = self.search_tableWidget.item(item.row(), 3).text()

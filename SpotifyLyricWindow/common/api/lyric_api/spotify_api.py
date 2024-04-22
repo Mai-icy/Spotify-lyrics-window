@@ -16,10 +16,29 @@ from common.lyric.lyric_type import LrcFile
 class SpotifyApi(BaseMusicApi):
     _SEARCH_SONG_ID_URL = "https://api.spotify.com/v1/search?query={}&type=track&offset={}&limit=10"
     _SEARCH_SONG_INFO_URL = "https://api.spotify.com/v1/tracks/{}"
-    _FETCH_LYRIC_URL = None
+    _FETCH_LYRIC_URL = "https://spclient.wg.spotify.com/color-lyrics/v2/track/{}?format=json&market=from_token"
+
+    _TOKEN_URL = 'https://open.spotify.com/get_access_token?reason=transport&productType=web_player'
 
     def __init__(self):
         self.auth = SpotifyUserAuth()
+        dc_token = "sp_dc here"
+        self.web_session = requests.Session()
+        self.web_session.cookies.set('sp_dc', dc_token)
+        self.web_session.headers['User-Agent'] = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, "
+                                                  "like Gecko) Chrome/101.0.4951.41 Safari/537.36")
+        self.web_session.headers['app-platform'] = 'WebPlayer'
+        # self._web_login()
+
+    def _web_login(self):
+        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+        proxy = {"https": proxy_ip} if proxy_ip else {}
+        try:
+            req = self.web_session.get(self._TOKEN_URL, allow_redirects=False, proxies=proxy)
+            token = req.json()
+            self.web_session.headers['authorization'] = f"Bearer {token['accessToken']}"
+        except Exception as e:
+            raise UserError("sp_dc provided is invalid, please check it again!") from e
 
     def search_song_id(self, keyword: str, page: int = 1):
         keyword = re.sub(r"|[!@#$%^&*/]+", "", keyword)
@@ -85,7 +104,25 @@ class SpotifyApi(BaseMusicApi):
         return SongInfo(**song_info)
 
     def fetch_song_lyric(self, song_id: str):
-        raise NotImplementedError("non lyric api")
+        url = self._FETCH_LYRIC_URL.format(song_id)
+
+        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+        proxy = {"https": proxy_ip} if proxy_ip else {}
+
+        lrc_file = LrcFile()
+        try:
+            res = self.web_session.get(url, proxies=proxy)
+        except requests.RequestException:
+            raise NetworkError("spotify歌词api获取失败")
+        if res.status_code == requests.status_codes.codes.not_found:
+            return lrc_file
+
+        res_json = res.json()
+
+        for line in res_json['lyrics']['lines']:
+            lrc_file.trans_non_dict[int(line['startTimeMs'])] = line['words']
+
+        return lrc_file
 
     def _get_token(self):
         return {"Authorization": "Bearer {0}".format(self.auth.get_client_token()),
@@ -101,3 +138,6 @@ if __name__ == "__main__":
     pprint(test_api.search_song_id("miku"))
     print("\n----test----(search_song_info)")
     print(test_api.search_song_info("5mJ8Sj9EqT9UgpWY1RnEi2", download_pic=True))
+    print("\n----test----(fetch_song_lyric)")
+    pprint(test_api.fetch_song_lyric("6CIQOFf01zQ9qJaqhD6rlH").trans_non_dict)
+
