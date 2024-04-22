@@ -2,7 +2,7 @@
 # -*- coding:utf-8 -*-
 import sys
 import time
-import webbrowser
+from selenium import webdriver
 from functools import wraps
 from types import MethodType
 
@@ -267,13 +267,22 @@ class LyricsWindow(LyricsWindowView):
         self.text_show_signal.emit(2, "(灬°ω°灬)", 0)
 
         auth_url = self.spotify_auth.auth.get_user_auth_url()
-        webbrowser.open_new(auth_url)
+        # webbrowser.open_new(auth_url)
+        driver = webdriver.Edge()
+        driver.get(auth_url)
+
         self.text_show_signal.emit(1, "请根据页面完成授权", 0)
         self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
 
         self.spotify_auth.auth.receive_user_auth_code()
+        driver.get("https://open.spotify.com/get_access_token?reason=transport&productType=web_player")
+        sp_dc = driver.get_cookie("sp_dc")["value"]
+        driver.quit()
+
         self.text_show_signal.emit(1, "正在获取验证", 0)
         self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
+
+        Config.CommonConfig.ClientConfig.sp_dc = sp_dc
         self.spotify_auth.auth.get_user_access_token()
         self.text_show_signal.emit(1, "验证成功！", 0)
         self.calibration_event()

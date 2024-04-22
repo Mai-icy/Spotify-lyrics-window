@@ -19,6 +19,7 @@ class Config:
         class ClientConfig:
             client_id: str = ""
             client_secret: str = ""
+            sp_dc: str = ""
             proxy_ip: str = ""
 
         class PathConfig:

@@ -22,12 +22,15 @@ class SpotifyApi(BaseMusicApi):
 
     def __init__(self):
         self.auth = SpotifyUserAuth()
-        dc_token = "sp_dc here"
+
         self.web_session = requests.Session()
+        dc_token = Config.CommonConfig.ClientConfig.sp_dc
         self.web_session.cookies.set('sp_dc', dc_token)
         self.web_session.headers['User-Agent'] = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, "
                                                   "like Gecko) Chrome/101.0.4951.41 Safari/537.36")
         self.web_session.headers['app-platform'] = 'WebPlayer'
+
+        self.is_login = False
         # self._web_login()
 
     def _web_login(self):
@@ -37,8 +40,9 @@ class SpotifyApi(BaseMusicApi):
             req = self.web_session.get(self._TOKEN_URL, allow_redirects=False, proxies=proxy)
             token = req.json()
             self.web_session.headers['authorization'] = f"Bearer {token['accessToken']}"
+            self.is_login = True
         except Exception as e:
-            raise UserError("sp_dc provided is invalid, please check it again!") from e
+            raise UserError("sp_dc 无效，请重新用户验证") from e
 
     def search_song_id(self, keyword: str, page: int = 1):
         keyword = re.sub(r"|[!@#$%^&*/]+", "", keyword)
@@ -104,6 +108,9 @@ class SpotifyApi(BaseMusicApi):
         return SongInfo(**song_info)
 
     def fetch_song_lyric(self, song_id: str):
+        if not self.is_login:
+            self._web_login()
+
         url = self._FETCH_LYRIC_URL.format(song_id)
 
         proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
@@ -116,6 +123,12 @@ class SpotifyApi(BaseMusicApi):
             raise NetworkError("spotify歌词api获取失败")
         if res.status_code == requests.status_codes.codes.not_found:
             return lrc_file
+        if res.status_code == requests.status_codes.codes.unauthorized:
+            self.is_login = False
+            raise UserError("web 会话未登录")
+        if res.status_code in (requests.status_codes.codes.forbidden, requests.status_codes.codes.bad):
+            self.is_login = False
+            raise UserError("web token已失效, 请重新获取")
 
         res_json = res.json()
 
