@@ -2,7 +2,6 @@
 # -*- coding:utf-8 -*-
 import io
 
-import requests
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -12,6 +11,7 @@ from components.dialog import WarningDialog
 from components.work_thread import thread_drive
 from common.api.lyric_api import CloudMusicWebApi, KugouApi
 from common.api.exceptions import NoneResultError
+from common.api.exceptions import NoneResultError, NetworkError
 from common.temp_manage import TempFileManage
 
 
@@ -106,14 +106,25 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
 
         keyword = self.search_lineEdit.text()
 
+        network_error = False
+
         try:
             res_kugou = self.kugou_api.search_song_id(keyword)
         except NoneResultError:
             res_kugou = []
+        except NetworkError:
+            res_kugou = []
+            self._load_detail_signal.emit(("连接到kugou网络错误", ""))
+            network_error = True
+
         try:
             res_cloud = self.cloud_api.search_song_id(keyword)
         except NoneResultError:
             res_cloud = []
+        except NetworkError:
+            res_cloud = []
+            self._load_detail_signal.emit(("连接到网易云网络错误", ""))
+            network_error = True
 
         # 交叉合并搜索结果，在前的优先级高
         res_list = []
@@ -127,7 +138,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
                 new_data = (data.songName, data.singer, data.duration, "cloud", data.idOrMd5)
                 res_list.append(new_data)
 
-        if not res_list:
+        if not res_list and not network_error:
             self._load_detail_signal.emit(("搜索词无结果", ""))
             return
 
@@ -152,9 +163,13 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
 
         if not image.getvalue():
             self.image_label.clear()
-            self.image_label.setText("正在获取封面")
-
-            song_data = data_api.search_song_info(track_id, download_pic=True, pic_size=64)
+            # self.image_label.setText("正在获取封面") 引发崩溃
+            try:
+                song_data = data_api.search_song_info(track_id, download_pic=True, pic_size=64)
+            except NetworkError:
+                self._load_detail_signal.emit(("网络错误，获取失败", ""))
+                self.search_tableWidget.setEnabled(True)
+                return
             image = song_data.picBuffer
             if image:
                 self.temp_file_manage.save_temp_image(track_id, image)
@@ -169,7 +184,9 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
                 pix.loadFromData(image.read())
                 self.image_label.setPixmap(pix)
             else:
-                self.image_label.setText("无图片")
+                # self.image_label.setText("无图片")
+                ...
+        self.search_tableWidget.setEnabled(True)
 
     def download_event(self, item=None):
         """下载歌词事件"""
@@ -186,7 +203,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             data_api = self.cloud_api
         try:
             lrc = data_api.fetch_song_lyric(track_id_or_md5)
-        except requests.RequestException as e:
+        except (NetworkError, NoneResultError) as e:
             self.warning_dialog.show()
             self.warning_dialog.set_text(str(e))
             return

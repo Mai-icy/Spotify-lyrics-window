@@ -9,6 +9,8 @@ from common.api.user_api.user_auth import SpotifyUserAuth
 from common.api.lyric_api.base_lyric_api import BaseMusicApi
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
 from common.config import Config
+from common.api.exceptions import UserError, NetworkError
+from common.lyric.lyric_type import LrcFile
 
 
 class SpotifyApi(BaseMusicApi):
@@ -26,8 +28,10 @@ class SpotifyApi(BaseMusicApi):
 
         proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
         proxy = {"https": proxy_ip} if proxy_ip else {}
-
-        res_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
+        try:
+            res_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
+        except requests.RequestException as e:
+            raise NetworkError("spotify查找歌曲失败") from e
         song_info_list = []
         for data in res_json['tracks']['items']:
             artists_list = [info["name"] for info in data["artists"]]
@@ -45,7 +49,10 @@ class SpotifyApi(BaseMusicApi):
         url = self._SEARCH_SONG_INFO_URL.format(song_id)
         proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
         proxy = {"https": proxy_ip} if proxy_ip else {}
-        song_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
+        try:
+            song_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
+        except requests.RequestException as e:
+            raise NetworkError("spotify查询歌曲数据失败") from e
 
         duration = int(song_json["duration_ms"]) // 1000
 

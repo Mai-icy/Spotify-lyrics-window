@@ -87,7 +87,10 @@ class SpotifyUserApi:
         func = getattr(requests, method)
         proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
         proxy = {"https": proxy_ip} if proxy_ip else {}
-        res = func(url, headers=self._get_auth_header(), params=kwargs, proxies=proxy)
+        try:
+            res = func(url, headers=self._get_auth_header(), params=kwargs, proxies=proxy)
+        except requests.RequestException as e:
+            raise NetworkError("spotify用户api连接失败") from e
         if res.status_code == 204 and url_suffix == "currently-playing":
             raise NoActiveUser("no user active")
         if res.status_code == 200:

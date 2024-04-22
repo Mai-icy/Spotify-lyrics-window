@@ -3,7 +3,7 @@
 import requests
 
 from common.api.lyric_api import CloudMusicWebApi, KugouApi, SpotifyApi
-from common.api.exceptions import NoneResultError
+from common.api.exceptions import NoneResultError, NetworkError
 from common.song_metadata import compare_song_info
 from common.lyric import LyricFileManage
 from common.path import LRC_PATH
@@ -23,12 +23,12 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
     try:
         cloud_song_id = cloud_api.search_song_id(track_name)[0].idOrMd5
         cloud_song_info = cloud_api.search_song_info(cloud_song_id)
-    except NoneResultError:
+    except (NetworkError, NoneResultError):
         cloud_song_info = cloud_song_id = None
     try:
         kugou_song_md5 = kugou_api.search_song_id(track_name)[0].idOrMd5
         kugou_song_info = kugou_api.search_song_info(kugou_song_md5)
-    except NoneResultError:
+    except (NetworkError, NoneResultError):
         kugou_song_info = kugou_song_md5 = None
 
     score_cloud = compare_song_info(cloud_song_info, spotify_info)
@@ -40,7 +40,7 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
             lrc = kugou_api.fetch_song_lyric(kugou_song_md5)
             if lrc.empty():
                 raise NoneResultError
-        except (requests.RequestException, NoneResultError):
+        except (NetworkError, NoneResultError):
             score_kugou = 0
 
     if score_cloud >= score_kugou and score_cloud > min_score:
@@ -50,7 +50,7 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
                 lrc.save_to_mrc(str(file_name))
                 LyricFileManage().set_track_id_map(track_id, track_name)
                 return True
-        except requests.RequestException:
+        except NetworkError:
             pass
     return False
 

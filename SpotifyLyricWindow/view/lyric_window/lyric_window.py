@@ -173,8 +173,8 @@ class LyricsWindow(LyricsWindowView):
         :param use_api_position: 是否使用api的时间进行校准
         """
         if not no_text_show:
-            self.set_lyrics_text(1, "calibrating！")
-            self.set_lyrics_text(2, " (o゜▽゜)o!")
+            self.text_show_signal.emit(1, "calibrating！", 0)
+            self.text_show_signal.emit(2, " (o゜▽゜)o!", 0)
 
         self.lrc_player.set_pause(True)
         user_current = self.spotify_auth.get_current_playing()
@@ -190,8 +190,9 @@ class LyricsWindow(LyricsWindowView):
         self.set_lyrics_rolling(user_current.is_playing)
 
         if not user_current.track_id:  # 正在播放非音乐（track）
-            self.set_lyrics_text(1, user_current.track_name + "!")
-            self.set_lyrics_text(2, "o(_ _)ozzZZ")
+            self.text_show_signal.emit(1, user_current.track_name + "!", 0)
+            self.text_show_signal.emit(2, "o(_ _)ozzZZ", 0)
+
             self.lrc_player.seek_to_position(0)
             if not self.media_session.is_connected():
                 self._refresh_player_track(user_current)
@@ -262,19 +263,19 @@ class LyricsWindow(LyricsWindowView):
         """获取用户api权限"""
         self.lrc_player.is_pause = True
 
-        self.set_lyrics_text(1, "正在获取授权链接")
-        self.set_lyrics_text(2, "(灬°ω°灬)")
+        self.text_show_signal.emit(1, "正在获取授权链接", 0)
+        self.text_show_signal.emit(2, "(灬°ω°灬)", 0)
 
         auth_url = self.spotify_auth.auth.get_user_auth_url()
         webbrowser.open_new(auth_url)
-        self.set_lyrics_text(1, "请根据页面完成授权")
-        self.set_lyrics_text(2, "ヾ(≧ ▽ ≦)ゝ")
+        self.text_show_signal.emit(1, "请根据页面完成授权", 0)
+        self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
 
         self.spotify_auth.auth.receive_user_auth_code()
-        self.set_lyrics_text(1, "正在获取验证")
-        self.set_lyrics_text(2, "ヾ(≧ ▽ ≦)ゝ")
+        self.text_show_signal.emit(1, "正在获取验证", 0)
+        self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
         self.spotify_auth.auth.get_user_access_token()
-        self.set_lyrics_text(1, "验证成功！")
+        self.text_show_signal.emit(1, "验证成功！", 0)
         self.calibration_event()
 
     def lyric_offset_add_event(self):
@@ -315,8 +316,8 @@ class LyricsWindow(LyricsWindowView):
         :param error: 引发的错误实例
         """
         self.lrc_player.is_pause = True
-        self.set_lyrics_text(1, str(error))
-        self.set_lyrics_text(2, "Σっ°Д°;)っ!")
+        self.text_show_signal.emit(1, str(error), 0)
+        self.text_show_signal.emit(2, "Σっ°Д°;)っ!", 0)
         if isinstance(error, NoPermission):
             self.delay_calibration()
 
@@ -349,19 +350,19 @@ class LyricsWindow(LyricsWindowView):
         found_data = self.lyric_file_manage.get_not_found(user_current.track_id)
         if found_data and int(time.time()) - found_data["last_time"] < 24 * 3600:
             # 最近 24h 内自动下载过但是失败 将在 24h 后重试 24h 内将不重试
-            self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
-            self.set_lyrics_text(2, f"no lyric found")
+            self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
+            self.text_show_signal.emit(2, f"no lyric found", 0)
             return self._refresh_player_track()
 
-        self.set_lyrics_text(1, "searching for lyric!")
-        self.set_lyrics_text(2, f"(〃'▽'〃)")
+        self.text_show_signal.emit(1, "searching for lyric!", 0)
+        self.text_show_signal.emit(2, f"(〃'▽'〃)", 0)
 
         is_success = download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id)
         if not is_success:  # 成功下载
             self.lyric_file_manage.set_not_found(user_current.track_id,
                                                  f"{user_current.track_name} - {user_current.artist}")
-            self.set_lyrics_text(1, f"{user_current.track_name} - {user_current.artist}")
-            self.set_lyrics_text(2, f"no lyric found")
+            self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
+            self.text_show_signal.emit(2, f"no lyric found", 0)
 
         return self._refresh_player_track()
 

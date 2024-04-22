@@ -7,7 +7,7 @@ from time import localtime
 
 import requests
 
-from common.api.exceptions import NoneResultError
+from common.api.exceptions import NoneResultError, NetworkError
 from common.api.lyric_api.base_lyric_api import BaseMusicApi
 from common.lyric.lyric_type import LrcFile, TransType
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
@@ -21,8 +21,10 @@ class CloudMusicWebApi(BaseMusicApi):
     def search_song_id(self, keyword: str, page: int = 1) -> List[SongSearchInfo]:
         keyword = re.sub(r"|[!@#$%^&*/]+", "", keyword)
         url = self._SEARCH_SONG_ID_URL.format(keyword, (page - 1) * 20)
-
-        res_json = requests.post(url, timeout=4, proxies={"https": None, "http": None}).json()
+        try:
+            res_json = requests.post(url, timeout=4, proxies={"https": None, "http": None}).json()
+        except requests.exceptions.RequestException as e:
+            raise NetworkError("网易云搜索歌词出错") from e
 
         if res_json["result"] == {} or res_json['code'] == 400 or res_json["result"]['songCount'] == 0:  # 该关键词没有结果
             raise NoneResultError
@@ -45,10 +47,13 @@ class CloudMusicWebApi(BaseMusicApi):
 
     def search_song_info(self, song_id: str, *, download_pic: bool = False, pic_size: int = 0) -> SongInfo:
         url = self._SEARCH_SONG_INFO_URL.format(song_id, song_id)
-        res_json = requests.post(url, timeout=10, proxies={"https": None, "http": None}).json()
+        try:
+            res_json = requests.post(url, timeout=10, proxies={"https": None, "http": None}).json()
+        except requests.exceptions.RequestException as e:
+            raise NetworkError("网易云查找歌词信息出错") from e
 
         if res_json['code'] == 400 or res_json['code'] == 406:
-            raise requests.RequestException("访问过于频繁或接口失效")
+            raise NetworkError("访问过于频繁或接口失效")
 
         song_json = res_json['songs'][0]
         artists_list = [info["name"] for info in song_json["artists"]]
@@ -59,7 +64,11 @@ class CloudMusicWebApi(BaseMusicApi):
             else:
                 param = {"param": f"{pic_size}y{pic_size}"}
             pic_url = song_json["album"]["picUrl"]
-            pic_data = requests.get(pic_url, timeout=10, params=param, proxies={"https": None, "http": None}).content
+            try:
+                pic_data = requests.get(pic_url, timeout=10, params=param,
+                                        proxies={"https": None, "http": None}).content
+            except requests.exceptions.RequestException as e:
+                raise NetworkError("网易云歌曲图片获取失败") from e
             pic_buffer = io.BytesIO(pic_data)
         else:
             pic_buffer = None
@@ -77,7 +86,11 @@ class CloudMusicWebApi(BaseMusicApi):
         return song_info
 
     def fetch_song_lyric(self, song_id: str) -> LrcFile:
-        res_json = requests.get(self._FETCH_LYRIC_URL.format(song_id), timeout=10, proxies={"https": None, "http": None}).json()
+        try:
+            res_json = requests.get(self._FETCH_LYRIC_URL.format(song_id), timeout=10,
+                                    proxies={"https": None, "http": None}).json()
+        except requests.exceptions.RequestException as e:
+            raise NetworkError("网易云下载歌词失败") from e
         lrc_file = LrcFile()
         lrc_file.load_content(res_json['lrc']['lyric'], TransType.NON)
         if res_json.get('tlyric', None):

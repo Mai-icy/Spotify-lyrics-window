@@ -7,7 +7,7 @@ from typing import List, Dict
 
 import requests
 
-from common.api.exceptions import NoneResultError
+from common.api.exceptions import NoneResultError, NetworkError
 from common.api.lyric_api.base_lyric_api import BaseMusicApi
 from common.lyric.lyric_type import KrcFile
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
@@ -29,7 +29,10 @@ class KugouApi(BaseMusicApi):
     def search_song_id(self, keyword: str, page: int = 1) -> List[SongSearchInfo]:
         keyword = re.sub(r"|[!@#$%^&*/]+", "", keyword)
         url = self._SEARCH_SONG_ID_URL.format(keyword, page)
-        res_json = requests.get(url, headers=self.header, timeout=4, proxies={"https": None, "http": None}).json()
+        try:
+            res_json = requests.get(url, headers=self.header, timeout=4, proxies={"https": None, "http": None}).json()
+        except requests.exceptions.RequestException as e:
+            raise NetworkError("酷狗查询歌词失败") from e
 
         song_info_list = []
 
@@ -45,18 +48,24 @@ class KugouApi(BaseMusicApi):
         if song_info_list:
             return song_info_list
         else:
-            raise NoneResultError
+            raise NoneResultError("该搜索词无对应歌曲")
 
     def search_song_info(self, md5: str, *, download_pic: bool = False, pic_size: int = 0) -> SongInfo:
-        song_json = requests.get(self._SEARCH_SONG_INFO_URL.format(md5), headers=self.header, timeout=4,
-                                 proxies={"https": None, "http": None}).json()
+        try:
+            song_json = requests.get(self._SEARCH_SONG_INFO_URL.format(md5), headers=self.header, timeout=4,
+                                     proxies={"https": None, "http": None}).json()
+        except requests.RequestException as e:
+            raise NetworkError("酷狗搜索歌词信息失败") from e
         duration = song_json["timeLength"]
         album_img = str(song_json["album_img"])
         year = album = None
         album_id = song_json["albumid"]  # if not found, the 'album_id' is 0
         if album_id:
-            album_json = requests.get(self._SEARCH_ALBUM_INFO_URL.format(album_id),
-                                      headers=self.header, timeout=4, proxies={"https": None, "http": None}).json()
+            try:
+                album_json = requests.get(self._SEARCH_ALBUM_INFO_URL.format(album_id),
+                                          headers=self.header, timeout=4, proxies={"https": None, "http": None}).json()
+            except requests.RequestException as e:
+                raise NetworkError("酷狗搜索歌词专辑信息失败") from e
             album = album_json["data"].get("albumname", None)
             year = album_json["data"].get("publishtime", None)  # like '2021-08-11 00:00:00'
 
@@ -66,7 +75,10 @@ class KugouApi(BaseMusicApi):
             pic_url = album_img.replace("/{size}/", "/")  # original pic
 
         if download_pic and pic_url:
-            pic_data = requests.get(pic_url, timeout=10, proxies={"https": None, "http": None}).content
+            try:
+                pic_data = requests.get(pic_url, timeout=10, proxies={"https": None, "http": None}).content
+            except requests.RequestException as e:
+                raise NetworkError("酷狗获取专辑图片失败") from e
             pic_buffer = io.BytesIO(pic_data)
         else:
             pic_buffer = None
@@ -95,7 +107,10 @@ class KugouApi(BaseMusicApi):
         :return: Contains a list of basic lyrics data.
         """
         url = self._GET_KEY_SEARCH_URL.format(md5)
-        res_json = requests.get(url, headers=self.header, timeout=4, proxies={"https": None, "http": None}).json()
+        try:
+            res_json = requests.get(url, headers=self.header, timeout=4, proxies={"https": None, "http": None}).json()
+        except requests.RequestException as e:
+            raise NetworkError("获取酷狗歌词信息失败") from e
         if res_json['errcode'] != 200:
             raise requests.RequestException(res_json["info"])
         res_list = []
@@ -113,7 +128,7 @@ class KugouApi(BaseMusicApi):
         if res_list:
             return res_list
         else:
-            raise NoneResultError
+            raise NoneResultError("该下载歌词无内容")
 
     def _get_lrc(self, lyric_info: dict) -> KrcFile:
         """
@@ -123,7 +138,10 @@ class KugouApi(BaseMusicApi):
         :return: Content of the lyrics.
         """
         url = self._FETCH_LYRIC_URL.format(lyric_info["id"], lyric_info["key"], 'krc')
-        res_json = requests.get(url, timeout=4, proxies={"https": None, "http": None}).json()
+        try:
+            res_json = requests.get(url, timeout=4, proxies={"https": None, "http": None}).json()
+        except requests.RequestException as e:
+            raise NetworkError("酷狗下载歌词失败") from e
         content = res_json['content']
         result = base64.b64decode(content.encode())
 
