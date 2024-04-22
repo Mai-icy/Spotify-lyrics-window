@@ -34,6 +34,8 @@ class SpotifyUserApi:
     def get_current_playing(self):
         start_time = int(time.time() * 1000)
         res = self._player_http("get", "currently-playing")
+        if res.status_code == requests.status_codes.codes.forbidden:
+            raise UserError("请在spotify Dashboard注册此用户")
         end_time = int(time.time() * 1000)
         offset = end_time - start_time
         res_json = res.json()
