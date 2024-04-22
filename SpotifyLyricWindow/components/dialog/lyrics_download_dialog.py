@@ -54,6 +54,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         """初始化使用的歌词api"""
         self.kugou_api = KugouApi()
         self.cloud_api = CloudMusicWebApi()
+        self.spotify_api = SpotifyApi()
 
     def _init_table_widget(self):
         """初始化表格属性"""
@@ -108,6 +109,15 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         network_error = False
 
         try:
+            res_spotify = self.spotify_api.search_song_id(keyword)
+        except NoneResultError:
+            res_spotify = []
+        except NetworkError:
+            res_spotify = []
+            self._load_detail_signal.emit(("连接到spotify网络错误", ""))
+            network_error = True
+
+        try:
             res_kugou = self.kugou_api.search_song_id(keyword)
         except NoneResultError:
             res_kugou = []
@@ -127,7 +137,11 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
 
         # 交叉合并搜索结果，在前的优先级高
         res_list = []
-        for i in range(len(res_kugou) + len(res_cloud)):
+        for i in range(len(res_kugou) + len(res_cloud) + len(res_spotify)):
+            if res_spotify:
+                data = res_spotify.pop(0)
+                new_data = (data.songName, data.singer, data.duration, "spotify", data.idOrMd5)
+                res_list.append(new_data)
             if res_kugou:
                 data = res_kugou.pop(0)
                 new_data = (data.songName, data.singer, data.duration, "kugou", data.idOrMd5)
@@ -155,6 +169,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         track_id = self.search_tableWidget.item(item.row(), 4).text()
         if api == "kugou":
             data_api = self.kugou_api
+        elif api == "spotify":
+            data_api = self.spotify_api
         else:
             data_api = self.cloud_api
 
@@ -199,6 +215,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         api = self.search_tableWidget.item(item.row(), 3).text()
         if api == "kugou":
             data_api = self.kugou_api
+        elif api == "spotify":
+            data_api = self.spotify_api
         else:
             data_api = self.cloud_api
         try:
