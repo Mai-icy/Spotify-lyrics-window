@@ -7,7 +7,7 @@ spotify 歌词滚动窗口
 
 ## 🤔Features 特性
 
-- Lyric Api from Kugou and NetEase CloudMusic. 歌词来源于网易云酷狗
+- Lyric Api from Kugou, NetEase CloudMusic and Spotify. 歌词来源于网易云酷狗以及Spotify
 
 - Operable control to play songs. 可以操控播放
 
@@ -23,7 +23,13 @@ spotify 歌词滚动窗口
 2. Create a developer app and edit its setting. 打开新创建的应用并且编辑设置
 3. add ```http://localhost:8888/callback``` to your **Redirect URIs** setting. 将该网址加入此设置项
 4. Run the program and open setting page. Put your client_id and client_secret in it. 运行程序并打开设置窗口输入您获取到的app id以及密码
-5. click the sure and enjoy it! 😋 按下确定，然后试试！
+5. Click the user icon in the window to complete the authorization. 点击窗口的用户图标完成授权
+6. click the sure and enjoy it! 😋 按下确定，然后试试！
+
+
+## ⚠️ notice 注意
+ - This project will obtain your sp_dc and store it locally, please keep it properly 本项目会获取你的sp_dc存入本地，请妥善保存
+ - The spotify api has instability biases that this project uses to connect to MediaSession. spotify api有不稳定偏差，本项目使用连接MediaSession来解决
 
 ## 🎼 example 用例
 
@@ -48,5 +54,6 @@ Manage and download Lyrics 管理和下载歌词
 - [x] Common settings page 设置常规页面
 - [x] Lyrics displayed vertically 竖向歌词显示
 - [x] Beautify the window 美化窗口
-- [ ] More lyric api 更多的歌词api
+- [x] More lyric api 更多的歌词api
+- [ ] Use qfluentwidget
 - [ ] etc.
