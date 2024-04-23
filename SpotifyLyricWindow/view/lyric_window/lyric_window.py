@@ -119,6 +119,8 @@ class LyricsWindow(LyricsWindowView):
     def player_done_event(self):
         """当前歌曲播放的事件"""
         self._manual_skip_flag = False
+        if not self.media_session.is_connected():
+            self.calibration_event()
 
     def media_properties_changed(self, info: MediaPropertiesInfo):
         self.lrc_player.set_pause(True)

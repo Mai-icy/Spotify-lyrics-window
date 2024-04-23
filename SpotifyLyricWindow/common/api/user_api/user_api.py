@@ -36,6 +36,11 @@ class SpotifyUserApi:
         res = self._player_http("get", "currently-playing")
         if res.status_code == requests.status_codes.codes.forbidden:
             raise UserError("请在spotify Dashboard注册此用户")
+        if res.status_code == requests.status_codes.codes.unauthorized:
+            raise UserError("用户token无效，请刷新token")
+        if res.status_code == requests.status_codes.codes.too_many_requests:
+            raise UserError("api请求数已达上限")
+
         end_time = int(time.time() * 1000)
         offset = end_time - start_time
         res_json = res.json()
