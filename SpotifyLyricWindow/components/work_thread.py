@@ -6,16 +6,35 @@ from types import MethodType
 from PyQt5.QtCore import QThread, pyqtSignal
 
 
+class ThreadManager:
+    def __init__(self):
+        self.threads = []
+
+    def add_thread(self, thread):
+        self.threads.append(thread)
+        thread.finished.connect(lambda: self.remove_thread(thread))
+
+    def remove_thread(self, thread):
+        self.threads.remove(thread)
+        thread.deleteLater()
+
+
+thread_manager = ThreadManager()
+
+
 def thread_drive(done_emit_func=None):
     """修饰线程驱动的类成员函数（槽函数必须依附于设置槽函数的线程）"""
     def outer(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            self.work_thread = WorkThread(func, self, *args, **kwargs)
+            work_thread = WorkThread(func, self, *args, **kwargs)
+            thread_manager.add_thread(work_thread)
             if done_emit_func:
                 res_func = MethodType(done_emit_func, self)
-                self.work_thread.finished.connect(res_func)
-            self.work_thread.start()
+                work_thread.finished.connect(res_func)
+            work_thread.start()
+            self.work_thread = work_thread
+
         return wrapper
     return outer
 

@@ -76,6 +76,8 @@ class SpotifyApi(BaseMusicApi):
             song_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
         except requests.RequestException as e:
             raise NetworkError("spotify查询歌曲数据失败") from e
+        if song_json.get("error"):
+            raise NetworkError("spotify查询歌曲数据失败")
 
         duration = int(song_json["duration_ms"]) // 1000
 
