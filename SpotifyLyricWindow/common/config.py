@@ -27,8 +27,8 @@ class Config:
             lyrics_file_path: str = ""
 
         class PositionConfig:
-            pos_x: int = 500
-            pos_y: int = 900
+            pos_x: int = 0
+            pos_y: int = 0
             width: int = 800
             height: int = 150
 
