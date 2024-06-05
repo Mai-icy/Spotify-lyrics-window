@@ -10,7 +10,7 @@ from components.raw_ui import Ui_LyricsDownloadDialog
 from components.dialog import WarningDialog
 from components.work_thread import thread_drive
 from common.api.lyric_api import CloudMusicWebApi, KugouApi, SpotifyApi
-from common.api.exceptions import NoneResultError, NetworkError
+from common.api.exceptions import NoneResultError, NetworkError, UserError
 from common.temp_manage import TempFileManage
 
 
@@ -211,6 +211,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
 
         if not item:
             return
+        self.search_tableWidget.setEnabled(False)
+
         track_id_or_md5 = self.search_tableWidget.item(item.row(), 4).text()
         api = self.search_tableWidget.item(item.row(), 3).text()
         if api == "kugou":
@@ -221,10 +223,12 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             data_api = self.cloud_api
         try:
             lrc = data_api.fetch_song_lyric(track_id_or_md5)
-        except (NetworkError, NoneResultError) as e:
+        except (NetworkError, NoneResultError, UserError) as e:
             self.warning_dialog.show()
             self.warning_dialog.set_text(str(e))
+            self.search_tableWidget.setEnabled(True)
             return
+        self.search_tableWidget.setEnabled(True)
         self.download_lrc_signal.emit(lrc)
         self.close()
 

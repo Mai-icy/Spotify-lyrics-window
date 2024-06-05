@@ -282,7 +282,8 @@ class LyricsWindow(LyricsWindowView):
             raise UserError("端口8888被占用，请检查端口占用")
 
         driver.get("https://open.spotify.com/get_access_token?reason=transport&productType=web_player")
-        sp_dc = driver.get_cookie("sp_dc")["value"]
+        sp_dc_dict = driver.get_cookie("sp_dc") or {}
+        sp_dc = sp_dc_dict.get("value")
         driver.quit()
 
         self.text_show_signal.emit(1, "正在获取验证", 0)
