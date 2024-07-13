@@ -18,8 +18,11 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
     file_name = LRC_PATH / f"{track_id}.mrc"
 
     # min_score = 74  # 最低相似度评分
+    try:
+        spotify_info = spotify_api.search_song_info(track_id)
+    except NetworkError as e:
+        raise e
 
-    spotify_info = spotify_api.search_song_info(track_id)
     try:
         cloud_song_id = cloud_api.search_song_id(track_name)[0].idOrMd5
         cloud_song_info = cloud_api.search_song_info(cloud_song_id)

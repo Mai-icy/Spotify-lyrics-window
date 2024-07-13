@@ -13,7 +13,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-from common.api.exceptions import UserError, NoPermission
+from common.api.exceptions import UserError, NoPermission, NetworkError
 from common.api.user_api import SpotifyUserApi
 from common.config import Config
 from common.lyric import LyricFileManage
@@ -40,6 +40,8 @@ class CatchError:
             new_err = Exception("Requests Error")
             args[0].error_msg_show_signal.emit(new_err)
         except NotImplementedError as e:
+            args[0].error_msg_show_signal.emit(str(e))
+        except NetworkError as e:
             args[0].error_msg_show_signal.emit(str(e))
         except Exception as e:
             raise e
@@ -203,6 +205,8 @@ class LyricsWindow(LyricsWindowView):
 
         if not self.lyric_file_manage.is_lyric_exist(user_current.track_id):
             user_current = self._download_lyric(user_current)
+            if user_current is None:
+                return
         else:
             if self.lyric_file_manage.get_not_found(user_current.track_id):  # 歌词文件存在 但 被记录为不存在
                 self.lyric_file_manage.set_not_found(user_current.track_id, "")  # 将 不存在 记录撤去
@@ -358,6 +362,7 @@ class LyricsWindow(LyricsWindowView):
         self.lrc_player.set_track(track_id, duration)
         return user_current
 
+    @CatchError
     def _download_lyric(self, user_current: UserCurrentPlaying) -> UserCurrentPlaying:
         """
         根据 用户播放信息 下载歌词
