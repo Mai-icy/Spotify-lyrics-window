@@ -138,10 +138,6 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         # 交叉合并搜索结果，在前的优先级高
         res_list = []
         for i in range(len(res_kugou) + len(res_cloud) + len(res_spotify)):
-            if res_spotify:
-                data = res_spotify.pop(0)
-                new_data = (data.songName, data.singer, data.duration, "spotify", data.idOrMd5)
-                res_list.append(new_data)
             if res_kugou:
                 data = res_kugou.pop(0)
                 new_data = (data.songName, data.singer, data.duration, "kugou", data.idOrMd5)
@@ -149,6 +145,10 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             if res_cloud:
                 data = res_cloud.pop(0)
                 new_data = (data.songName, data.singer, data.duration, "cloud", data.idOrMd5)
+                res_list.append(new_data)
+            if res_spotify:
+                data = res_spotify.pop(0)
+                new_data = (data.songName, data.singer, data.duration, "spotify", data.idOrMd5)
                 res_list.append(new_data)
 
         if not res_list and not network_error:

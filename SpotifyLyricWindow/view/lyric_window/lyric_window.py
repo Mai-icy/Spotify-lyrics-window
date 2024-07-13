@@ -3,6 +3,7 @@
 import sys
 import time
 from selenium import webdriver
+import webbrowser
 from functools import wraps
 from types import MethodType
 
@@ -269,9 +270,9 @@ class LyricsWindow(LyricsWindowView):
         self.text_show_signal.emit(2, "(灬°ω°灬)", 0)
 
         auth_url = self.spotify_auth.auth.get_user_auth_url()
-        # webbrowser.open_new(auth_url)
-        driver = webdriver.Edge()
-        driver.get(auth_url)
+        webbrowser.open_new(auth_url)
+        # driver = webdriver.Edge()
+        # driver.get(auth_url)
 
         self.text_show_signal.emit(1, "请根据页面完成授权", 0)
         self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
@@ -281,15 +282,16 @@ class LyricsWindow(LyricsWindowView):
             self.account_button.setEnabled(True)
             raise UserError("端口8888被占用，请检查端口占用")
 
-        driver.get("https://open.spotify.com/get_access_token?reason=transport&productType=web_player")
-        sp_dc_dict = driver.get_cookie("sp_dc") or {}
-        sp_dc = sp_dc_dict.get("value")
-        driver.quit()
+        # driver.get("https://open.spotify.com/get_access_token?reason=transport&productType=web_player")
+        # sp_dc_dict = driver.get_cookie("sp_dc") or {}
+        # sp_dc = sp_dc_dict.get("value")
+        # driver.quit()
 
         self.text_show_signal.emit(1, "正在获取验证", 0)
         self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
 
-        Config.CommonConfig.ClientConfig.sp_dc = sp_dc
+        # Config.CommonConfig.ClientConfig.sp_dc = sp_dc
+        # 模拟浏览器行为会导致登陆被阻止，放弃自动获取sp_dc的行为，改为用户自己添加。
         self.spotify_auth.auth.get_user_access_token()
         self.text_show_signal.emit(1, "验证成功！", 0)
         self.calibration_event()

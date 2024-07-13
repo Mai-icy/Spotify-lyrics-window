@@ -28,7 +28,8 @@ spotify 歌词滚动窗口
 
 
 ## ⚠️ notice 注意
- - This project will obtain your sp_dc and store it locally, please keep it properly 本项目会获取你的sp_dc存入本地，请妥善保存
+ - if you need proxy, fill your `proxy_ip` in the `resource/setting.toml` such as `http:127.0.0.1:2333`, only spotify through the proxy. 如果需要代理，请在`resource/setting.toml`中填写代理ip，只有spotify会使用代理。
+ - sp_dc requires you to get and fill in the `resource/setting.toml` yourself. 如果需要获取spotify的歌词，需要手动填入sp_dc在配置文件中
  - The spotify api has instability biases that this project uses to connect to MediaSession. spotify api有不稳定偏差，本项目使用连接MediaSession来解决
 
 ## 🎼 example 用例

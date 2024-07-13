@@ -42,7 +42,7 @@ class SpotifyApi(BaseMusicApi):
             self.web_session.headers['authorization'] = f"Bearer {token['accessToken']}"
             self.is_login = True
         except Exception as e:
-            raise UserError("sp_dc 无效，请重新用户验证") from e
+            raise UserError("请在配置文件更新sp_dc") from e
 
     def search_song_id(self, keyword: str, page: int = 1):
         keyword = re.sub(r"|[!@#$%^&*/]+", "", keyword)
