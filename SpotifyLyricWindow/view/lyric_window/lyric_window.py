@@ -287,7 +287,8 @@ class LyricsWindow(LyricsWindowView):
         self.text_show_signal.emit(1, "请根据页面完成授权", 0)
         self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
         try:
-            self.spotify_auth.auth.receive_user_auth_code()
+            if not self.spotify_auth.auth.is_listen:
+                self.spotify_auth.auth.receive_user_auth_code()
         except OSError:
             self.account_button.setEnabled(True)
             raise UserError("端口8888被占用，请检查端口占用")

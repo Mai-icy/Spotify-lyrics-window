@@ -28,6 +28,7 @@ class SpotifyUserAuth:
 
     def __init__(self):
         if not self._is_init:
+            self.is_listen = False
             self.user_token_info = None
             self.client_token_info = None
             self.state = None
@@ -90,6 +91,7 @@ class SpotifyUserAuth:
         return auth_code.url
 
     def receive_user_auth_code(self) -> str:
+        self.is_listen = True
         receive_address = ('127.0.0.1', 8888)
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server.bind(receive_address)
@@ -110,8 +112,10 @@ class SpotifyUserAuth:
             client.send(html_content)
             client.recv(1024)  # 确保发回html页面提示用户关闭
             self.auth_code = auth_code
+            self.is_listen = False
             return auth_code
         else:
+            self.is_listen = False
             raise Exception("验证失败")
 
     def get_user_access_token(self):
