@@ -26,6 +26,8 @@ class CloudMusicWebApi(BaseMusicApi):
         except requests.exceptions.RequestException as e:
             raise NetworkError("网易云搜索歌词出错") from e
 
+        if res_json.get("abroad"):
+            raise NoneResultError
         if res_json["result"] == {} or res_json['code'] == 400 or res_json["result"]['songCount'] == 0:  # 该关键词没有结果
             raise NoneResultError
 
