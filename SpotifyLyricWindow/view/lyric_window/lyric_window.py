@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 import sys
 import time
+import logging
 from selenium import webdriver
 import webbrowser
 from functools import wraps
@@ -26,6 +27,10 @@ from view.lyric_window.lyrics_window_view import LyricsWindowView
 from view.setting_window import SettingWindow
 from components.work_thread import thread_drive
 
+logging.basicConfig(filename='resource/error.log',
+                    level=logging.ERROR,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 class CatchError:
     def __init__(self, func):
@@ -44,7 +49,8 @@ class CatchError:
         except NetworkError as e:
             args[0].error_msg_show_signal.emit(str(e))
         except Exception as e:
-            raise e
+            logging.error("Unknown Error", exc_info=True)
+            args[0].error_msg_show_signal.emit("Unknown Error. Refer to log (resource/error.log)")
 
     def __get__(self, instance, cls):
         if instance is None:
