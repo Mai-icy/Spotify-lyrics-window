@@ -56,6 +56,10 @@ class KugouApi(BaseMusicApi):
                                      proxies={"https": None, "http": None}).json()
         except requests.RequestException as e:
             raise NetworkError("酷狗搜索歌词信息失败") from e
+
+        if song_json.get("errcode") != 0:
+            raise NetworkError("无法获取kugou歌词")
+
         duration = song_json["timeLength"]
         album_img = str(song_json["album_img"])
         year = album = None
