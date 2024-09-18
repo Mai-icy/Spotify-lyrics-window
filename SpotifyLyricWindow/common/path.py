@@ -30,6 +30,8 @@ TEMP_DATA_FILE_PATH = TEMP_PATH / "temp.json"
 
 SETTING_TOML_PATH = BASE_PATH / Path(r"resource/setting.toml")
 
+ERROR_LOG_PATH = BASE_PATH / Path(r"resource/error.log")
+
 
 def path_check():
     """check the path, if not exists, create it"""
