@@ -1,9 +1,8 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import logging
 import sys
 import time
-import logging
-from selenium import webdriver
 import webbrowser
 from functools import wraps
 from types import MethodType
@@ -13,21 +12,21 @@ from PyQt5 import QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-
 from common.api.exceptions import UserError, NoPermission, NetworkError
 from common.api.user_api import SpotifyUserApi
 from common.config import Config
 from common.lyric import LyricFileManage
 from common.lyric.lyric_download import download_lrc
+from common.path import ERROR_LOG_PATH
 from common.player import LrcPlayer
 from common.temp_manage import TempFileManage
 from common.typing import TransType, UserCurrentPlaying, MediaPropertiesInfo, MediaPlaybackInfo
 from common.win_utils import WindowsMediaSession
+from components.work_thread import thread_drive
 from view.lyric_window.lyrics_window_view import LyricsWindowView
 from view.setting_window import SettingWindow
-from components.work_thread import thread_drive
 
-logging.basicConfig(filename='resource/error.log',
+logging.basicConfig(filename=ERROR_LOG_PATH,
                     level=logging.ERROR,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
