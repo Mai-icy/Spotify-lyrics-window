@@ -101,9 +101,12 @@ class SpotifyUserApi:
         if res.status_code == 204 and url_suffix == "currently-playing":
             raise NoActiveUser("no user active")
         if res.status_code == 200:
-            res_json = res.json()
-            if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
-                raise NoPermission("Premium required!")
+            try:
+                res_json = res.json()
+                if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
+                    raise NoPermission("Premium required!")
+            except requests.exceptions.JSONDecodeError:
+                pass
         return res
 
 
