@@ -227,7 +227,7 @@ class LyricsWindow(LyricsWindowView):
     @CatchError
     def set_user_next_event(self, *_):
         """播放下一首歌"""
-        if self.media_session.skip_next_media():
+        if self.media_session.is_connected() and self.media_session.skip_next_media():
             return
         self.spotify_auth.set_user_next()
         time.sleep(0.5)
@@ -237,7 +237,7 @@ class LyricsWindow(LyricsWindowView):
     @CatchError
     def set_user_previous_event(self, *_):
         """播放上一首歌"""
-        if self.media_session.skip_previous_media():
+        if self.media_session.is_connected() and self.media_session.skip_previous_media():
             return
         self.spotify_auth.set_user_previous()
         time.sleep(0.5)
@@ -247,7 +247,7 @@ class LyricsWindow(LyricsWindowView):
     @CatchError
     def pause_resume_button_event(self, *_):
         """暂停/恢复 播放 事件"""
-        if self.media_session.play_pause_media():
+        if self.media_session.is_connected() and self.media_session.play_pause_media():
             return
 
         current_user = self.spotify_auth.get_current_playing()
