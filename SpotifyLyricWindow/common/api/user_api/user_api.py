@@ -105,7 +105,7 @@ class SpotifyUserApi:
                 res_json = res.json()
                 if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
                     raise NoPermission("Premium required!")
-            except requests.exceptions.JSONDecodeError:
+            except requests.JSONDecodeError:
                 pass
         return res
 
