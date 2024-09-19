@@ -91,6 +91,16 @@ class WindowsMediaSession:
                 if not self._is_connect:
                     self._init_signal_func(current_session)
                 return current_session
+
+        for current_session in all_sessions:
+            if current_session:
+                name = str(current_session.source_app_user_model_id)
+                if not name.startswith("Chromium."):
+                    continue
+                if not self._is_connect:
+                    self._init_signal_func(current_session)
+                return current_session
+
         self._is_connect = False
         raise NoSpotifyRunning
 
