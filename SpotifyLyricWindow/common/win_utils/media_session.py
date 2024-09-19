@@ -102,7 +102,7 @@ class WindowsMediaSession:
                 return current_session
 
         self._is_connect = False
-        raise NoSpotifyRunning
+        # raise NoSpotifyRunning
 
     async def _media_async_operate(self, operate, *args) -> bool:
         """MediaSession 对应操作函数"""
@@ -176,10 +176,12 @@ class WindowsMediaSession:
 
     def is_connected(self) -> bool:
         """是否连接上spotify桌面应用"""
+        asyncio.run(self._get_media_session())
         return self._is_connect
 
     def connect_spotify(self):
         """尝试连接spotify桌面应用"""
+        asyncio.run(self._get_media_session())
         if self._is_connect:
             return True
         try:
