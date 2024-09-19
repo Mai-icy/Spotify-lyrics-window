@@ -1,5 +1,6 @@
 /SpotifyLyricWindow/resource/setting.toml
 /SpotifyLyricWindow/resource/token
+/SpotifyLyricWindow/resource/error.log
 /SpotifyLyricWindow/download/
 **/.idea
 **/.vs
