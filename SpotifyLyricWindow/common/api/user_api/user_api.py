@@ -4,6 +4,7 @@ import time
 from collections import namedtuple
 
 import requests
+import json
 
 from common.api.exceptions import *
 from common.api.user_api.user_auth import SpotifyUserAuth
@@ -105,7 +106,7 @@ class SpotifyUserApi:
                 res_json = res.json()
                 if res_json.get("error") and res_json.get("error").get('reason') == 'PREMIUM_REQUIRED':
                     raise NoPermission("Premium required!")
-            except requests.JSONDecodeError:
+            except json.JSONDecodeError:
                 pass
         return res
 
