@@ -388,12 +388,12 @@ class LyricsWindow(LyricsWindowView):
         self.text_show_signal.emit(2, f"(〃'▽'〃)", 0)
 
         is_success = download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id)
-        if not is_success:  # 成功下载
+        if not is_success:  # 没有成功下载
             self.lyric_file_manage.set_not_found(user_current.track_id,
                                                  f"{user_current.track_name} - {user_current.artist}")
             self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
             self.text_show_signal.emit(2, f"no lyric found", 0)
-
+        self.delay_calibration()
         return self._refresh_player_track()
 
     def closeEvent(self, event: QCloseEvent):
