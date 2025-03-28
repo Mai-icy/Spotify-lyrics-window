@@ -56,5 +56,6 @@ Manage and download Lyrics 管理和下载歌词
 - [x] Lyrics displayed vertically 竖向歌词显示
 - [x] Beautify the window 美化窗口
 - [x] More lyric api 更多的歌词api
+- [ ] update 更新至pyqt6以支持维护
 - [ ] Use qfluentwidget
 - [ ] etc.
