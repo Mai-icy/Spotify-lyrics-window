@@ -8,6 +8,7 @@ from functools import wraps, partial
 from io import BytesIO
 from types import MethodType
 
+
 from winrt.windows.media.control import (
     GlobalSystemMediaTransportControlsSessionManager as MediaManager,
     GlobalSystemMediaTransportControlsSession as MediaSession,
@@ -169,8 +170,9 @@ class WindowsMediaSession:
         playback_info = session.get_playback_info()
         info = MediaPlaybackInfo(
             playStatus=playback_info.playback_status,
-            duration=timeline_properties.end_time.duration // 10000,
-            position=timeline_properties.position.duration // 10000  # position并不会实时更新 而是每过一段时间更新一次 会触发信号
+            duration=(timeline_properties.end_time.seconds * 1000 + timeline_properties.end_time.microseconds // 1000),
+            position=(timeline_properties.position.seconds * 1000 + timeline_properties.position.microseconds // 1000)
+            # position并不会实时更新 而是每过一段时间更新一次 会触发信号
         )
         return info
 
