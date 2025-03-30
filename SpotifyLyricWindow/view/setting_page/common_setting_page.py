@@ -3,7 +3,7 @@
 import weakref
 
 from requests.exceptions import ProxyError
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 
 from common.api.user_api import SpotifyUserAuth
 from common.config import Config
@@ -40,7 +40,7 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def _init_line_edit(self):
         """初始化lineEdit"""
-        self.secret_lineEdit.setEchoMode(QLineEdit.PasswordEchoOnEdit)
+        self.secret_lineEdit.setEchoMode(QLineEdit.EchoMode.PasswordEchoOnEdit)
 
         self.cache_path_lineEdit.setReadOnly(True)
         self.lyrics_path_lineEdit.setReadOnly(True)

@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from PyQt5 import QtWidgets
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6 import QtWidgets
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 
 class VerticalLabel(QLabel):
@@ -30,7 +30,7 @@ class VerticalLabel(QLabel):
                 if ascii_text:
                     # painter 被旋转，坐标轴也会跟着变化 参考(x,y) 等价于 (y,-x) 10为补偿经验值
                     painter.drawText(QPoint(self.text_height, -paint_x - 10), ascii_text)
-                    self.text_height += font_metrics.width(ascii_text)
+                    self.text_height += font_metrics.horizontalAdvance(ascii_text)
                     ascii_text = ""
                 painter.rotate(-90)
                 self.text_height += font_metrics.height()
@@ -38,7 +38,7 @@ class VerticalLabel(QLabel):
         painter.rotate(90)
         if ascii_text:
             painter.drawText(QPoint(self.text_height, -paint_x - 10), ascii_text)
-            self.text_height += font_metrics.width(ascii_text)
+            self.text_height += font_metrics.horizontalAdvance(ascii_text)
 
         self.text_height += 1 * font_metrics.height()  # 经验值 补偿
 

@@ -4,9 +4,9 @@ import re
 import weakref
 
 import requests
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from common.api.lyric_api import SpotifyApi
 from common.lyric.lyric_manage import LyricFileManage
@@ -61,8 +61,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
     def _init_label(self):
         """初始化标签"""
         self.image_label.setScaledContents(True)
-        self.songname_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        self.singer_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.songname_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.singer_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
     def _init_dialog(self):
         """初始化对话框"""
@@ -90,8 +90,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
     def _init_list_widget(self):
         """初始化歌词文件列 添加右键菜单栏"""
-        self.lyrics_listWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.lyrics_listWidget.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.lyrics_listWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.lyrics_listWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
         self.lyrics_listWidget.customContextMenuRequested.connect(self.menu_show_event)
 
@@ -133,7 +133,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
                     item.setHidden(False)
             return
 
-        res = self.lyrics_listWidget.findItems(filter_text, Qt.MatchWrap | Qt.MatchContains)
+        res = self.lyrics_listWidget.findItems(filter_text, Qt.MatchFlag.MatchWrap | Qt.MatchFlag.MatchContains)
 
         count_ = self.lyrics_listWidget.count()
         for i in range(count_):
@@ -299,7 +299,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         list_widget_menu.addAction(del_item_action)
         del_item_action.triggered.connect(self.menu_delete_item)
 
-        list_widget_menu.exec_(self.lyrics_listWidget.mapToGlobal(position))
+        list_widget_menu.exec(self.lyrics_listWidget.mapToGlobal(position))
 
     def menu_delete_item(self):
         """删除歌词文件项事件"""

@@ -2,18 +2,17 @@
 # -*- coding:utf-8 -*-
 import sys
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from view.lyric_window.lyric_window import LyricsWindow
 import components.source
 
 
 if __name__ == "__main__":
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     myWin = LyricsWindow()
     myWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

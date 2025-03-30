@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from PyQt5 import QtWidgets
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6 import QtWidgets
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 
 class HorizontalLabel(QLabel):
@@ -12,4 +12,4 @@ class HorizontalLabel(QLabel):
 
     def getTextSize(self):
         """满足和竖向label同函数格式"""
-        return QFontMetrics(self.font()).width(self.text())
+        return QFontMetrics(self.font()).horizontalAdvance(self.text())

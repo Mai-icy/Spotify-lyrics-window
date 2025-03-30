@@ -3,7 +3,7 @@
 from functools import wraps, partial
 from types import MethodType
 
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt6.QtCore import QThread, pyqtSignal
 
 
 class ThreadManager:

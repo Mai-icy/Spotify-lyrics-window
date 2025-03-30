@@ -2,9 +2,9 @@
 # -*- coding:utf-8 -*-
 import io
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from components.raw_ui import Ui_LyricsDownloadDialog
 from components.dialog import WarningDialog
@@ -34,8 +34,8 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
     def _init_label(self):
         """初始化标签"""
         self.image_label.setScaledContents(True)
-        self.songname_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        self.singer_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        self.songname_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.singer_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
 
     def _init_signal(self):
         """初始化信号"""
@@ -66,22 +66,28 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.search_tableWidget.verticalHeader().setVisible(False)
         self.search_tableWidget.setShowGrid(False)
 
-        self.search_tableWidget.horizontalHeader().setDefaultAlignment(Qt.AlignLeft)
+        # 设置表头的默认对齐方式
+        self.search_tableWidget.horizontalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignLeft)
 
-        self.search_tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
+        # 设置垂直表头的固定大小
+        self.search_tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
         self.search_tableWidget.verticalHeader().setDefaultSectionSize(47)
         self.search_tableWidget.horizontalHeader().setMinimumHeight(30)  # 表头高度
 
-        self.search_tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.search_tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.search_tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # 设置选择模式和行为
+        self.search_tableWidget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.search_tableWidget.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.search_tableWidget.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
-        # self.search_tableWidget.clear()
+        # 设置列数
         self.search_tableWidget.setColumnCount(5)
 
-        self.search_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        self.search_tableWidget.horizontalHeader().setSectionResizeMode(2, QHeaderView.Fixed)
-        self.search_tableWidget.horizontalHeader().setSectionResizeMode(3, QHeaderView.Fixed)
+        # 设置表头列宽自动拉伸
+        self.search_tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+
+        # 设置指定列宽固定
+        self.search_tableWidget.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
+        self.search_tableWidget.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
         # self.setColumnWidth(0, 380)  # 设置指定列宽
         self.search_tableWidget.setColumnWidth(2, 55)
         self.search_tableWidget.setColumnWidth(3, 55)

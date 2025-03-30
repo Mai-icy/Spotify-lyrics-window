@@ -1,10 +1,10 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from PyQt5 import QtGui
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtGui
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from common.config import Config
 from components.widget.mask_widget import MaskWidget
@@ -22,7 +22,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
     def __init__(self, parent=None, *, lyric_window=None):
         super(SettingWindow, self).__init__(parent)
         self.lyric_window = lyric_window
-        self.setAttribute(Qt.WA_DeleteOnClose, True)  # 在关闭的时候删除对象
+        self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)  # 在关闭的时候删除对象
         self.setupUi(self)
 
         self._init_page()

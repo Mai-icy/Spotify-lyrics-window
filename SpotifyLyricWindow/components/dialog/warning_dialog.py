@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 
 from components.raw_ui import Ui_WarningDialog
 from components.widget.mask_widget import MaskWidget
