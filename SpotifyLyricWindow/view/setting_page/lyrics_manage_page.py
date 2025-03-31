@@ -29,7 +29,7 @@ class FileListWidgetItem(QListWidgetItem):
         if flag:
             self.setBackground(QColor(177, 177, 177))
         else:
-            self.setBackground(Qt.white)
+            self.setBackground(Qt.GlobalColor.white)
         self.no_lyric = flag
 
 

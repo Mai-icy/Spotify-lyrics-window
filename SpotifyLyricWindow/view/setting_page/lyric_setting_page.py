@@ -200,8 +200,3 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         """
         stylesheet = f"background:rgb({rgb[0]}, {rgb[1]}, {rgb[2]})"
         label.setStyleSheet(stylesheet)
-
-
-
-
-

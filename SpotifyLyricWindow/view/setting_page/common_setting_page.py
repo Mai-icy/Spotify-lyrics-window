@@ -123,7 +123,7 @@ class CommonPage(QWidget, Ui_CommonPage):
     def set_path_event(self, line_edit: QLineEdit):
         """设置路径事件"""
         self.setting_window.mask_.show()
-        file_path = QFileDialog.getExistingDirectory(self, "选择一个目录", "./", QFileDialog.ShowDirsOnly)
+        file_path = QFileDialog.getExistingDirectory(self, "选择一个目录", "./", QFileDialog.Option.ShowDirsOnly)
         self.setting_window.mask_.hide()
         if not file_path:
             return
@@ -178,4 +178,3 @@ class CommonPage(QWidget, Ui_CommonPage):
     @property
     def temp_file_manage(self):
         return self.temp_file_manage_()
-

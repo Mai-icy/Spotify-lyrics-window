@@ -66,15 +66,16 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         if not self.isHidden():
             self.hide()
             if flag:
-                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
             else:
-                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
+
             self.show()
         else:
             if flag:
-                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
             else:
-                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
 
     def show(self) -> None:
         # 载入配置
@@ -101,8 +102,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
 if __name__ == "__main__":
     import sys
 
-    QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     myWin = SettingWindow()
     myWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

@@ -430,7 +430,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         if not self._clicked:
             self._update_pos_index(pos)
             if self.y_index == self.x_index == 1 and self._is_locked:
-                self.set_cursor_icon(Qt.ArrowCursor)
+                self.set_cursor_icon(Qt.CursorShape.ArrowCursor)
             if not self._is_locked:
                 self.set_cursor_icon(self._drag_cursor[self.y_index][self.x_index])
 

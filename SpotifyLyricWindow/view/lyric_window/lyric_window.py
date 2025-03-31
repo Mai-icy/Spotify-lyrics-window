@@ -404,9 +404,7 @@ class LyricsWindow(LyricsWindowView):
 
 
 if __name__ == "__main__":
-    # 适配2k等高分辨率屏幕,低分辨率屏幕可以缺省
-    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     myWin = LyricsWindow()
     myWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
