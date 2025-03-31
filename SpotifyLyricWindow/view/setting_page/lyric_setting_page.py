@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtGui, QtWidgets
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from components.raw_ui import Ui_LyricsSettingsPage
 from common.typing import DisplayMode, TransType
@@ -200,8 +200,3 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         """
         stylesheet = f"background:rgb({rgb[0]}, {rgb[1]}, {rgb[2]})"
         label.setStyleSheet(stylesheet)
-
-
-
-
-

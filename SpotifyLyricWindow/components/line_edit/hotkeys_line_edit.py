@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6 import QtCore, QtGui, QtWidgets
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 
 from common.config import Config
 
@@ -73,20 +73,23 @@ class HotkeyLineEdit(QLineEdit):
         """捕获快捷键"""
         self.start_record = True
         key_value = event.key()
+
         other_key_dict = {
-            Qt.Key_Left: "left",
-            Qt.Key_Right: "right",
-            Qt.Key_Up: "up",
-            Qt.Key_Down: "down"
+            Qt.Key.Key_Left: "left",
+            Qt.Key.Key_Right: "right",
+            Qt.Key.Key_Up: "up",
+            Qt.Key.Key_Down: "down"
         }
+
         modifier_dict = {
-            Qt.AltModifier: ["alt"],
-            Qt.ShiftModifier: ["shift"],
-            Qt.ControlModifier: ["ctrl"],
-            (Qt.ControlModifier | Qt.AltModifier): ["ctrl", "alt"],
-            (Qt.ShiftModifier | Qt.ControlModifier): ["ctrl", "shift"],
-            (Qt.ShiftModifier | Qt.AltModifier): ["shift", "alt"],
-            (Qt.ShiftModifier | Qt.AltModifier | Qt.ControlModifier): ["ctrl", "shift", "alt"]
+            Qt.KeyboardModifier.AltModifier: ["alt"],
+            Qt.KeyboardModifier.ShiftModifier: ["shift"],
+            Qt.KeyboardModifier.ControlModifier: ["ctrl"],
+            (Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.AltModifier): ["ctrl", "alt"],
+            (Qt.KeyboardModifier.ShiftModifier | Qt.KeyboardModifier.ControlModifier): ["ctrl", "shift"],
+            (Qt.KeyboardModifier.ShiftModifier | Qt.KeyboardModifier.AltModifier): ["shift", "alt"],
+            (Qt.KeyboardModifier.ShiftModifier | Qt.KeyboardModifier.AltModifier | Qt.KeyboardModifier.ControlModifier)
+            : ["ctrl", "shift", "alt"]
         }
 
         key = modifiers = None
@@ -106,7 +109,7 @@ class HotkeyLineEdit(QLineEdit):
             self.set_hotkey(modifiers + [key])
             self.unvalidated = False
 
-        if event.key() == Qt.Key_Escape:
+        if event.key() == Qt.Key.Key_Escape:
             self.unvalidated = True
 
         super(HotkeyLineEdit, self).keyPressEvent(event)

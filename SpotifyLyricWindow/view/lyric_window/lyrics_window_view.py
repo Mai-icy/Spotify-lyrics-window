@@ -2,10 +2,10 @@
 # -*- coding:utf-8 -*-
 from system_hotkey import SystemHotkey
 
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtGui, QtWidgets
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 
 from components.raw_ui import Ui_VerticalLyricsWindow, Ui_HorizontalLyricsWindow
 from components.scroll_area.text_scroll_area import TextScrollArea
@@ -71,9 +71,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _init_main_window(self):
         """初始化界面控件以及属性"""
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.SplashScreen)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.SplashScreen)
         self.set_always_front(Config.LyricConfig.is_always_front)
-        self.setAttribute(Qt.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         self.set_button_hide(True)
 
@@ -117,9 +117,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self.x_index = self.y_index = -1
         # 在各个方向的 Qt.CursorShape
         self._drag_cursor = [
-            (Qt.SizeFDiagCursor, Qt.SizeVerCursor, Qt.SizeBDiagCursor),
-            (Qt.SizeHorCursor, Qt.SizeAllCursor, Qt.SizeHorCursor),
-            (Qt.SizeBDiagCursor, Qt.SizeVerCursor, Qt.SizeFDiagCursor)
+            (Qt.CursorShape.SizeFDiagCursor, Qt.CursorShape.SizeVerCursor, Qt.CursorShape.SizeBDiagCursor),
+            (Qt.CursorShape.SizeHorCursor, Qt.CursorShape.SizeAllCursor, Qt.CursorShape.SizeHorCursor),
+            (Qt.CursorShape.SizeBDiagCursor, Qt.CursorShape.SizeVerCursor, Qt.CursorShape.SizeFDiagCursor)
         ]
 
         self.move_DragPosition = 0
@@ -388,15 +388,15 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         if not self.isHidden():
             self.hide()
             if flag:
-                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
             else:
-                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
             self.show()
         else:
             if flag:
-                self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowStaysOnTopHint)
             else:
-                self.setWindowFlags(self.windowFlags() & ~Qt.WindowStaysOnTopHint)
+                self.setWindowFlags(self.windowFlags() & ~Qt.WindowType.WindowStaysOnTopHint)
 
     def enterEvent(self, event: QEvent):
         """定义鼠标移入事件,显示按钮,设置半透明背景"""
@@ -417,9 +417,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def mousePressEvent(self, event: QMouseEvent):
         """重写鼠标点击的事件"""
-        if not self._is_locked and event.button() == Qt.LeftButton:
+        if not self._is_locked and event.button() == Qt.MouseButton.LeftButton:
             self._clicked = True
-            self.move_DragPosition = event.globalPos() - self.pos()  # 开始拖动 鼠标相对窗口的位置
+            self.move_DragPosition = event.globalPosition() - QPointF(self.pos())  # 开始拖动 鼠标相对窗口的位置
             event.accept()
 
     def mouseMoveEvent(self, event: QMouseEvent):
@@ -430,7 +430,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         if not self._clicked:
             self._update_pos_index(pos)
             if self.y_index == self.x_index == 1 and self._is_locked:
-                self.set_cursor_icon(Qt.ArrowCursor)
+                self.set_cursor_icon(Qt.CursorShape.ArrowCursor)
             if not self._is_locked:
                 self.set_cursor_icon(self._drag_cursor[self.y_index][self.x_index])
 
@@ -438,7 +438,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             if self.x_index == self.y_index == 1:  # 中间 (1, 1)
                 # 拖动窗口 不改变大小
                 if self.move_DragPosition:
-                    self.move(event.globalPos() - self.move_DragPosition)
+                    self.move(event.globalPosition().toPoint() - self.move_DragPosition.toPoint())
             elif self.x_index + self.y_index >= 3:  # 右下角 或者 下 或者 右 [(2, 2), (1, 2), (2, 1)]
                 # x_index为2 代表宽度(右边)被拖动  y_index为2 代表高度(下边)被拖动。 如果被拖动，使用光标的值
                 height = pos.y() if self.y_index == 2 else self.height()

@@ -2,9 +2,9 @@
 # -*- coding:utf-8 -*-
 import math
 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
+from PyQt6.QtCore import *
 from components.label import VerticalLabel, HorizontalLabel
 from common.typing import DisplayMode
 from common.config import Config
@@ -31,8 +31,8 @@ class TextScrollArea(QScrollArea):
         self.horizontal_label.setMinimumSize(QSize(552, 38))
         self.vertical_label.setMinimumSize(QSize(38, 552))
 
-        self.horizontal_label.setAlignment(Qt.AlignCenter)
-        self.vertical_label.setAlignment(Qt.AlignCenter)
+        self.horizontal_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.vertical_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # setAttribute(Qt.WA_TranslucentBackground, True)
 
     def _init_roll(self):
@@ -66,8 +66,8 @@ class TextScrollArea(QScrollArea):
             self.setMinimumSize(QSize(38, 552))
 
         self.setContentsMargins(0, 0, 0, 0)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setWidgetResizable(True)
 
         self.setStyleSheet('border:none;background-color:transparent;')
@@ -81,9 +81,9 @@ class TextScrollArea(QScrollArea):
         self.refresh_label_size()
 
         if self.is_roll:
-            self.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            self.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
         else:
-            self.setAlignment(Qt.AlignCenter)
+            self.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
     def set_roll_time(self, roll_time: int):
         """依据roll_time通过神奇的计算公式得到滚动需要的两个参数"""
@@ -101,6 +101,7 @@ class TextScrollArea(QScrollArea):
 
         self.move_step = math.ceil(2 * (self.timer_tick_lag * roll_distance) / (roll_time * self.roll_time_rate))
         self.begin_tick = 0.5 * (1 - self.roll_time_rate) * roll_time // self.timer_tick_lag
+        self.begin_tick = int(self.begin_tick)
 
     def refresh_label_size(self):
         """刷新文本框大小，防止卡住不动"""
@@ -114,14 +115,14 @@ class TextScrollArea(QScrollArea):
         lyrics_label = self.get_current_label()
         if not self.is_roll:
             lyrics_label.resize(self.size())
-            lyrics_label.setAlignment(Qt.AlignCenter)
+            lyrics_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.setWidgetResizable(True)
         else:
             if self.display_mode == DisplayMode.Horizontal:
                 lyrics_label.resize(QSize(text_size, self.height()))
             else:
                 lyrics_label.resize(QSize(self.width(), text_size))
-            lyrics_label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+            lyrics_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
             self.setWidgetResizable(False)
 
     def get_current_label(self) -> QLabel:

@@ -3,7 +3,7 @@
 import weakref
 
 from requests.exceptions import ProxyError
-from PyQt5.QtWidgets import *
+from PyQt6.QtWidgets import *
 
 from common.api.user_api import SpotifyUserAuth
 from common.config import Config
@@ -40,7 +40,7 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def _init_line_edit(self):
         """初始化lineEdit"""
-        self.secret_lineEdit.setEchoMode(QLineEdit.PasswordEchoOnEdit)
+        self.secret_lineEdit.setEchoMode(QLineEdit.EchoMode.PasswordEchoOnEdit)
 
         self.cache_path_lineEdit.setReadOnly(True)
         self.lyrics_path_lineEdit.setReadOnly(True)
@@ -123,7 +123,7 @@ class CommonPage(QWidget, Ui_CommonPage):
     def set_path_event(self, line_edit: QLineEdit):
         """设置路径事件"""
         self.setting_window.mask_.show()
-        file_path = QFileDialog.getExistingDirectory(self, "选择一个目录", "./", QFileDialog.ShowDirsOnly)
+        file_path = QFileDialog.getExistingDirectory(self, "选择一个目录", "./", QFileDialog.Option.ShowDirsOnly)
         self.setting_window.mask_.hide()
         if not file_path:
             return
@@ -178,4 +178,3 @@ class CommonPage(QWidget, Ui_CommonPage):
     @property
     def temp_file_manage(self):
         return self.temp_file_manage_()
-

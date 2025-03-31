@@ -8,10 +8,10 @@ from functools import wraps
 from types import MethodType
 
 import requests
-from PyQt5 import QtCore
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+from PyQt6 import QtCore
+from PyQt6.QtCore import *
+from PyQt6.QtGui import *
+from PyQt6.QtWidgets import *
 from common.api.exceptions import UserError, NoPermission, NetworkError
 from common.api.user_api import SpotifyUserApi
 from common.config import Config
@@ -404,9 +404,7 @@ class LyricsWindow(LyricsWindowView):
 
 
 if __name__ == "__main__":
-    # 适配2k等高分辨率屏幕,低分辨率屏幕可以缺省
-    QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
     app = QApplication(sys.argv)
     myWin = LyricsWindow()
     myWin.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
