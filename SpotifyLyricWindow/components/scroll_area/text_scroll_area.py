@@ -101,6 +101,7 @@ class TextScrollArea(QScrollArea):
 
         self.move_step = math.ceil(2 * (self.timer_tick_lag * roll_distance) / (roll_time * self.roll_time_rate))
         self.begin_tick = 0.5 * (1 - self.roll_time_rate) * roll_time // self.timer_tick_lag
+        self.begin_tick = int(self.begin_tick)
 
     def refresh_label_size(self):
         """刷新文本框大小，防止卡住不动"""
