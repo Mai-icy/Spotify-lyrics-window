@@ -9,7 +9,6 @@ PyQt6_sip==13.10.0
 pywin32==310
 requests==2.32.3
 rtoml==0.12.0
-system-hotkey==1.0.3
 typing_extensions==4.13.0
 urllib3==2.3.0
 winrt-runtime==3.0.0
@@ -18,3 +17,4 @@ winrt-Windows.Foundation.Collections==3.0.0
 winrt-Windows.Media.Control==3.0.0
 winrt-Windows.Storage.Streams==3.0.0
 winrt-Windows.System==3.0.0
+pynput~=1.8.1

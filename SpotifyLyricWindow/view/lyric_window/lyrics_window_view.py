@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from system_hotkey import SystemHotkey
+from pynput import keyboard
 
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import *
@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import *
 from components.raw_ui import Ui_VerticalLyricsWindow, Ui_HorizontalLyricsWindow
 from components.scroll_area.text_scroll_area import TextScrollArea
 from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
-from common.typing import DisplayMode
+from common.typing import DisplayMode, Callable
 from common.config import Config
 
 
@@ -155,7 +155,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _init_hotkey(self):
         """初始化快捷键"""
-        self.hotkey = SystemHotkey()
+        self.hotkeys_listener = keyboard.GlobalHotKeys({})
 
         self.signal_dic = {
             "calibrate_button": self.calibrate_button.clicked,
@@ -204,33 +204,38 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
         :param flag: 是否 打开
         """
+        hotkey_record = {}
         for key in self.signal_dic.keys():
             hotkeys = getattr(Config.HotkeyConfig, key)
             if hotkeys and hotkeys != "null":
-                if flag and Config.HotkeyConfig.is_enable:
-                    self.hotkey.register(hotkeys,
-                                         callback=self.get_emit_func(self.signal_dic[key]))
-                else:
-                    self.hotkey.unregister(hotkeys)
+                hotkey_text = "+".join(f"<{_key}>" if len(_key) != 1 else _key for _key in hotkeys)
+                hotkey_record[hotkey_text] = self.get_emit_func(self.signal_dic[key])
 
-    def set_signal_hotkey(self, signal_key: str, hotkeys: tuple):
-        """
-        设置绑定 快捷键 以触发 对应信号
+        if flag and Config.HotkeyConfig.is_enable:
+            self.hotkeys_listener.stop()
+            self.hotkeys_listener = keyboard.GlobalHotKeys(hotkey_record)
+            self.hotkeys_listener.start()
+        else:
+            self.hotkeys_listener.stop()
 
-        :param signal_key: 代表对应信号的键  请使用self.signal_dic内的key
-        :param hotkeys: 对应快捷键 例如 ("alt", "r")
-        """
-        # 解除旧的绑定
-        old_hotkey = getattr(Config.HotkeyConfig, signal_key)
-        if old_hotkey:
-            self.hotkey.unregister(old_hotkey)
-
-        # 进行新的的绑定
-        if hotkeys:
-            self.hotkey.register(hotkeys, callback=self.get_emit_func(self.signal_dic[signal_key]))
-
-        # 同步到配置
-        setattr(Config.HotkeyConfig, signal_key, hotkeys)
+    # def set_signal_hotkey(self, signal_key: str, hotkeys: tuple):
+    #     """
+    #     设置绑定 快捷键 以触发 对应信号
+    #
+    #     :param signal_key: 代表对应信号的键  请使用self.signal_dic内的key
+    #     :param hotkeys: 对应快捷键 例如 ("alt", "r")
+    #     """
+    #     # 解除旧的绑定
+    #     old_hotkey = getattr(Config.HotkeyConfig, signal_key)
+    #     if old_hotkey:
+    #         self.hotkey.unregister(old_hotkey)
+    #
+    #     # 进行新的的绑定
+    #     if hotkeys:
+    #         self.hotkey.register(hotkeys, callback=self.get_emit_func(self.signal_dic[signal_key]))
+    #
+    #     # 同步到配置
+    #     setattr(Config.HotkeyConfig, signal_key, hotkeys)
 
     def set_lyrics_rgb(self, rgb: tuple):
         """
@@ -570,10 +575,10 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             self.calibrate_button.setHidden(False)
 
     @staticmethod
-    def get_emit_func(signal):
+    def get_emit_func(signal) -> Callable[[], None]:
         """返回对应信号触发函数，lambda函数因引用问题不使用"""
 
-        def emit_func(_):
+        def emit_func():
             signal.emit()
 
         return emit_func
