@@ -62,6 +62,10 @@ class HotkeysPage(QWidget, Ui_HotkeysPage):
 
         self.enable_hotkeys_checkBox.setChecked(Config.HotkeyConfig.is_enable)
 
+        if not Config.HotkeyConfig.is_enable:
+            for line_edit in self.line_edit_dict.values():
+                line_edit.setEnabled(False)
+
     def set_default_event(self):
         """设置初始化按钮事件"""
         default_dict = Config.get_default_dict()["HotkeyConfig"]
@@ -78,8 +82,10 @@ class HotkeysPage(QWidget, Ui_HotkeysPage):
         if self.enable_hotkeys_checkBox.isChecked() and not self.pause_hotkey_lineEdit.isEnabled():
             for line_edit in self.line_edit_dict.values():
                 line_edit.setEnabled(True)
+            Config.HotkeyConfig.is_enable = True
         elif not self.enable_hotkeys_checkBox.isChecked() and self.pause_hotkey_lineEdit.isEnabled():
             for line_edit in self.line_edit_dict.values():
                 line_edit.setEnabled(False)
+            Config.HotkeyConfig.is_enable = False
         else:
             return
