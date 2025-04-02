@@ -455,7 +455,8 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
                     # 如果下端被拉动，则使用光标的y坐标 即(0, 2)
                     new_geometry_y = pos.y() if self.y_index == 2 else self.height()
 
-                    if not (self.width() == self.minimumWidth() and pos.x() > 0):
+                    if not ((self.width() == self.minimumWidth() and pos.x() > 0)
+                            or (self.width() == self.maximumWidth() and pos.x() < 0)):
                         self.setGeometry(
                             self.geometry().x() + pos.x(),
                             self.geometry().y(),
