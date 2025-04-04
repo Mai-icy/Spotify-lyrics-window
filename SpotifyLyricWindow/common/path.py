@@ -33,6 +33,10 @@ SETTING_TOML_PATH = BASE_PATH / Path(r"resource/setting.toml")
 
 ERROR_LOG_PATH = BASE_PATH / Path(r"resource/error.log")
 
+RESOURCE_PATH = BASE_PATH / "resource"
+QSS_PATH = RESOURCE_PATH / Path(r"ui/lightstyle.qss")
+HTML_PATH = RESOURCE_PATH / Path(r"html/auth_done.html")
+
 
 def path_check():
     """check the path, if not exists, create it"""

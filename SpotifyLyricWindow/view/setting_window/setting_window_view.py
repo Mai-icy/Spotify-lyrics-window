@@ -6,6 +6,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
+from common.path import QSS_PATH
 from common.config import Config
 from components.widget.mask_widget import MaskWidget
 from components.raw_ui import Ui_SettingsWindow
@@ -48,7 +49,7 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         self.page_listWidget.itemClicked.connect(self.page_click_event)
 
     def _init_style_sheet(self):
-        with open("resource/ui/lightstyle.qss", "r") as f:
+        with QSS_PATH.open("r") as f:
             style_sheet = f.read()
         self.setStyleSheet(style_sheet)
 

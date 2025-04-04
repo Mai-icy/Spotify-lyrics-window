@@ -9,7 +9,7 @@ import time
 
 import requests
 
-from common.path import TOKEN_PATH
+from common.path import TOKEN_PATH, HTML_PATH
 from common.api.exceptions import NoAuthError
 from common.config import Config
 
@@ -107,7 +107,7 @@ class SpotifyUserAuth:
             response = "HTTP/1.1 200 OK\r\n"
             response += "\r\n"
             client.send(response.encode("utf-8"))
-            with open("resource/html/auth_done.html", "rb") as f:
+            with HTML_PATH.open("rb") as f:
                 html_content = f.read()
             client.send(html_content)
             client.recv(1024)  # 确保发回html页面提示用户关闭
