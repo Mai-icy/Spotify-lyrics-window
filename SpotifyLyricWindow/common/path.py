@@ -24,6 +24,7 @@ else:
 TEMP_IMAGE_PATH = TEMP_PATH / "image"
 
 TOKEN_PATH = BASE_PATH / Path(r"resource/token")
+LYRIC_TOKEN_PATH = BASE_PATH / Path(r"resource/lyric_token")
 
 LYRIC_DATA_FILE_PATH = LRC_PATH / "lyric.json"
 TEMP_DATA_FILE_PATH = TEMP_PATH / "temp.json"

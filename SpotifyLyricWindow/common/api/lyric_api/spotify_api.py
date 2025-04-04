@@ -2,7 +2,10 @@
 # -*- coding:utf-8 -*-
 import io
 import re
+import time
 
+import json
+import pyotp
 import requests
 
 from common.api.user_api.user_auth import SpotifyUserAuth
@@ -11,6 +14,7 @@ from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
 from common.config import Config
 from common.api.exceptions import UserError, NetworkError
 from common.lyric.lyric_type import LrcFile
+from common.path import LYRIC_TOKEN_PATH
 
 
 class SpotifyApi(BaseMusicApi):
@@ -19,30 +23,16 @@ class SpotifyApi(BaseMusicApi):
     _FETCH_LYRIC_URL = "https://spclient.wg.spotify.com/color-lyrics/v2/track/{}?format=json&market=from_token"
 
     _TOKEN_URL = 'https://open.spotify.com/get_access_token?reason=transport&productType=web_player'
-
+    _SERVER_TIME_URL = 'https://open.spotify.com/server-time'
+    _SECRET_BASE32 = 'GU2TANZRGQ2TQNJTGQ4DONBZHE2TSMRSGQ4DMMZQGMZDSMZUG4'
+    # 参考 https://github.com/akashrchandran/spotify-lyrics-api/
+    
     def __init__(self):
         self.auth = SpotifyUserAuth()
 
         self.web_session = requests.Session()
         dc_token = Config.CommonConfig.ClientConfig.sp_dc
-        self.web_session.cookies.set('sp_dc', dc_token)
-        self.web_session.headers['User-Agent'] = ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, "
-                                                  "like Gecko) Chrome/101.0.4951.41 Safari/537.36")
-        self.web_session.headers['app-platform'] = 'WebPlayer'
-
-        self.is_login = False
-        # self._web_login()
-
-    def _web_login(self):
-        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-        proxy = {"https": proxy_ip} if proxy_ip else {}
-        try:
-            req = self.web_session.get(self._TOKEN_URL, allow_redirects=False, proxies=proxy)
-            token = req.json()
-            self.web_session.headers['authorization'] = f"Bearer {token['accessToken']}"
-            self.is_login = True
-        except Exception as e:
-            raise UserError("请在配置文件更新sp_dc") from e
+        self.sp_dc = dc_token
 
     def search_song_id(self, keyword: str, page: int = 1):
         keyword = re.sub(r"|[!@#$%^&*/]+", "", keyword)
@@ -110,17 +100,27 @@ class SpotifyApi(BaseMusicApi):
         return SongInfo(**song_info)
 
     def fetch_song_lyric(self, song_id: str):
-        if not self.is_login:
-            self._web_login()
+        self._check_token_expired()
+        lyric_token = self._load_lyric_token()
 
         url = self._FETCH_LYRIC_URL.format(song_id)
 
         proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
         proxy = {"https": proxy_ip} if proxy_ip else {}
 
+        header = {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
+            "referer": "https://open.spotify.com/",
+            "origin": "https://open.spotify.com/",
+            "accept": "application/json",
+            "app-platform": "WebPlayer",
+            "spotify-app-version": "1.2.61.20.g3b4cd5b2",
+            "authorization": "Bearer {0}".format(lyric_token["accessToken"])
+        }
+
         lrc_file = LrcFile()
         try:
-            res = self.web_session.get(url, proxies=proxy)
+            res = requests.get(url, headers=header, proxies=proxy)
         except requests.RequestException:
             raise NetworkError("spotify歌词api获取失败")
         if res.status_code == requests.status_codes.codes.not_found:
@@ -142,6 +142,63 @@ class SpotifyApi(BaseMusicApi):
     def _get_token(self):
         return {"Authorization": "Bearer {0}".format(self.auth.get_client_token()),
                 "Content-Type": "application/json"}
+
+    def _check_token_expired(self):
+        cache_data = self._load_lyric_token()
+        if 'accessToken' not in cache_data or cache_data['expiration'] < int(time.time() * 1000):
+            self._get_lyric_token()
+
+    def _get_lyric_token(self):
+        server_time = self._get_server_time()
+        totp = self._generate_totp(server_time)
+        params = {
+            'reason': 'transport',
+            'productType': 'web_player',
+            'totp': totp,
+            'totpServer': totp,
+            'totpVer': '5',
+            'sTime': str(server_time),
+            'cTime': str(server_time) + '.233'
+        }
+        headers = {
+            'Referer': 'https://open.spotify.com/',
+            'Origin': 'https://open.spotify.com/',
+            'Cookie': f'sp_dc={self.sp_dc}'
+        }
+        response = requests.get(self._TOKEN_URL, headers=headers, params=params)
+        response.raise_for_status()
+        data = response.json()
+        if data.get('isAnonymous'):
+            raise UserError("请在配置文件更新sp_dc")
+
+        lyric_token = {'accessToken': data['accessToken'], 'expiration': data['accessTokenExpirationTimestampMs']}
+        with LYRIC_TOKEN_PATH.open("w") as f:
+            json.dump(lyric_token, f)
+        return lyric_token
+
+    def _get_server_time(self):
+        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
+        proxy = {"https": proxy_ip} if proxy_ip else {}
+        headers = {
+            'Referer': 'https://open.spotify.com/',
+            'Origin': 'https://open.spotify.com/',
+            'Cookie': f'sp_dc={self.sp_dc}'
+        }
+        response = requests.get(self._SERVER_TIME_URL, headers=headers, proxies=proxy)
+        if response.status_code != 200:
+            raise NetworkError("spotify服务器时间获取失败")
+        return response.json()['serverTime']
+
+    def _generate_totp(self, server_time):
+        totp = pyotp.TOTP(self._SECRET_BASE32, interval=30, digest='sha1')
+        return totp.at(int(server_time))
+
+    @staticmethod
+    def _load_lyric_token():
+        if LYRIC_TOKEN_PATH.exists():
+            with LYRIC_TOKEN_PATH.open('r') as f:
+                return json.load(f)
+        return {}
 
 
 if __name__ == "__main__":
