@@ -21,7 +21,7 @@ spotify 歌词滚动窗口
 
 1. Get your own spotify client id and secret from [spotify developer](https://developer.spotify.com/dashboard/). 从spotify开发者面板获取您的app id和密码
 2. Create a developer app and edit its setting. 打开新创建的应用并且编辑设置
-3. add ```http://localhost:8888/callback``` to your **Redirect URIs** setting. 将该网址加入此设置项
+3. add ```http://127.0.0.1:8888/callback``` to your **Redirect URIs** setting. 将该网址加入此设置项
 4. Run the program and open setting page. Put your client_id and client_secret in it. 运行程序并打开设置窗口输入您获取到的app id以及密码
 5. Click the user icon in the window to complete the authorization. 点击窗口的用户图标完成授权
 6. click the sure and enjoy it! 😋 按下确定，然后试试！
