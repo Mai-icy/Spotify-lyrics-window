@@ -82,7 +82,7 @@ class SpotifyUserAuth:
         url_param = {
             "client_id": self.client_id,
             'response_type': 'code',
-            'redirect_uri': 'http://localhost:8888/callback',
+            'redirect_uri': 'http://127.0.0.1:8888/callback',
             'scope': self._generate_scope_data(),
             'state': self.state
         }
@@ -123,7 +123,7 @@ class SpotifyUserAuth:
             raise NoAuthError("请先完成用户验证")
         form = {
             "code": self.auth_code,
-            "redirect_uri": "http://localhost:8888/callback",
+            "redirect_uri": "http://127.0.0.1:8888/callback",
             "grant_type": 'authorization_code'
         }
         self.user_token_info = requests.post(self.AUTH_TOKEN_URL, data=form, headers=self.auth_client_header, proxies=self.proxy).json()
