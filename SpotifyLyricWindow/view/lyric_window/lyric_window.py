@@ -1,11 +1,12 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import logging
+import platform
 import sys
 import time
 import webbrowser
 from functools import wraps
-from types import MethodType
+from types import MethodType, SimpleNamespace
 
 import requests
 from PyQt6 import QtCore
@@ -21,10 +22,16 @@ from common.path import ERROR_LOG_PATH
 from common.player import LrcPlayer
 from common.temp_manage import TempFileManage
 from common.typing import TransType, UserCurrentPlaying, MediaPropertiesInfo, MediaPlaybackInfo
-from common.win_utils import WindowsMediaSession
 from components.work_thread import thread_drive
 from view.lyric_window.lyrics_window_view import LyricsWindowView
 from view.setting_window import SettingWindow
+
+is_support_winrt = False
+
+if platform.system() == "Liux" and int(platform.release()) >= 10:
+    from common.win_utils import WindowsMediaSession
+    is_support_winrt = True
+
 
 logging.basicConfig(filename=ERROR_LOG_PATH,
                     level=logging.ERROR,
@@ -118,11 +125,16 @@ class LyricsWindow(LyricsWindowView):
 
     def _init_media_session(self):
         """初始化 media session"""
-        self.media_session = WindowsMediaSession()
+        if is_support_winrt:
+            self.media_session = WindowsMediaSession()
 
-        self.media_session.media_properties_changed_connect(self.media_properties_changed)
-        self.media_session.playback_info_changed_connect(self.playback_info_changed)
-        self.media_session.timeline_properties_changed_connect(self.timeline_properties_changed)
+            self.media_session.media_properties_changed_connect(self.media_properties_changed)
+            self.media_session.playback_info_changed_connect(self.playback_info_changed)
+            self.media_session.timeline_properties_changed_connect(self.timeline_properties_changed)
+        else:
+            self.media_session = SimpleNamespace()
+            self.media_session.is_connected = lambda: False
+            self.media_session.connect_spotify = lambda: False
 
     def player_done_event(self):
         """当前歌曲播放的事件"""
