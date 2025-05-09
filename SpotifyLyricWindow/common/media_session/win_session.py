@@ -6,7 +6,8 @@ import time
 from functools import wraps, partial
 from io import BytesIO
 from types import MethodType
-from common.win_utils.media_session_type import MediaPropertiesInfo, MediaPlaybackInfo
+from common.media_session.media_session_type import MediaPropertiesInfo, MediaPlaybackInfo
+from common.media_session.base_session import BaseMediaSession
 
 from winrt.windows.media.control import (
     GlobalSystemMediaTransportControlsSessionManager as MediaManager,
@@ -42,6 +43,7 @@ class _TimesCallOnce:
             self.ava_times = 0
             self.last_time = 0
             return self.__wrapped__(*args, **kwargs)
+        return None
 
     def __get__(self, instance, cls):
         if instance is None:
@@ -50,7 +52,7 @@ class _TimesCallOnce:
             return MethodType(self, instance)
 
 
-class WindowsMediaSession:
+class WindowsMediaSession(BaseMediaSession):
     """
     winrt参考：
     https://learn.microsoft.com/zh-cn/uwp/api/windows.media.control.globalsystemmediatransportcontrolssession

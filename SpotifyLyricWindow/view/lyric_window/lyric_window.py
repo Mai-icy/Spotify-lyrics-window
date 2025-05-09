@@ -29,7 +29,7 @@ from view.setting_window import SettingWindow
 is_support_winrt = False
 
 if platform.system() == "Liux" and int(platform.release()) >= 10:
-    from common.win_utils import WindowsMediaSession
+    from common.media_session.win_session import WindowsMediaSession
     is_support_winrt = True
 
 
