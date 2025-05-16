@@ -27,11 +27,14 @@ from view.lyric_window.lyrics_window_view import LyricsWindowView
 from view.setting_window import SettingWindow
 
 is_support_winrt = False
+is_support_dbus = False
 
-if platform.system() == "Liux" and int(platform.release()) >= 10:
+if platform.system() == "Windows" and int(platform.release()) >= 10:
     from common.media_session.win_session import WindowsMediaSession
     is_support_winrt = True
-
+if platform.system() == "Linux":
+    is_support_dbus = True
+    from common.media_session.linux_session import LinuxMediaSession
 
 logging.basicConfig(filename=ERROR_LOG_PATH,
                     level=logging.ERROR,
@@ -127,6 +130,12 @@ class LyricsWindow(LyricsWindowView):
         """初始化 media session"""
         if is_support_winrt:
             self.media_session = WindowsMediaSession()
+
+            self.media_session.media_properties_changed_connect(self.media_properties_changed)
+            self.media_session.playback_info_changed_connect(self.playback_info_changed)
+            self.media_session.timeline_properties_changed_connect(self.timeline_properties_changed)
+        elif is_support_dbus:
+            self.media_session = LinuxMediaSession()
 
             self.media_session.media_properties_changed_connect(self.media_properties_changed)
             self.media_session.playback_info_changed_connect(self.playback_info_changed)

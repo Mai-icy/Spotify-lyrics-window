@@ -68,6 +68,31 @@ class LinuxMediaSession(QObject, BaseMediaSession):
         self.position_req = QDBusMessage.createMethodCall(*get_args)
         self.position_req.setArguments([self.PLAYER_INTERFACE, "Position"])
 
+        self.session_bus.connect(self.SERVICE,
+                                 self.PATH,
+                                 self.PLAYER_INTERFACE,
+                                 "Seeked",
+                                 self._timeline_properties_changed_func)
+        self.session_bus.connect(self.SERVICE,
+                                 self.PATH,
+                                 self.PROP_INTERFACE,
+                                 "PropertiesChanged",
+                                 self._media_properties_playback_changed_func)
+
+    @pyqtSlot("QString", "QVariantMap")
+    def _media_properties_playback_changed_func(self, interface_name, changed_properties):
+        if changed_properties.get("Metadata"):
+            info = self.get_current_media_properties()
+            self.media_properties_changed_func(info)
+        if changed_properties.get("PlaybackStatus"):
+            info = self.get_current_playback_info()
+            self.playback_info_changed_func(info)
+
+    @pyqtSlot('qint64')
+    def _timeline_properties_changed_func(self, timestamp):
+        info = self.get_current_playback_info()
+        self.timeline_properties_changed_func(info)
+
     def get_current_media_properties(self, session=None) -> MediaPropertiesInfo:
         res_metadata = self.session_bus.call(self.metadata_req)
         metadata = res_metadata.arguments()[0]
@@ -157,6 +182,9 @@ if __name__ == "__main__":
     player = LinuxMediaSession()
     # print(player.get_current_media_properties())
     # print(player.get_current_playback_info())
-    print(player.seek_to_position_media(100))
+
+    player.timeline_properties_changed_connect(lambda _:print("timeline"))
+    player.media_properties_changed_connect(lambda _: print("media"))
+    player.playback_info_changed_connect(lambda _: print("playback"))
 
     sys.exit(app.exec())
