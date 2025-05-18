@@ -57,6 +57,6 @@ Manage and download Lyrics 管理和下载歌词
 - [x] Beautify the window 美化窗口
 - [x] More lyric api 更多的歌词api
 - [x] update 更新至pyqt6以支持维护
-- [ ] support Linux 支持 linux
+- [x] support Linux 支持 linux
 - [ ] Use qfluentwidget
 - [ ] etc.
