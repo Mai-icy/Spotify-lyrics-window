@@ -58,5 +58,6 @@ Manage and download Lyrics 管理和下载歌词
 - [x] More lyric api 更多的歌词api
 - [x] update 更新至pyqt6以支持维护
 - [x] support Linux 支持 linux
+- [ ] support English 支持英文
 - [ ] Use qfluentwidget
 - [ ] etc.
