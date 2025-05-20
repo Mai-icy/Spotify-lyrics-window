@@ -33,7 +33,7 @@ class CommonPage(QWidget, Ui_CommonPage):
     def _init_label(self):
         """初始化标签属性"""
         self.register_label.setOpenExternalLinks(True)
-        self.register_label.setText('<a href="https://developer.spotify.com/dashboard/">注册client</a>')
+        self.register_label.setText(f'<a href="https://developer.spotify.com/dashboard/">{self.tr("注册client")}</a>')
 
         self.cache_tip_label.setText("")
         self.lyrics_tip_label.setText("")
@@ -96,11 +96,11 @@ class CommonPage(QWidget, Ui_CommonPage):
             self.lyric_window.error_msg_show_signal.emit(e)
             return
         except ProxyError:
-            error = ProxyError("代理错误 请在配置文件检查代理并重启")
+            error = ProxyError(self.tr("代理错误 请在配置文件检查代理并重启"))
             self.lyric_window.error_msg_show_signal.emit(error)
             return
-        self.lyric_window.text_show_signal.emit(1, "成功设置client配置！", 0)
-        self.lyric_window.text_show_signal.emit(2, "♪(^∇^*)", 0)
+        self.lyric_window.text_show_signal.emit(1, self.tr("成功设置client配置！"), 0)
+        self.lyric_window.text_show_signal.emit(2, self.tr("♪(^∇^*)"), 0)
         self.lyric_window.delay_calibration()
 
     def set_default_event(self):
@@ -123,7 +123,7 @@ class CommonPage(QWidget, Ui_CommonPage):
     def set_path_event(self, line_edit: QLineEdit):
         """设置路径事件"""
         self.setting_window.mask_.show()
-        file_path = QFileDialog.getExistingDirectory(self, "选择一个目录", "./", QFileDialog.Option.ShowDirsOnly)
+        file_path = QFileDialog.getExistingDirectory(self, self.tr("选择一个目录"), "./", QFileDialog.Option.ShowDirsOnly)
         self.setting_window.mask_.hide()
         if not file_path:
             return
@@ -166,10 +166,9 @@ class CommonPage(QWidget, Ui_CommonPage):
     def _save_position_event(self):
         self.set_check_box_event(self.save_position_checkBox)
 
-    @staticmethod
-    def path_change_tip_event(tip_label: QLabel):
+    def path_change_tip_event(self, tip_label: QLabel):
         """修改路径事件"""
-        tip_label.setText("路径修改将在重启后生效")
+        tip_label.setText(self.tr("路径修改将在重启后生效"))
 
     @property
     def lyrics_file_manage(self):

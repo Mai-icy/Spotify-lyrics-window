@@ -200,12 +200,12 @@ class LyricsWindow(LyricsWindowView):
         """
         同步歌词
 
-        :param no_text_show: 是否显示 calibrating！ 的 正在校准提示
+        :param no_text_show: 是否显示 ‘校准中！’ 的 正在校准提示
         :param use_api_position: 是否使用api的时间进行校准
         """
         if not no_text_show:
-            self.text_show_signal.emit(1, "calibrating！", 0)
-            self.text_show_signal.emit(2, " (o゜▽゜)o!", 0)
+            self.text_show_signal.emit(1, self.tr("校准中！"), 0)
+            self.text_show_signal.emit(2, self.tr(" (o゜▽゜)o!"), 0)
 
         self.lrc_player.set_pause(True)
         user_current = self.spotify_auth.get_current_playing()
@@ -222,7 +222,7 @@ class LyricsWindow(LyricsWindowView):
 
         if not user_current.track_id:  # 正在播放非音乐（track）
             self.text_show_signal.emit(1, user_current.track_name + "!", 0)
-            self.text_show_signal.emit(2, "o(_ _)ozzZZ", 0)
+            self.text_show_signal.emit(2, self.tr("o(_ _)ozzZZ"), 0)
 
             self.lrc_player.seek_to_position(0)
             if not self.media_session.is_connected():
@@ -296,35 +296,35 @@ class LyricsWindow(LyricsWindowView):
         """获取用户api权限"""
         self.lrc_player.is_pause = True
 
-        self.text_show_signal.emit(1, "正在获取授权链接", 0)
-        self.text_show_signal.emit(2, "(灬°ω°灬)", 0)
+        self.text_show_signal.emit(1, self.tr("正在获取授权链接"), 0)
+        self.text_show_signal.emit(2, self.tr("(灬°ω°灬)"), 0)
 
         auth_url = self.spotify_auth.auth.get_user_auth_url()
         webbrowser.open_new(auth_url)
         # driver = webdriver.Edge()
         # driver.get(auth_url)
 
-        self.text_show_signal.emit(1, "请根据页面完成授权", 0)
-        self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
+        self.text_show_signal.emit(1, self.tr("请根据页面完成授权"), 0)
+        self.text_show_signal.emit(2, self.tr("ヾ(≧ ▽ ≦)ゝ"), 0)
         try:
             if not self.spotify_auth.auth.is_listen:
                 self.spotify_auth.auth.receive_user_auth_code()
         except OSError:
             self.account_button.setEnabled(True)
-            raise UserError("端口8888被占用，请检查端口占用")
+            raise UserError(self.tr("端口8888被占用，请检查端口占用"))
 
         # driver.get("https://open.spotify.com/get_access_token?reason=transport&productType=web_player")
         # sp_dc_dict = driver.get_cookie("sp_dc") or {}
         # sp_dc = sp_dc_dict.get("value")
         # driver.quit()
 
-        self.text_show_signal.emit(1, "正在获取验证", 0)
-        self.text_show_signal.emit(2, "ヾ(≧ ▽ ≦)ゝ", 0)
+        self.text_show_signal.emit(1, self.tr("正在获取验证"), 0)
+        self.text_show_signal.emit(2, self.tr("ヾ(≧ ▽ ≦)ゝ"), 0)
 
         # Config.CommonConfig.ClientConfig.sp_dc = sp_dc
         # 模拟浏览器行为会导致登陆被阻止，放弃自动获取sp_dc的行为，改为用户自己添加。
         self.spotify_auth.auth.get_user_access_token()
-        self.text_show_signal.emit(1, "验证成功！", 0)
+        self.text_show_signal.emit(1, self.tr("验证成功！"), 0)
         self.calibration_event()
 
     def lyric_offset_add_event(self):
@@ -366,7 +366,7 @@ class LyricsWindow(LyricsWindowView):
         """
         self.lrc_player.is_pause = True
         self.text_show_signal.emit(1, str(error), 0)
-        self.text_show_signal.emit(2, "Σっ°Д°;)っ!", 0)
+        self.text_show_signal.emit(2, self.tr("Σっ°Д°;)っ!"), 0)
         if isinstance(error, NoPermission):
             self.delay_calibration()
 
@@ -401,18 +401,18 @@ class LyricsWindow(LyricsWindowView):
         if found_data and int(time.time()) - found_data["last_time"] < 24 * 3600:
             # 最近 24h 内自动下载过但是失败 将在 24h 后重试 24h 内将不重试
             self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
-            self.text_show_signal.emit(2, f"no lyric found", 0)
+            self.text_show_signal.emit(2, self.tr("无歌词"), 0)
             return self._refresh_player_track()
 
-        self.text_show_signal.emit(1, "searching for lyric!", 0)
-        self.text_show_signal.emit(2, f"(〃'▽'〃)", 0)
+        self.text_show_signal.emit(1, self.tr("查找歌词中！"), 0)
+        self.text_show_signal.emit(2, self.tr("(〃'▽'〃)"), 0)
 
         is_success = download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id)
         if not is_success:  # 没有成功下载
             self.lyric_file_manage.set_not_found(user_current.track_id,
                                                  f"{user_current.track_name} - {user_current.artist}")
             self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
-            self.text_show_signal.emit(2, f"no lyric found", 0)
+            self.text_show_signal.emit(2, self.tr("无歌词"), 0)
         self.delay_calibration()
         return self._refresh_player_track()
 

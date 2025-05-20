@@ -169,7 +169,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         # 下载歌曲专辑封面
         if not image.getvalue():
             self.image_label.clear()
-            self.image_label.setText("正在获取封面")
+            self.image_label.setText(self.tr("正在获取封面"))
             try:
                 song_data = self.spotify_api.search_song_info(track_id, download_pic=True, pic_size=64)
             except requests.RequestException:
@@ -218,8 +218,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
     def export_lyric_event(self):
         """导出歌词事件"""
-        lrc_text = self.lyrics_plainTextEdit.toPlainText()
-        if not lrc_text or lrc_text == "无歌词":
+        lrc_text = self.lyrics_plainTextEdit.toPlainText()  # todo 处理略微不合适
+        if not lrc_text or lrc_text == self.tr("无歌词"):
             return
         item = self.lyrics_listWidget.currentItem()
         title = item.text()
@@ -227,7 +227,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         file_name = re.sub(r'[\\/:*?"<>|]', '-', title)
         self.setting_window.mask_.show()
 
-        file_path = QFileDialog.getSaveFileName(self, "save file", file_name, "Lyric (*.lrc);;Text files (*.txt)")
+        file_path = QFileDialog.getSaveFileName(self, self.tr("保存文件"), file_name, "Lyric (*.lrc);;Text files (*.txt)")
         self.setting_window.mask_.hide()
         if not file_path[0]:
             return
@@ -260,8 +260,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         """确认修改事件"""
         self._set_modify_mode(False)
 
-        new_lyric_text = self.lyrics_plainTextEdit.toPlainText()
-        if new_lyric_text == "无歌词":
+        new_lyric_text = self.lyrics_plainTextEdit.toPlainText()  # todo 处理略微不合适
+        if new_lyric_text == self.tr("无歌词"):
             return
 
         trans_type = TransType(self.show_comboBox.currentIndex())
@@ -286,7 +286,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             index_ = self.show_comboBox.currentIndex()
         trans_type = TransType(index_)
         if self.current_lrc.empty(trans_type):
-            self.set_plain_text_signal.emit("无歌词")
+            self.set_plain_text_signal.emit(self.tr("无歌词"))
         else:
             self.set_plain_text_signal.emit(self.current_lrc.get_content(trans_type))
 
@@ -295,7 +295,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         if not self.lyrics_listWidget.itemAt(position):
             return
         list_widget_menu = QMenu()
-        del_item_action = QAction("删除歌词", self)
+        del_item_action = QAction(self.tr("删除歌词"), self)
         list_widget_menu.addAction(del_item_action)
         del_item_action.triggered.connect(self.menu_delete_item)
 

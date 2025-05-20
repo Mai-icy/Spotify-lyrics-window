@@ -95,7 +95,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.setAcceptDrops(True)
         self.search_tableWidget.setAcceptDrops(True)  # 允许文件拖入
 
-        column_text_list = ['曲名', '歌手', '时长', '来源', 'id']
+        column_text_list = [self.tr('曲名'), self.tr('歌手'), self.tr('时长'), self.tr('来源'), self.tr('id')]
         for column in range(5):
             item = QTableWidgetItem()
             item.setText(column_text_list[column])
@@ -108,7 +108,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.search_tableWidget.clearContents()
 
         self.image_label.setPixmap(QPixmap())
-        self._load_detail_signal.emit(("正在搜索相关歌词，请稍后", ""))
+        self._load_detail_signal.emit((self.tr("正在搜索相关歌词，请稍后"), ""))
 
         keyword = self.search_lineEdit.text()
 
@@ -120,7 +120,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             res_spotify = []
         except NetworkError:
             res_spotify = []
-            self._load_detail_signal.emit(("连接到spotify网络错误", ""))
+            self._load_detail_signal.emit((self.tr("连接到spotify网络错误"), ""))
             network_error = True
 
         try:
@@ -129,7 +129,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             res_kugou = []
         except NetworkError:
             res_kugou = []
-            self._load_detail_signal.emit(("连接到kugou网络错误", ""))
+            self._load_detail_signal.emit((self.tr("连接到kugou网络错误"), ""))
             network_error = True
 
         try:
@@ -138,7 +138,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             res_cloud = []
         except NetworkError:
             res_cloud = []
-            self._load_detail_signal.emit(("连接到网易云网络错误", ""))
+            self._load_detail_signal.emit((self.tr("连接到网易云网络错误"), ""))
             network_error = True
 
         # 交叉合并搜索结果，在前的优先级高
@@ -158,12 +158,12 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
                 res_list.append(new_data)
 
         if not res_list and not network_error:
-            self._load_detail_signal.emit(("搜索词无结果", ""))
+            self._load_detail_signal.emit((self.tr("搜索词无结果"), ""))
             return
 
         self.search_tableWidget.setRowCount(len(res_list))
         self._load_data_signal.emit(res_list)
-        self._load_detail_signal.emit(("请在上方选择", ""))
+        self._load_detail_signal.emit((self.tr("请在上方选择"), ""))
 
     @thread_drive()
     def result_click_event(self, item):
@@ -189,7 +189,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             try:
                 song_data = data_api.search_song_info(track_id, download_pic=True, pic_size=64)
             except NetworkError:
-                self._load_detail_signal.emit(("网络错误，获取失败", ""))
+                self._load_detail_signal.emit((self.tr("网络错误，获取失败"), ""))
                 self.search_tableWidget.setEnabled(True)
                 return
             image = song_data.picBuffer
