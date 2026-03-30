@@ -15,6 +15,8 @@ class ThreadManager:
         thread.finished.connect(lambda: self.remove_thread(thread))
 
     def remove_thread(self, thread):
+        if thread not in self.threads:
+            return
         self.threads.remove(thread)
         thread.deleteLater()
 
