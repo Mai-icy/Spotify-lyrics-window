@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import ast
 import base64
+import json
 import random
 import re
 import socket
@@ -40,7 +42,7 @@ class SpotifyUserAuth:
             auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
             self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
             if TOKEN_PATH.exists():
-                self.user_token_info = eval(TOKEN_PATH.read_text("utf-8"))
+                self.user_token_info = self._load_token()
             # self._fetch_client_access_token()
 
             self._is_init = True
@@ -86,37 +88,40 @@ class SpotifyUserAuth:
             'scope': self._generate_scope_data(),
             'state': self.state
         }
-        # suffix_url = "?" + "&".join(f"{it[0]}={it[1]}" for it in url_param.items())
-        auth_code = requests.get(self.AUTH_AUTHORIZE_URL, url_param, proxies=self.proxy)
-        return auth_code.url
+        request = requests.Request("GET", self.AUTH_AUTHORIZE_URL, params=url_param)
+        return request.prepare().url
 
     def receive_user_auth_code(self) -> str:
         self.is_listen = True
         receive_address = ('127.0.0.1', 8888)
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server.bind(receive_address)
-        server.listen(5)
-        client, addr = server.accept()
-        raw_data = client.recv(1024).decode("utf-8")
-
         data_pattern = re.compile(r"/callback\?code=(.*)&state=(.*) HTTP/1.1")
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+                server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                server.bind(receive_address)
+                server.listen(5)
+                client, addr = server.accept()
+                with client:
+                    raw_data = client.recv(1024).decode("utf-8")
+                    result = data_pattern.findall(raw_data)
+                    if not result:
+                        raise Exception("验证失败")
 
-        auth_code, state = data_pattern.findall(raw_data)[0]
-        if state == self.state:
-            # 返回页面
-            response = "HTTP/1.1 200 OK\r\n"
-            response += "\r\n"
-            client.send(response.encode("utf-8"))
-            with HTML_PATH.open("rb") as f:
-                html_content = f.read()
-            client.send(html_content)
-            client.recv(1024)  # 确保发回html页面提示用户关闭
-            self.auth_code = auth_code
-            self.is_listen = False
-            return auth_code
-        else:
-            self.is_listen = False
+                    auth_code, state = result[0]
+                    if state == self.state:
+                        # 返回页面
+                        response = "HTTP/1.1 200 OK\r\n"
+                        response += "\r\n"
+                        client.send(response.encode("utf-8"))
+                        with HTML_PATH.open("rb") as f:
+                            html_content = f.read()
+                        client.send(html_content)
+                        client.recv(1024)  # 确保发回html页面提示用户关闭
+                        self.auth_code = auth_code
+                        return auth_code
             raise Exception("验证失败")
+        finally:
+            self.is_listen = False
 
     def get_user_access_token(self):
         if not self.auth_code:
@@ -126,7 +131,9 @@ class SpotifyUserAuth:
             "redirect_uri": "http://127.0.0.1:8888/callback",
             "grant_type": 'authorization_code'
         }
-        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, data=form, headers=self.auth_client_header, proxies=self.proxy).json()
+        self.user_token_info = requests.post(
+            self.AUTH_TOKEN_URL, data=form, headers=self.auth_client_header, proxies=self.proxy
+        ).json()
         self.user_token_info["expires_at"] = int(time.time()) + self.user_token_info["expires_in"]
         self.save_token()
 
@@ -136,7 +143,9 @@ class SpotifyUserAuth:
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
         }
-        self.user_token_info = requests.post(self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payloads, proxies=self.proxy).json()
+        self.user_token_info = requests.post(
+            self.AUTH_TOKEN_URL, headers=self.auth_client_header, data=payloads, proxies=self.proxy
+        ).json()
         if not self.user_token_info.get("expires_in"):
             # print(self.user_token_info)  # {'error': 'invalid_grant', 'error_description': 'Refresh token revoked'}
             raise NoAuthError("请先引导用户完成验证")
@@ -146,7 +155,21 @@ class SpotifyUserAuth:
         self.save_token()
 
     def save_token(self):
-        TOKEN_PATH.write_text(str(self.user_token_info), encoding="utf-8")
+        TOKEN_PATH.write_text(json.dumps(self.user_token_info, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    @staticmethod
+    def _load_token():
+        raw_token = TOKEN_PATH.read_text("utf-8").strip()
+        if not raw_token:
+            return None
+        try:
+            return json.loads(raw_token)
+        except json.JSONDecodeError:
+            # Compatibility for legacy token files that were written with str(dict).
+            try:
+                return ast.literal_eval(raw_token)
+            except (SyntaxError, ValueError):
+                return None
 
     def access_token(self):
         if not self.user_token_info:

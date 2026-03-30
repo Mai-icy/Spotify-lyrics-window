@@ -122,6 +122,7 @@ class LyricsWindow(LyricsWindowView):
         self.spotify_auth = SpotifyUserApi()
         self.delay_timer = QTimer()
         self.delay_timer.setSingleShot(True)
+        self.delay_timer.timeout.connect(self.calibration_event)
 
         if not hasattr(self, "setting_window"):
             self.setting_window = None  # 初始化为空，在打开的时候被定义，关闭的时候被释放
@@ -373,7 +374,6 @@ class LyricsWindow(LyricsWindowView):
     def delay_calibration(self):
         """延时触发校准事件"""
         self.delay_timer.start(2000)
-        self.delay_timer.timeout.connect(self.calibration_event)
 
     def _refresh_player_track(self, user_current: UserCurrentPlaying = None) -> UserCurrentPlaying:
         """
@@ -417,7 +417,8 @@ class LyricsWindow(LyricsWindowView):
         return self._refresh_player_track()
 
     def closeEvent(self, event: QCloseEvent):
-        self.lrc_player.thread_play_lrc.terminate()
+        self.delay_timer.stop()
+        self.lrc_player.close()
         del self.lrc_player
         del self.lyric_file_manage
         self.temp_manage.auto_clean_temp()

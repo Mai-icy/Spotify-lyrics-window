@@ -32,6 +32,10 @@ class LrcPlayer:
         self.thread_play_lrc = LyricThread(self)
         self.thread_play_lrc.start()
 
+    def close(self, timeout: float = 1.0):
+        self.thread_play_lrc.terminate()
+        self.thread_play_lrc.join(timeout=timeout)
+
     def get_time(self) -> int:
         """获取播放进度"""
         return int(time.time() * 1000) - self.timer_start_value + self.track_offset + self.global_offset
@@ -120,7 +124,7 @@ class LrcPlayer:
 
 class LyricThread(threading.Thread):
     def __init__(self, player: LrcPlayer):
-        super(LyricThread, self).__init__(target=self._play_lyric_thread)
+        super(LyricThread, self).__init__(target=self._play_lyric_thread, daemon=True)
         self.sleep = threading.Event()
 
         self.player_ = weakref.ref(player)
@@ -131,7 +135,7 @@ class LyricThread(threading.Thread):
 
     def _play_lyric_thread(self):
         while self.is_running:
-            if self.sleep.isSet() and self.is_running:
+            if self.sleep.is_set() and self.is_running:
                 self.sleep.clear()
             position = self.player.get_time()
             lyric_order = self.player.lrc_file.get_order_position(position)
@@ -170,11 +174,11 @@ class LyricThread(threading.Thread):
 
     @property
     def player(self):
-        if not self.player_():
+        player = self.player_()
+        if not player:
             self.terminate()
-            sys.exit(0)
-        else:
-            return self.player_()
+            raise SystemExit(0)
+        return player
 
 
 if __name__ == '__main__':
