@@ -13,7 +13,7 @@ from PyQt6 import QtCore
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
-from common.api.exceptions import UserError, NoPermission, NetworkError
+from common.api.exceptions import UserError, NoPermission, NetworkError, NoActiveUser
 from common.api.user_api import SpotifyUserApi
 from common.config import Config
 from common.lyric import LyricFileManage
@@ -152,7 +152,20 @@ class LyricsWindow(LyricsWindowView):
         if not self.media_session.is_connected():
             self.calibration_event()
 
+    def _clear_player_state(self):
+        """清空当前歌词上下文，避免旧歌词在无活跃用户时被重新唤起"""
+        self.lrc_player.set_pause(True)
+        self.lrc_player.set_track("", 0)
+        self.lrc_player.seek_to_position(0, is_show_last_lyric=False)
+        self._manual_skip_flag = True
+
+    def _has_active_track(self) -> bool:
+        return bool(self.lrc_player.track_id)
+
     def media_properties_changed(self, info: MediaPropertiesInfo):
+        if not self._has_active_track():
+            self.calibration_event(no_text_show=True)
+            return
         self.lrc_player.set_pause(True)
 
         track_title = f"{info.title} - {info.artist}"
@@ -180,6 +193,8 @@ class LyricsWindow(LyricsWindowView):
             self.calibration_event()
 
     def playback_info_changed(self, info: MediaPlaybackInfo):
+        if not self._has_active_track():
+            return
         self.lrc_player.seek_to_position(info.position)
         is_playing = info.playStatus == 4  # 4 代表正在播放 实际播放的枚举值为4
         self.lrc_player.set_pause(not is_playing)
@@ -187,7 +202,7 @@ class LyricsWindow(LyricsWindowView):
         self.set_lyrics_rolling(is_playing)
 
     def timeline_properties_changed(self, info: MediaPlaybackInfo):
-        if not self._manual_skip_flag:
+        if not self._manual_skip_flag or not self._has_active_track():
             return
         if info.position < 500 or self.lrc_player.is_pause:
             # 由于切换到下一首歌会同时触发timeline和properties的变化信号，利用position<500过滤掉切换歌时候的timeline信号
@@ -224,10 +239,7 @@ class LyricsWindow(LyricsWindowView):
         if not user_current.track_id:  # 正在播放非音乐（track）
             self.text_show_signal.emit(1, user_current.track_name + "!", 0)
             self.text_show_signal.emit(2, self.tr("o(_ _)ozzZZ"), 0)
-
-            self.lrc_player.seek_to_position(0)
-            if not self.media_session.is_connected():
-                self._refresh_player_track(user_current)
+            self._clear_player_state()
             return
 
         if not self.lyric_file_manage.is_lyric_exist(user_current.track_id):
@@ -366,6 +378,8 @@ class LyricsWindow(LyricsWindowView):
         :param error: 引发的错误实例
         """
         self.lrc_player.is_pause = True
+        if isinstance(error, NoActiveUser):
+            self._clear_player_state()
         self.text_show_signal.emit(1, str(error), 0)
         self.text_show_signal.emit(2, self.tr("Σっ°Д°;)っ!"), 0)
         if isinstance(error, NoPermission):
