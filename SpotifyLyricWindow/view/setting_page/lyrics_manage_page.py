@@ -94,6 +94,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.set_plain_text_signal.connect(self._set_plain_text_event)
         self.set_detail_label_signal.connect(self._set_detail_label_event)
         self.set_cover_pixmap_signal.connect(self._set_cover_pixmap_event)
+        self.lyrics_file_manage.notifier().changed.connect(self._lyrics_data_changed_event)
 
     def _init_list_widget(self):
         """初始化歌词文件列 添加右键菜单栏"""
@@ -102,10 +103,15 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
         self.lyrics_listWidget.customContextMenuRequested.connect(self.menu_show_event)
 
-    def load_lyrics_file(self):
+    def load_lyrics_file(self, *, keep_state: bool = False):
         """导入已有的歌词文件，显示在左边"""
-        self.filter_lineEdit.clear()
-        self.lyrics_plainTextEdit.clear()
+        current_item = self.lyrics_listWidget.currentItem()
+        current_track_id = current_item.track_id if (keep_state and current_item) else ""
+        filter_text = self.filter_lineEdit.text() if keep_state else ""
+
+        if not keep_state:
+            self.filter_lineEdit.clear()
+            self.lyrics_plainTextEdit.clear()
 
         tracks_id_data = self.lyrics_file_manage.get_tracks_id_data()
         not_found_data = self.lyrics_file_manage.get_not_found_data()
@@ -129,6 +135,25 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
             self.lyrics_listWidget.addItem(item)
             self.lyrics_file_items.append(item)
+
+        if keep_state:
+            self.filter_lineEdit.blockSignals(True)
+            self.filter_lineEdit.setText(filter_text)
+            self.filter_lineEdit.blockSignals(False)
+            self.filter_file_item_event()
+
+            selected_item = None
+            if current_track_id:
+                for item in self.lyrics_file_items:
+                    if item.track_id == current_track_id:
+                        self.lyrics_listWidget.setCurrentItem(item)
+                        selected_item = item
+                        break
+            if selected_item is None:
+                self.current_lrc = LrcFile()
+                self.image_label.clear()
+                self.set_detail_label_signal.emit(("", ""))
+                self.set_plain_text_signal.emit("")
 
     def filter_file_item_event(self):
         """筛选，随着输入框的输入同步"""
@@ -367,6 +392,12 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
     def _is_page_gone(self) -> bool:
         return self._is_destroyed or sip.isdeleted(self)
+
+    def _lyrics_data_changed_event(self):
+        """歌词数据变化时自动刷新列表，同时尽量保留当前上下文"""
+        if self._is_page_gone() or not self.isVisible():
+            return
+        self.load_lyrics_file(keep_state=True)
 
     def _set_modify_mode(self, flag: bool):
         """设置是否进入修改模式"""
