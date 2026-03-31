@@ -4,11 +4,13 @@ import re
 import weakref
 
 import requests
+from PyQt6 import sip
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
 from common.api.lyric_api import SpotifyApi
+from common.api.exceptions import NetworkError
 from common.lyric.lyric_manage import LyricFileManage
 from common.typing import TransType, LrcFile
 from common.temp_manage import TempFileManage
@@ -36,6 +38,7 @@ class FileListWidgetItem(QListWidgetItem):
 class LyricsManagePage(QWidget, Ui_LyricsManage):
     set_plain_text_signal = pyqtSignal(str)
     set_detail_label_signal = pyqtSignal(tuple)
+    set_cover_pixmap_signal = pyqtSignal(str, object)
 
     def __init__(self, parent=None, *, setting_window=None):
         super(LyricsManagePage, self).__init__(parent)
@@ -50,6 +53,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self._init_signal()
 
         self._set_modify_mode(False)
+        self.destroyed.connect(self._destroyed_event)
 
     def _init_common(self):
         self.lyrics_file_manage_ = weakref.ref(LyricFileManage())
@@ -57,6 +61,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.spotify_api = SpotifyApi()
 
         self.lyrics_file_items = []
+        self._current_cover_track_id = ""
+        self._is_destroyed = False
 
     def _init_label(self):
         """初始化标签"""
@@ -87,6 +93,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         # 设置文本信号连接（为了便于线程设置文本不出现未响应）
         self.set_plain_text_signal.connect(self._set_plain_text_event)
         self.set_detail_label_signal.connect(self._set_detail_label_event)
+        self.set_cover_pixmap_signal.connect(self._set_cover_pixmap_event)
 
     def _init_list_widget(self):
         """初始化歌词文件列 添加右键菜单栏"""
@@ -145,11 +152,11 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
                 if p_item.isHidden():
                     p_item.setHidden(False)
 
-    @thread_drive()
     def click_file_item_event(self, item: FileListWidgetItem):
         """选中项事件 显示其详细信息 以及 已有歌词"""
         track_id = item.track_id
         track_title = item.text()
+        self._current_cover_track_id = track_id
 
         image = self.temp_file_manage.get_temp_image(track_id)
         offset = self.lyrics_file_manage.get_offset_file(track_id)
@@ -170,17 +177,45 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         if not image.getvalue():
             self.image_label.clear()
             self.image_label.setText(self.tr("正在获取封面"))
-            try:
-                song_data = self.spotify_api.search_song_info(track_id, download_pic=True, pic_size=64)
-            except requests.RequestException:
-                return
-            image = song_data.picBuffer
-            self.temp_file_manage.save_temp_image(track_id, image)
-        # 显示歌曲专辑封面
-        if self.lyrics_listWidget.currentItem() == item:
-            pix = QPixmap()
-            pix.loadFromData(image.read())
-            self.image_label.setPixmap(pix)
+            self.fetch_cover_event(track_id)
+            return
+        self._show_cover(track_id, image)
+
+    @thread_drive()
+    def fetch_cover_event(self, track_id: str):
+        """后台获取歌曲专辑封面，避免阻塞设置页"""
+        if self._is_page_gone():
+            return
+        try:
+            song_data = self.spotify_api.search_song_info(track_id, download_pic=True, pic_size=64)
+        except (requests.RequestException, NetworkError):
+            self._emit_cover_result(track_id, None)
+            return
+
+        if self._is_page_gone():
+            return
+
+        image = song_data.picBuffer
+        self.temp_file_manage.save_temp_image(track_id, image)
+        self._emit_cover_result(track_id, image)
+
+    def _show_cover(self, track_id: str, image):
+        if track_id != self._current_cover_track_id:
+            return
+
+        current_item = self.lyrics_listWidget.currentItem()
+        if not current_item or current_item.track_id != track_id:
+            return
+
+        if not image or not image.getvalue():
+            self.image_label.clear()
+            self.image_label.setText(self.tr("封面获取失败"))
+            return
+
+        image.seek(0)
+        pix = QPixmap()
+        pix.loadFromData(image.read())
+        self.image_label.setPixmap(pix)
 
     def set_spin_box_offset_event(self):
         """设置偏移事件"""
@@ -315,6 +350,23 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         """设置文本，利于非主线程控制"""
         self.songname_label.setText(texts[0])
         self.singer_label.setText(texts[1])
+
+    def _set_cover_pixmap_event(self, track_id: str, image):
+        """在主线程中安全更新封面"""
+        if self._is_page_gone():
+            return
+        self._show_cover(track_id, image)
+
+    def _emit_cover_result(self, track_id: str, image):
+        if self._is_page_gone():
+            return
+        self.set_cover_pixmap_signal.emit(track_id, image)
+
+    def _destroyed_event(self, *_):
+        self._is_destroyed = True
+
+    def _is_page_gone(self) -> bool:
+        return self._is_destroyed or sip.isdeleted(self)
 
     def _set_modify_mode(self, flag: bool):
         """设置是否进入修改模式"""
