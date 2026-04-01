@@ -268,13 +268,27 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             return
 
         item = self.lyrics_listWidget.currentItem()
+        if not item or sip.isdeleted(item):
+            self.setting_window.mask_.hide()
+            return
         track_id = item.track_id
 
         self.current_lrc = lrc
         self.lyric_show_trans_event()
         self.lyrics_file_manage.save_lyric_file(track_id, lrc)
 
-        item.set_no_lyric(False)
+        current_item = self.lyrics_listWidget.currentItem()
+        if current_item and not sip.isdeleted(current_item) and current_item.track_id == track_id:
+            current_item.set_no_lyric(False)
+            return
+
+        for refreshed_item in self.lyrics_file_items:
+            if sip.isdeleted(refreshed_item):
+                continue
+            if refreshed_item.track_id == track_id:
+                refreshed_item.set_no_lyric(False)
+                self.lyrics_listWidget.setCurrentItem(refreshed_item)
+                break
 
     def export_lyric_event(self):
         """导出歌词事件"""
@@ -304,6 +318,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         if not self.lyrics_file_manage.is_lyric_exist(item.track_id):
             return
         title = item.text()
+
         self.lyrics_file_manage.set_not_found(item.track_id, title)
         item.set_no_lyric(True)
 

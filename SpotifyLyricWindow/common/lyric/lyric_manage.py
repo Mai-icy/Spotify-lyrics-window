@@ -81,11 +81,10 @@ class LyricFileManage:
             title = self.lyric_data_json["no_lyric"][track_id]["track_title"]
             self.lyric_data_json["no_lyric"].pop(track_id)
             self.lyric_data_json["id2title"][track_id] = title
+            self.lyric_data_json["title2id"][title] = track_id
             self.save_json()
-        self._notify_changed()
 
     def delete_lyric_file(self, track_id: str):
-        is_changed = False
         if track_id in self.lyric_data_json["id2title"]:
             title = self.lyric_data_json["id2title"][track_id]
             self.lyric_data_json["id2title"].pop(track_id)
@@ -93,14 +92,10 @@ class LyricFileManage:
             lrc_path = LRC_PATH / (track_id + ".mrc")
             if lrc_path.exists():
                 lrc_path.unlink()
-            is_changed = True
 
         if track_id in self.lyric_data_json["no_lyric"]:
             self.lyric_data_json["no_lyric"].pop(track_id)
             self.save_json()
-            is_changed = True
-        if is_changed:
-            self._notify_changed()
 
     def get_not_found(self, track_id: str) -> dict:
         return self.lyric_data_json["no_lyric"].get(track_id, None)
@@ -110,12 +105,16 @@ class LyricFileManage:
         if lrc_path.exists():
             lrc_path.unlink()
 
+        is_changed = False
         if not track_title:
             self.lyric_data_json["no_lyric"].pop(track_id)
         else:
+            is_changed = (track_id not in self.lyric_data_json["no_lyric"] and
+                          track_id not in self.lyric_data_json["id2title"])
             self.lyric_data_json["no_lyric"][track_id] = {"track_title": track_title, "last_time": int(time.time())}
         self.save_json()
-        self._notify_changed()
+        if is_changed:
+            self._notify_changed()
 
     def get_id(self, track_title: str):
         return self.lyric_data_json["title2id"].get(track_title)
@@ -124,10 +123,12 @@ class LyricFileManage:
         return self.lyric_data_json["id2title"].get(track_id)
 
     def set_track_id_map(self, track_id: str, title: str):
+        is_changed = track_id not in self.lyric_data_json["id2title"]
         self.lyric_data_json["id2title"][track_id] = title
         self.lyric_data_json["title2id"][title] = track_id
         self.save_json()
-        self._notify_changed()
+        if is_changed:
+            self._notify_changed()
 
     def get_offset_file(self, track_id: str) -> int:
         return self.lyric_data_json["offset"].get(track_id, 0)
