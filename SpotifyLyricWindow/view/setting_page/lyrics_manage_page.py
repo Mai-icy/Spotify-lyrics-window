@@ -11,12 +11,15 @@ from PyQt6.QtWidgets import *
 
 from common.api.lyric_api import SpotifyApi
 from common.api.exceptions import NetworkError
+from common.logger import get_logger
 from common.lyric.lyric_manage import LyricFileManage
 from common.typing import TransType, LrcFile
 from common.temp_manage import TempFileManage
 from components.dialog.lyrics_download_dialog import LyricsDownloadDialog
 from components.work_thread import thread_drive
 from components.raw_ui import Ui_LyricsManage
+
+logger = get_logger(__name__)
 
 
 class FileListWidgetItem(QListWidgetItem):
@@ -343,8 +346,11 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         try:
             LrcFile.load_content(self.current_lrc, new_lyric_text, trans_type)
         except Exception as e:
-            print(e)
+            current_item = self.lyrics_listWidget.currentItem()
+            track_id = current_item.track_id if current_item else ""
+            logger.exception("保存歌词编辑内容失败: track_id=%s", track_id)
             self.set_plain_text_signal.emit(self.ori_plain_text)
+            return
 
         track_id = self.lyrics_listWidget.currentItem().track_id
         self.lyrics_file_manage.save_lyric_file(track_id, self.current_lrc)

@@ -1,6 +1,5 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-import logging
 import platform
 import sys
 import time
@@ -18,7 +17,7 @@ from common.api.user_api import SpotifyUserApi
 from common.config import Config
 from common.lyric import LyricFileManage
 from common.lyric.lyric_download import download_lrc
-from common.path import ERROR_LOG_PATH
+from common.logger import get_logger, init_logging
 from common.player import LrcPlayer
 from common.temp_manage import TempFileManage
 from common.typing import TransType, UserCurrentPlaying, MediaPropertiesInfo, MediaPlaybackInfo
@@ -36,9 +35,8 @@ if platform.system() == "Linux":
     is_support_dbus = True
     from common.media_session.linux_session import LinuxMediaSession
 
-logging.basicConfig(filename=ERROR_LOG_PATH,
-                    level=logging.ERROR,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+init_logging()
+logger = get_logger(__name__)
 
 
 class CatchError:
@@ -51,6 +49,7 @@ class CatchError:
         except UserError as e:
             args[0].error_msg_show_signal.emit(e)
         except requests.RequestException as e:
+            logger.exception("Requests error in %s", self.__wrapped__.__name__)
             new_err = Exception("Requests Error")
             args[0].error_msg_show_signal.emit(new_err)
         except NotImplementedError as e:
@@ -58,7 +57,7 @@ class CatchError:
         except NetworkError as e:
             args[0].error_msg_show_signal.emit(str(e))
         except Exception as e:
-            logging.error("Unknown Error", exc_info=True)
+            logger.exception("Unhandled error in %s", self.__wrapped__.__name__)
             args[0].error_msg_show_signal.emit("Unknown Error. Refer to log (resource/error.log)")
 
     def __get__(self, instance, cls):
