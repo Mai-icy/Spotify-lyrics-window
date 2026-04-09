@@ -1,21 +1,15 @@
-certifi==2025.1.31
-charset-normalizer==3.4.1
 fuzzywuzzy==0.18.0
-idna==3.10
-psutil==7.0.0
-PyQt6==6.8.1
-PyQt6-Qt6==6.8.2
+pynput==1.8.1
+pyotp==2.9.0
+PyQt6==6.11.0
 PyQt6_sip==13.10.0
-pywin32==310
-requests==2.32.3
-rtoml==0.12.0
-typing_extensions==4.13.0
-urllib3==2.6.3
-winrt-runtime==3.0.0
-winrt-Windows.Foundation==3.0.0
-winrt-Windows.Foundation.Collections==3.0.0
-winrt-Windows.Media.Control==3.0.0
-winrt-Windows.Storage.Streams==3.0.0
-winrt-Windows.System==3.0.0
-pynput~=1.8.1
-pyotp~=2.9.0
+requests==2.33.1
+rtoml==0.13.0
+
+# Windows only
+winrt_runtime==3.0.0; sys_platform == "win32"
+winrt_windows_foundation==3.0.0; sys_platform == "win32"
+winrt_windows_foundation_collections==3.0.0; sys_platform == "win32"
+winrt_windows_media_control==3.0.0; sys_platform == "win32"
+winrt_windows_storage_streams==3.0.0; sys_platform == "win32"
+winrt_windows_system==3.0.0; sys_platform == "win32"
