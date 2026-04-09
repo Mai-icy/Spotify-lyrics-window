@@ -7,6 +7,10 @@ import re
 import zlib
 from enum import Enum
 
+from common.logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class TransType(Enum):
     NON = 0
@@ -66,7 +70,7 @@ class LrcFile:
                     context = line[end + 1:]
                 while moment in target_dict.keys():
                     moment += 10
-                    print(moment)
+                    logger.debug("检测到重复时间戳，顺延 10ms: %s", moment)
                 target_dict[moment] = context
         # 同步
         if self.trans_non_dict.keys():

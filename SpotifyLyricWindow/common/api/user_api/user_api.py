@@ -9,6 +9,9 @@ import json
 from common.api.exceptions import *
 from common.api.user_api.user_auth import SpotifyUserAuth
 from common.config import Config
+from common.logger import get_logger
+
+logger = get_logger(__name__)
 
 UserCurrentPlaying = namedtuple("UserCurrentPlaying", ["progress_ms", "artist", "track_name", "is_playing", "track_id",
                                                        "duration", "api_offset"])
@@ -60,10 +63,14 @@ class SpotifyUserApi:
         track_name = res_json["item"]["name"]
         track_id = res_json["item"]["id"]
         duration = res_json["item"]["duration_ms"]
-        print(f"正在播放{track_name} - {artist}")
-        print(progress_ms)
-        print(f"播放状态{is_playing}")
-        print(track_id)
+        logger.debug(
+            "当前播放信息: track=%s - %s, progress_ms=%s, is_playing=%s, track_id=%s",
+            track_name,
+            artist,
+            progress_ms,
+            is_playing,
+            track_id,
+        )
         return UserCurrentPlaying(progress_ms, artist, track_name, is_playing, track_id, duration, offset)
 
     def _get_user_devices(self):
@@ -98,8 +105,10 @@ class SpotifyUserApi:
         try:
             res = func(url, headers=self._get_auth_header(), params=kwargs, proxies=proxy)
         except requests.RequestException as e:
+            logger.warning("Spotify 用户 API 请求失败: method=%s, endpoint=%s", method, url_suffix, exc_info=True)
             raise NetworkError("spotify用户api连接失败") from e
         if res.status_code == 204 and url_suffix == "currently-playing":
+            logger.debug("Spotify 当前没有活跃用户播放")
             raise NoActiveUser("no user active")
         if res.status_code == 200:
             try:
