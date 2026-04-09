@@ -58,14 +58,15 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
         except NetworkError:
             pass
 
-    try:
-        lrc = spotify_api.fetch_song_lyric(track_id)
-        if not lrc.empty():
-            lrc.save_to_mrc(str(file_name))
-            LyricFileManage().set_track_id_map(track_id, track_name)
-            return True
-    except (NetworkError, UserError):
-        pass
+    # spotify 歌词 API 暂不支持
+    # try:
+    #     lrc = spotify_api.fetch_song_lyric(track_id)
+    #     if not lrc.empty():
+    #         lrc.save_to_mrc(str(file_name))
+    #         LyricFileManage().set_track_id_map(track_id, track_name)
+    #         return True
+    # except (NetworkError, UserError):
+    #     pass
 
     return False
 
