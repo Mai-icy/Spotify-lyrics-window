@@ -104,7 +104,7 @@ python main.py
 
 ## ⚙️ Configuration Notes
 
-- If you need a proxy, set `proxy_ip` in `SpotifyLyricWindow/resource/setting.toml`
+- If you need a proxy, set `spotify_proxy_ip/cloudmusic_proxy_ip/kugou_proxy_ip` in `SpotifyLyricWindow/resource/setting.toml`
 - If you need Spotify lyric-related features that rely on `sp_dc`, fill it manually in the config file
 - Lyric directory and temporary directory paths can be customized in the config
 

@@ -104,7 +104,7 @@ python main.py
 
 ## ⚙️ 配置说明
 
-- 如果需要代理，可在 `SpotifyLyricWindow/resource/setting.toml` 中设置 `proxy_ip`
+- 如果需要代理，可在 `SpotifyLyricWindow/resource/setting.toml` 中设置 `spotify_proxy_ip`
 - 如果需要依赖 `sp_dc` 的 Spotify 歌词能力，需要手动在配置文件中填写
 - 歌词目录、临时目录等路径支持在配置中自定义
 
