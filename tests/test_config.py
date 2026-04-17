@@ -31,6 +31,7 @@ def test_save_config_writes_toml(tmp_path, monkeypatch):
     monkeypatch.setattr(config_module, "SETTING_TOML_PATH", setting_path)
     try:
         Config.CommonConfig.ClientConfig.client_id = "client-id"
+        Config.CommonConfig.ClientConfig.mainland_ip = "123.58.172.91"
         Config.CommonConfig.PathConfig.lyrics_file_path = "C:/lyrics"
         Config.LyricConfig.font_family = "测试字体"
         Config.HotkeyConfig.pause_button = ["ctrl", "p"]
@@ -39,6 +40,7 @@ def test_save_config_writes_toml(tmp_path, monkeypatch):
 
         saved = rtoml.load(setting_path)
         assert saved["CommonConfig"]["ClientConfig"]["client_id"] == "client-id"
+        assert saved["CommonConfig"]["ClientConfig"]["mainland_ip"] == "123.58.172.91"
         assert saved["CommonConfig"]["PathConfig"]["lyrics_file_path"] == "C:/lyrics"
         assert saved["LyricConfig"]["font_family"] == "测试字体"
         assert saved["HotkeyConfig"]["pause_button"] == ["ctrl", "p"]
@@ -90,6 +92,7 @@ def test_to_dict_keeps_nested_sections_shape():
         Config.CommonConfig.ClientConfig.client_secret = ""
         Config.CommonConfig.ClientConfig.sp_dc = ""
         Config.CommonConfig.ClientConfig.proxy_ip = ""
+        Config.CommonConfig.ClientConfig.mainland_ip = ""
 
         data = Config.to_dict()
 

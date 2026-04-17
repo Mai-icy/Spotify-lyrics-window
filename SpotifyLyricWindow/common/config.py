@@ -21,6 +21,7 @@ class Config:
             client_secret: str = ""
             sp_dc: str = ""
             proxy_ip: str = ""
+            mainland_ip: str = ""
 
         class PathConfig:
             temp_file_path: str = ""
