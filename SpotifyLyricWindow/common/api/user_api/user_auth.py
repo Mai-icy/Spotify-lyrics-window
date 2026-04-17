@@ -37,8 +37,8 @@ class SpotifyUserAuth:
             self.auth_code = None
             self.client_id = Config.CommonConfig.ClientConfig.client_id
             self.client_secret = Config.CommonConfig.ClientConfig.client_secret
-            self.proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-            self.proxy = {"https": self.proxy_ip} if self.proxy_ip else {}
+            self.proxy_ip = Config.CommonConfig.ClientConfig.spotify_proxy_ip
+            self.proxy = {"https": self.proxy_ip, "http": self.proxy_ip} if self.proxy_ip else {}
             auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
             self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
             if TOKEN_PATH.exists():
@@ -50,8 +50,8 @@ class SpotifyUserAuth:
     def load_client_config(self):
         self.client_id = Config.CommonConfig.ClientConfig.client_id
         self.client_secret = Config.CommonConfig.ClientConfig.client_secret
-        self.proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-        self.proxy = {"https": self.proxy_ip} if self.proxy_ip else {}
+        self.proxy_ip = Config.CommonConfig.ClientConfig.spotify_proxy_ip
+        self.proxy = {"https": self.proxy_ip, "http": self.proxy_ip} if self.proxy_ip else {}
 
         auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
         self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}

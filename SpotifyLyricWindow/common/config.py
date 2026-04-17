@@ -20,7 +20,9 @@ class Config:
             client_id: str = ""
             client_secret: str = ""
             sp_dc: str = ""
-            proxy_ip: str = ""
+            spotify_proxy_ip: str = ""
+            cloudmusic_proxy_ip: str = ""
+            kugou_proxy_ip: str = ""
             mainland_ip: str = ""
 
         class PathConfig:

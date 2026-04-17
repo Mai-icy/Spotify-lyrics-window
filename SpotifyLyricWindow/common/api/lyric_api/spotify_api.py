@@ -34,13 +34,17 @@ class SpotifyApi(BaseMusicApi):
         dc_token = Config.CommonConfig.ClientConfig.sp_dc
         self.sp_dc = dc_token
 
+    @staticmethod
+    def _get_proxy():
+        proxy_ip = Config.CommonConfig.ClientConfig.spotify_proxy_ip
+        return {"https": proxy_ip, "http": proxy_ip} if proxy_ip else {}
+
     def search_song_id(self, keyword: str, page: int = 1):
         keyword = re.sub(r"|[!@#$%^&*/]+", "", keyword)
 
         url = self._SEARCH_SONG_ID_URL.format(keyword, (page - 1) * 10)
 
-        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-        proxy = {"https": proxy_ip} if proxy_ip else {}
+        proxy = self._get_proxy()
         try:
             res_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
         except requests.RequestException as e:
@@ -60,8 +64,7 @@ class SpotifyApi(BaseMusicApi):
 
     def search_song_info(self, song_id: str, *, download_pic: bool = False, pic_size: int = 0):
         url = self._SEARCH_SONG_INFO_URL.format(song_id)
-        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-        proxy = {"https": proxy_ip} if proxy_ip else {}
+        proxy = self._get_proxy()
         try:
             song_json = requests.get(url, headers=self._get_token(), proxies=proxy).json()
         except requests.RequestException as e:
@@ -79,8 +82,7 @@ class SpotifyApi(BaseMusicApi):
             if pic_jsons:
                 pic_json = pic_jsons[0]
                 pic_url = pic_json["url"]
-                proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-                proxy = {"https": proxy_ip} if proxy_ip else {}
+                proxy = self._get_proxy()
                 pic_data = requests.get(pic_url, timeout=10, proxies=proxy).content
                 pic_buffer = io.BytesIO(pic_data)
             else:
@@ -105,8 +107,7 @@ class SpotifyApi(BaseMusicApi):
 
         url = self._FETCH_LYRIC_URL.format(song_id)
 
-        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-        proxy = {"https": proxy_ip} if proxy_ip else {}
+        proxy = self._get_proxy()
 
         header = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
@@ -151,6 +152,7 @@ class SpotifyApi(BaseMusicApi):
     def _get_lyric_token(self):
         server_time = self._get_server_time()
         totp = self._generate_totp(server_time)
+        proxy = self._get_proxy()
         params = {
             'reason': 'transport',
             'productType': 'web_player',
@@ -165,7 +167,7 @@ class SpotifyApi(BaseMusicApi):
             'Origin': 'https://open.spotify.com/',
             'Cookie': f'sp_dc={self.sp_dc}'
         }
-        response = requests.get(self._TOKEN_URL, headers=headers, params=params)
+        response = requests.get(self._TOKEN_URL, headers=headers, params=params, proxies=proxy)
         response.raise_for_status()
         data = response.json()
         if data.get('isAnonymous'):
@@ -177,8 +179,7 @@ class SpotifyApi(BaseMusicApi):
         return lyric_token
 
     def _get_server_time(self):
-        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-        proxy = {"https": proxy_ip} if proxy_ip else {}
+        proxy = self._get_proxy()
         headers = {
             'Referer': 'https://open.spotify.com/',
             'Origin': 'https://open.spotify.com/',

@@ -31,6 +31,9 @@ def test_save_config_writes_toml(tmp_path, monkeypatch):
     monkeypatch.setattr(config_module, "SETTING_TOML_PATH", setting_path)
     try:
         Config.CommonConfig.ClientConfig.client_id = "client-id"
+        Config.CommonConfig.ClientConfig.spotify_proxy_ip = "http://127.0.0.1:8890"
+        Config.CommonConfig.ClientConfig.cloudmusic_proxy_ip = "http://127.0.0.1:8891"
+        Config.CommonConfig.ClientConfig.kugou_proxy_ip = "http://127.0.0.1:8892"
         Config.CommonConfig.ClientConfig.mainland_ip = "123.58.172.91"
         Config.CommonConfig.PathConfig.lyrics_file_path = "C:/lyrics"
         Config.LyricConfig.font_family = "测试字体"
@@ -40,6 +43,9 @@ def test_save_config_writes_toml(tmp_path, monkeypatch):
 
         saved = rtoml.load(setting_path)
         assert saved["CommonConfig"]["ClientConfig"]["client_id"] == "client-id"
+        assert saved["CommonConfig"]["ClientConfig"]["spotify_proxy_ip"] == "http://127.0.0.1:8890"
+        assert saved["CommonConfig"]["ClientConfig"]["cloudmusic_proxy_ip"] == "http://127.0.0.1:8891"
+        assert saved["CommonConfig"]["ClientConfig"]["kugou_proxy_ip"] == "http://127.0.0.1:8892"
         assert saved["CommonConfig"]["ClientConfig"]["mainland_ip"] == "123.58.172.91"
         assert saved["CommonConfig"]["PathConfig"]["lyrics_file_path"] == "C:/lyrics"
         assert saved["LyricConfig"]["font_family"] == "测试字体"
@@ -91,7 +97,9 @@ def test_to_dict_keeps_nested_sections_shape():
         Config.CommonConfig.ClientConfig.client_id = ""
         Config.CommonConfig.ClientConfig.client_secret = ""
         Config.CommonConfig.ClientConfig.sp_dc = ""
-        Config.CommonConfig.ClientConfig.proxy_ip = ""
+        Config.CommonConfig.ClientConfig.spotify_proxy_ip = ""
+        Config.CommonConfig.ClientConfig.cloudmusic_proxy_ip = ""
+        Config.CommonConfig.ClientConfig.kugou_proxy_ip = ""
         Config.CommonConfig.ClientConfig.mainland_ip = ""
 
         data = Config.to_dict()
