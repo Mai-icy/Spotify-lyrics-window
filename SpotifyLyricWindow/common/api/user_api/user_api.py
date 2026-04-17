@@ -100,8 +100,8 @@ class SpotifyUserApi:
             self.load_client_id_secret()
         url = self.USER_PLAYER_URL + url_suffix
         func = getattr(requests, method)
-        proxy_ip = Config.CommonConfig.ClientConfig.proxy_ip
-        proxy = {"https": proxy_ip} if proxy_ip else {}
+        proxy_ip = Config.CommonConfig.ClientConfig.spotify_proxy_ip
+        proxy = {"https": proxy_ip, "http": proxy_ip} if proxy_ip else {}
         try:
             res = func(url, headers=self._get_auth_header(), params=kwargs, proxies=proxy)
         except requests.RequestException as e:
@@ -123,4 +123,3 @@ class SpotifyUserApi:
 if __name__ == "__main__":
     tt = SpotifyUserApi()
     tt.get_current_playing()
-

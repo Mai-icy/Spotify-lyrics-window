@@ -3,16 +3,16 @@
 import io
 import random
 import re
-from typing import List
 from time import localtime
+from typing import List
 
 import requests
 
 from common.api.exceptions import NoneResultError, NetworkError
 from common.api.lyric_api.base_lyric_api import BaseMusicApi
 from common.config import Config
-from common.path import RESOURCE_PATH
 from common.lyric.lyric_type import LrcFile, TransType
+from common.path import RESOURCE_PATH
 from common.song_metadata.metadata_type import SongInfo, SongSearchInfo
 
 
@@ -22,6 +22,11 @@ class CloudMusicWebApi(BaseMusicApi):
     _FETCH_LYRIC_URL = 'http://music.163.com/api/song/lyric?id={}&lv=-1&kv=-1&tv=-1&rv=-1'
     _USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36'
     _MAINLAND_IP_PATH = RESOURCE_PATH / 'data' / 'mainland_ip.txt'
+
+    @staticmethod
+    def _get_proxy():
+        proxy_ip = Config.CommonConfig.ClientConfig.cloudmusic_proxy_ip
+        return {"https": proxy_ip, "http": proxy_ip} if proxy_ip else {}
 
     @classmethod
     def _generate_mainland_ip(cls):
@@ -64,19 +69,16 @@ class CloudMusicWebApi(BaseMusicApi):
                 url,
                 timeout=4,
                 headers=self._build_headers(),
-                proxies={"https": None, "http": None}
+                proxies=self._get_proxy(),
             ).json()
         except requests.exceptions.RequestException as e:
             raise NetworkError("网易云搜索歌词出错") from e
 
         if res_json.get("abroad"):
             if _retry:
-                new_ip = self._generate_mainland_ip()
-                Config.CommonConfig.ClientConfig.mainland_ip = new_ip
-                Config.save_config()
+                self._get_or_create_mainland_ip()
                 return self.search_song_id(keyword, page, _retry=False)
-            else:
-                raise NoneResultError
+            raise NoneResultError
         if res_json["result"] == {} or res_json['code'] == 400 or res_json["result"]['songCount'] == 0:  # 该关键词没有结果
             raise NoneResultError
 
@@ -104,7 +106,7 @@ class CloudMusicWebApi(BaseMusicApi):
                 url,
                 timeout=10,
                 headers=self._build_headers(),
-                proxies={"https": None, "http": None}
+                proxies=self._get_proxy(),
             ).json()
         except requests.exceptions.RequestException as e:
             raise NetworkError("网易云查找歌词信息出错") from e
@@ -116,10 +118,7 @@ class CloudMusicWebApi(BaseMusicApi):
         artists_list = [info["name"] for info in song_json["artists"]]
         duration = song_json["duration"] // 1000
         if download_pic:
-            if not pic_size:
-                param = {}  # if you need original pic, remove params
-            else:
-                param = {"param": f"{pic_size}y{pic_size}"}
+            param = {} if not pic_size else {"param": f"{pic_size}y{pic_size}"}
             pic_url = song_json["album"]["picUrl"]
             try:
                 pic_data = requests.get(
@@ -127,7 +126,7 @@ class CloudMusicWebApi(BaseMusicApi):
                     timeout=10,
                     params=param,
                     headers=self._build_headers(),
-                    proxies={"https": None, "http": None}
+                    proxies=self._get_proxy(),
                 ).content
             except requests.exceptions.RequestException as e:
                 raise NetworkError("网易云歌曲图片获取失败") from e
@@ -143,9 +142,9 @@ class CloudMusicWebApi(BaseMusicApi):
             "trackNumber": (song_json["no"], song_json["album"]["size"]),
             "duration": f'{duration // 60}:{duration % 60 // 10}{duration % 10}',
             "genre": None,
-            "picBuffer": pic_buffer}
-        song_info = SongInfo(**song_info)
-        return song_info
+            "picBuffer": pic_buffer,
+        }
+        return SongInfo(**song_info)
 
     def fetch_song_lyric(self, song_id: str) -> LrcFile:
         try:
@@ -153,15 +152,15 @@ class CloudMusicWebApi(BaseMusicApi):
                 self._FETCH_LYRIC_URL.format(song_id),
                 timeout=10,
                 headers=self._build_headers(),
-                proxies={"https": None, "http": None}
+                proxies=self._get_proxy(),
             ).json()
         except requests.exceptions.RequestException as e:
             raise NetworkError("网易云下载歌词失败") from e
         lrc_file = LrcFile()
         lrc_file.load_content(res_json['lrc']['lyric'], TransType.NON)
-        if res_json.get('tlyric', None):
+        if res_json.get('tlyric'):
             lrc_file.load_content(res_json['tlyric']['lyric'], TransType.CHINESE)
-        if res_json.get('romalrc', None):
+        if res_json.get('romalrc'):
             lrc_file.load_content(res_json['romalrc']['lyric'], TransType.ROMAJI)
         return lrc_file
 
