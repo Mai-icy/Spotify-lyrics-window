@@ -317,12 +317,44 @@
          </size>
         </property>
         <property name="text">
-         <string>字体:</string>
+         <string>歌词字体:</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QComboBox" name="font_comboBox">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>200</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>-1</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="translation_font_label">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>译文字体:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="translation_font_comboBox">
         <property name="minimumSize">
          <size>
           <width>0</width>

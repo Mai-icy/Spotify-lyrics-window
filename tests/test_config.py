@@ -37,6 +37,7 @@ def test_save_config_writes_toml(tmp_path, monkeypatch):
         Config.CommonConfig.ClientConfig.mainland_ip = "123.58.172.91"
         Config.CommonConfig.PathConfig.lyrics_file_path = "C:/lyrics"
         Config.LyricConfig.font_family = "测试字体"
+        Config.LyricConfig.translation_font_family = "译文字体"
         Config.HotkeyConfig.pause_button = ["ctrl", "p"]
 
         Config.save_config()
@@ -49,6 +50,7 @@ def test_save_config_writes_toml(tmp_path, monkeypatch):
         assert saved["CommonConfig"]["ClientConfig"]["mainland_ip"] == "123.58.172.91"
         assert saved["CommonConfig"]["PathConfig"]["lyrics_file_path"] == "C:/lyrics"
         assert saved["LyricConfig"]["font_family"] == "测试字体"
+        assert saved["LyricConfig"]["translation_font_family"] == "译文字体"
         assert saved["HotkeyConfig"]["pause_button"] == ["ctrl", "p"]
     finally:
         _reset_config_state(snapshot)

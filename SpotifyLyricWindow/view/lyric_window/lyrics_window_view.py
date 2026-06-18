@@ -97,18 +97,21 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
     def _init_font(self):
         """初始化字体 字体类型 以及 大小"""
         # 导入配置
-        family = Config.LyricConfig.font_family
         height = Config.CommonConfig.PositionConfig.height
         width = Config.CommonConfig.PositionConfig.width
 
-        self.font = QtGui.QFont()
-        self.font.setFamily(family)
+        self.lyric_font = QtGui.QFont()
+        self.lyric_font.setFamily(Config.LyricConfig.font_family)
+        self.translation_font = QtGui.QFont()
+        self.translation_font.setFamily(Config.LyricConfig.translation_font_family)
         if self.display_mode == DisplayMode.Horizontal:
-            self.font.setPixelSize(int((height - 30) / 3))
+            font_size = int((height - 30) / 3)
         else:
-            self.font.setPixelSize(int((width - 45) / 3))
-        self.above_scrollArea.setFont(self.font)
-        self.below_scrollArea.setFont(self.font)
+            font_size = int((width - 45) / 3)
+        self.lyric_font.setPixelSize(font_size)
+        self.translation_font.setPixelSize(font_size)
+        self.above_scrollArea.setFont(self.lyric_font)
+        self.below_scrollArea.setFont(self.translation_font)
 
     def _init_window_drag_flag(self):
         """拖动相关变量初始化"""
@@ -289,9 +292,13 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
         :param family: 必须为原有配套字体 例如 “微软雅黑”
         """
-        self.font.setFamily(family)
-        self.above_scrollArea.setFont(self.font)
-        self.below_scrollArea.setFont(self.font)
+        self.lyric_font.setFamily(family)
+        self.above_scrollArea.setFont(self.lyric_font)
+
+    def set_translation_font_family(self, family: str):
+        """设置译文（或罗马音）字体。"""
+        self.translation_font.setFamily(family)
+        self.below_scrollArea.setFont(self.translation_font)
 
     def set_font_size(self, size: int, *, resize_window: bool = False):
         """
@@ -300,9 +307,10 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         :param size: 字体大小
         :param resize_window: 是否由字体大小反向设置窗口大小
         """
-        self.font.setPixelSize(size)
-        self.above_scrollArea.setFont(self.font)
-        self.below_scrollArea.setFont(self.font)
+        self.lyric_font.setPixelSize(size)
+        self.translation_font.setPixelSize(size)
+        self.above_scrollArea.setFont(self.lyric_font)
+        self.below_scrollArea.setFont(self.translation_font)
         if resize_window:
             height = int(size * 3 + 30)
             self.resize(self.width(), height)

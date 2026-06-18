@@ -40,6 +40,7 @@ class Config:
         display_mode: int = 0  # 0代表水平显示歌词，1代表竖直显示歌词
 
         font_family: str = "微软雅黑"
+        translation_font_family: str = "微软雅黑"
         font_size: int = 25
 
         is_always_front: bool = True
