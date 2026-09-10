@@ -216,15 +216,18 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
             return
         try:
             song_data = self.spotify_api.search_song_info(track_id, download_pic=True, pic_size=64)
+            if self._is_page_gone():
+                return
+            image = song_data.picBuffer
+            self.temp_file_manage.save_temp_image(track_id, image)
         except (requests.RequestException, NetworkError):
             self._emit_cover_result(track_id, None)
             return
-
-        if self._is_page_gone():
+        except Exception:
+            # Exceptions escaping QThread.run can terminate the entire app.
+            logger.exception("获取或缓存封面失败: track_id=%s", track_id)
+            self._emit_cover_result(track_id, None)
             return
-
-        image = song_data.picBuffer
-        self.temp_file_manage.save_temp_image(track_id, image)
         self._emit_cover_result(track_id, image)
 
     def _show_cover(self, track_id: str, image):
@@ -406,7 +409,12 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
     def _emit_cover_result(self, track_id: str, image):
         if self._is_page_gone():
             return
-        self.set_cover_pixmap_signal.emit(track_id, image)
+        try:
+            self.set_cover_pixmap_signal.emit(track_id, image)
+        except RuntimeError:
+            # Settings may be deleted between the check and signal emission.
+            if not sip.isdeleted(self):
+                raise
 
     def _destroyed_event(self, *_):
         self._is_destroyed = True
