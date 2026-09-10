@@ -42,8 +42,22 @@ class VerticalLabel(QLabel):
 
         self.text_height += 1 * font_metrics.height()  # 经验值 补偿
 
-        super(VerticalLabel, self).paintEvent(a0)
+        # 已完成自定义竖排绘制，不再调用 QLabel 的默认横排绘制。
 
     def getTextSize(self):
         """获取当前播放歌词的高度, 可用于计算滚动参数"""
-        return self.text_height
+        # 滚动参数会在重绘前读取高度，不能使用上一次 paintEvent 的缓存。
+        font_metrics = QFontMetrics(self.font())
+        text_height = font_metrics.height()  # 与绘制时的末尾补偿保持一致
+        ascii_text = ""
+        for ch in self.text():
+            if ch.isascii():
+                ascii_text += ch
+            else:
+                if ascii_text:
+                    text_height += font_metrics.horizontalAdvance(ascii_text)
+                    ascii_text = ""
+                text_height += font_metrics.height()
+        if ascii_text:
+            text_height += font_metrics.horizontalAdvance(ascii_text)
+        return text_height
