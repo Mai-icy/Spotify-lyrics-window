@@ -70,6 +70,9 @@ class CatchError:
 class LyricsWindow(LyricsWindowView):
     error_msg_show_signal = pyqtSignal(object)
     text_show_signal = pyqtSignal(int, str, int)
+    pause_icon_signal = pyqtSignal(bool)
+    account_enabled_signal = pyqtSignal(bool)
+    delay_calibration_signal = pyqtSignal(int)
 
     def __init__(self, parent=None):
         super(LyricsWindow, self).__init__(parent)
@@ -105,6 +108,9 @@ class LyricsWindow(LyricsWindowView):
 
         self.error_msg_show_signal.connect(self._error_msg_show_event)
         self.text_show_signal.connect(self.set_lyrics_text)
+        self.pause_icon_signal.connect(self.set_pause_button_icon)
+        self.account_enabled_signal.connect(self.account_button.setEnabled)
+        self.delay_calibration_signal.connect(self.delay_timer.start)
         self.lrc_player.play_done_event_connect(self.player_done_event)
 
     def _init_lrc_player(self):
@@ -232,7 +238,7 @@ class LyricsWindow(LyricsWindowView):
             if self.lyric_file_manage.get_title(user_current.track_id) != track_title:
                 self.lyric_file_manage.set_track_id_map(user_current.track_id, track_title)
 
-        self.set_pause_button_icon(user_current.is_playing)
+        self.pause_icon_signal.emit(user_current.is_playing)
         self.set_lyrics_rolling(user_current.is_playing)
 
         if not user_current.track_id:  # 正在播放非音乐（track）
@@ -286,12 +292,12 @@ class LyricsWindow(LyricsWindowView):
         if current_user.is_playing:
             self.spotify_auth.set_user_pause()
             self.calibration_event(no_text_show=True)
-            self.set_pause_button_icon(False)
+            self.pause_icon_signal.emit(False)
             self.set_lyrics_rolling(False)
         else:
             self.spotify_auth.set_user_resume()
             self.calibration_event(no_text_show=True)
-            self.set_pause_button_icon(True)
+            self.pause_icon_signal.emit(True)
             self.set_lyrics_rolling(True)
 
     @CatchError
@@ -322,7 +328,7 @@ class LyricsWindow(LyricsWindowView):
             if not self.spotify_auth.auth.is_listen:
                 self.spotify_auth.auth.receive_user_auth_code()
         except OSError:
-            self.account_button.setEnabled(True)
+            self.account_enabled_signal.emit(True)
             raise UserError(self.tr("端口8888被占用，请检查端口占用"))
 
         # driver.get("https://open.spotify.com/get_access_token?reason=transport&productType=web_player")
@@ -386,7 +392,7 @@ class LyricsWindow(LyricsWindowView):
 
     def delay_calibration(self):
         """延时触发校准事件"""
-        self.delay_timer.start(2000)
+        self.delay_calibration_signal.emit(2000)
 
     def _refresh_player_track(self, user_current: UserCurrentPlaying = None) -> UserCurrentPlaying:
         """

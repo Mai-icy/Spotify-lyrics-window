@@ -379,8 +379,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
         :param flag: True 为 可滚动
         """
-        if (flag and not self.timer.isActive()) or (not flag and self.timer.isActive()):
-            self.set_timer_status_signal.emit(flag)
+        self.set_timer_status_signal.emit(flag)
 
     def set_lyrics_text(self, rows: int, text: str, roll_time: int = 0):
         """
@@ -524,6 +523,8 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             self.hide()
 
     def _set_timer_status_signal_event(self, flag):
+        if self.timer.isActive() == flag:
+            return
         if flag:
             self.timer.start()
         else:
