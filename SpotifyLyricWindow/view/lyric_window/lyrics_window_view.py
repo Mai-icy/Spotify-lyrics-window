@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
-from pynput import keyboard
+import sys
 
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import *
@@ -12,6 +12,7 @@ from components.scroll_area.text_scroll_area import TextScrollArea
 from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from common.typing import DisplayMode, Callable
 from common.config import Config
+from common.hotkeys import create_global_hotkeys
 
 
 class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
@@ -66,12 +67,17 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self.effect_shadow = QtWidgets.QGraphicsDropShadowEffect(self)
         self.effect_shadow.setOffset(0, 0)  # 偏移
         self.effect_shadow.setBlurRadius(10)  # 阴影半径
-        # self.effect_shadow.setColor(QtCore.Qt.gray)  # 阴影颜色
+        # On macOS keep both text and the hover panel free of shadow outlines.
+        # Retain the effect object so existing color settings remain compatible.
+        self.effect_shadow.setEnabled(sys.platform != "darwin")
         self.background_frame.setGraphicsEffect(self.effect_shadow)
 
     def _init_main_window(self):
         """初始化界面控件以及属性"""
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.SplashScreen)
+        window_flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.SplashScreen
+        if sys.platform == "darwin":
+            window_flags |= Qt.WindowType.NoDropShadowWindowHint
+        self.setWindowFlags(window_flags)
         self.set_always_front(Config.LyricConfig.is_always_front)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
@@ -158,7 +164,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _init_hotkey(self):
         """初始化快捷键"""
-        self.hotkeys_listener = keyboard.GlobalHotKeys({})
+        self.hotkeys_listener = None
 
         self.signal_dic = {
             "calibrate_button": self.calibrate_button.clicked,
@@ -214,12 +220,12 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
                 hotkey_text = "+".join(f"<{_key}>" if len(_key) != 1 else _key for _key in hotkeys)
                 hotkey_record[hotkey_text] = self.get_emit_func(self.signal_dic[key])
 
+        if self.hotkeys_listener is not None:
+            self.hotkeys_listener.stop()
+            self.hotkeys_listener = None
         if flag and Config.HotkeyConfig.is_enable:
-            self.hotkeys_listener.stop()
-            self.hotkeys_listener = keyboard.GlobalHotKeys(hotkey_record)
+            self.hotkeys_listener = create_global_hotkeys(hotkey_record)
             self.hotkeys_listener.start()
-        else:
-            self.hotkeys_listener.stop()
 
     # def set_signal_hotkey(self, signal_key: str, hotkeys: tuple):
     #     """
