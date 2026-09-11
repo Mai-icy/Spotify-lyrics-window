@@ -13,6 +13,7 @@ from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from common.typing import DisplayMode, Callable
 from common.config import Config
 from common.hotkeys import create_global_hotkeys
+from common.ui_fonts import resolve_font_family
 
 
 class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
@@ -74,12 +75,18 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _init_main_window(self):
         """初始化界面控件以及属性"""
-        window_flags = Qt.WindowType.FramelessWindowHint | Qt.WindowType.SplashScreen
-        if sys.platform == "darwin":
-            window_flags |= Qt.WindowType.NoDropShadowWindowHint
-        self.setWindowFlags(window_flags)
-        self.set_always_front(Config.LyricConfig.is_always_front)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        window_type = Qt.WindowType.SplashScreen
+        if sys.platform == "darwin":
+            window_type = Qt.WindowType.Tool | Qt.WindowType.NoDropShadowWindowHint
+            self.setAttribute(Qt.WidgetAttribute.WA_MacAlwaysShowToolWindow)
+            # Generated layouts carry Windows font families on their children.
+            for widget in [self, *self.findChildren(QWidget)]:
+                font = widget.font()
+                font.setFamily(resolve_font_family(font.family()))
+                widget.setFont(font)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | window_type)
+        self.set_always_front(Config.LyricConfig.is_always_front)
 
         self.set_button_hide(True)
 
@@ -107,9 +114,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         width = Config.CommonConfig.PositionConfig.width
 
         self.lyric_font = QtGui.QFont()
-        self.lyric_font.setFamily(Config.LyricConfig.font_family)
+        self.lyric_font.setFamily(resolve_font_family(Config.LyricConfig.font_family))
         self.translation_font = QtGui.QFont()
-        self.translation_font.setFamily(Config.LyricConfig.translation_font_family)
+        self.translation_font.setFamily(resolve_font_family(Config.LyricConfig.translation_font_family))
         if self.display_mode == DisplayMode.Horizontal:
             font_size = int((height - 30) / 3)
         else:
@@ -298,12 +305,12 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
         :param family: 必须为原有配套字体 例如 “微软雅黑”
         """
-        self.lyric_font.setFamily(family)
+        self.lyric_font.setFamily(resolve_font_family(family))
         self.above_scrollArea.setFont(self.lyric_font)
 
     def set_translation_font_family(self, family: str):
         """设置译文（或罗马音）字体。"""
-        self.translation_font.setFamily(family)
+        self.translation_font.setFamily(resolve_font_family(family))
         self.below_scrollArea.setFont(self.translation_font)
 
     def set_font_size(self, size: int, *, resize_window: bool = False):
@@ -495,6 +502,19 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
                 self.set_font_size(int((self.width() - 45) / 3))
 
         event.accept()
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if sys.platform == "darwin" and QApplication.platformName() == "cocoa":
+            # Window flag changes and layout switches can recreate the native
+            # panel. Qt also resets its level after showEvent returns.
+            QTimer.singleShot(0, self._apply_mac_window_policy)
+
+    def _apply_mac_window_policy(self):
+        if self.isVisible():
+            from common.mac_window import configure_overlay
+            # Use actual flags: the settings callback updates Config later.
+            configure_overlay(self.winId(), bool(self.windowFlags() & Qt.WindowType.WindowStaysOnTopHint))
 
     def show(self):
         """从隐藏状态到显示状态"""
