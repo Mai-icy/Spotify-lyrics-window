@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import sys
+
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import *
 from PyQt6.QtGui import *
@@ -47,6 +49,14 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
                                  "Yu Gothic UI Semilight", "仿宋", "华文中宋", "华文仿宋", "华文宋体", "华文彩云", "华文新魏",
                                  "华文楷体", "华文琥珀", "华文细黑", "华文行楷", "华文隶书", "宋体", "幼圆", "微软雅黑",
                                  "微软雅黑 Light", "新宋体", "方正姚体", "方正舒体", "楷体", "等线", "等线 Light", "隶书", "黑体"]
+        if sys.platform == "darwin":
+            # Keep saved/default names selectable so imported preferences and
+            # Restore Defaults still work; offer the actual installed Mac fonts.
+            defaults = Config.get_default_dict()["LyricConfig"]
+            self.font_family_list = sorted(set(QFontDatabase.families()) | {
+                Config.LyricConfig.font_family, Config.LyricConfig.translation_font_family,
+                defaults["font_family"], defaults["translation_font_family"],
+            })
         self.color_comboBox.addItems(self.color_list)
         self.font_comboBox.addItems(self.font_family_list)
         self.translation_font_comboBox.addItems(self.font_family_list)

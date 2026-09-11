@@ -6,6 +6,9 @@ PyQt6_sip==13.10.0
 requests==2.33.1
 rtoml==0.13.0
 
+# macOS native window policy (also used transitively by pynput)
+pyobjc-framework-Cocoa==12.2.2; sys_platform == "darwin"
+
 # Windows only
 winrt_runtime==3.0.0; sys_platform == "win32"
 winrt_windows_foundation==3.0.0; sys_platform == "win32"
