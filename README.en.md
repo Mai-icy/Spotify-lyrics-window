@@ -41,7 +41,7 @@ Instead of being a simple lyric display script, this project offers a more compl
 - Horizontal and vertical lyric layouts
 - Custom fonts, colors, shadows, and window styles
 - Global hotkey support
-- Windows and Linux media session support
+- Windows, Linux, and macOS (Spotify Desktop) media session support
 
 ## 💡 Why This Project
 
@@ -102,7 +102,21 @@ python main.py
 5. Start playing music in Spotify
 6. Enjoy the floating lyrics window
 
+### macOS Media Session
+
+On macOS, `MacMediaSession` inherits `BaseMediaSession` and subscribes to system Now Playing events through MediaRemote. Track, playback-state, and timeline changes use the same callbacks as Windows/Linux; a local clock advances lyric progress without polling Spotify. Only Spotify Desktop is recognized.
+
+Install the project dependencies; macOS automatically installs the pinned [macos-mediaremote-python](https://pypi.org/project/macos-mediaremote-python/0.1.0a1/) package:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+The package requires Python 3.11+ and its macOS wheel includes the Intel/Apple Silicon native resources; no manual build or CMake is needed. It is imported only when the macOS session is actually initialized, and is neither installed nor imported on Windows/Linux. A background subscription forwards events to the main thread through Qt signals. System Perl is still used, without Spotify AppleScript authorization. MediaRemote is private API and the pinned package is an alpha release. A missing package, helper failure, or a non-Spotify player falls back to the existing Spotify API, so account setup remains necessary. Controls recheck Spotify's bundle ID and PID but cannot atomically lock the system player. See the [macOS development notes](docs/macos.md).
+
 ## ⚙️ Configuration Notes
+
+The macOS lyrics panel stays visible when switching apps. Always-on-top enables all-Spaces and fullscreen-auxiliary behavior; disabling it restores the normal window level. Coverage over fullscreen apps and Stage Manager needs verification on the target system. Missing Windows fonts fall back to PingFang, and font selectors include installed Mac fonts.
 
 - If you need a proxy, set `spotify_proxy_ip/cloudmusic_proxy_ip/kugou_proxy_ip` in `SpotifyLyricWindow/resource/setting.toml`
 - If you need Spotify lyric-related features that rely on `sp_dc`, fill it manually in the config file
