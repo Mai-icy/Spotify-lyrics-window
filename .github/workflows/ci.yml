@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - project-refresh
-      - fix/macos-threading
+      - feat/macos-support
   pull_request:
 
 jobs:
