@@ -6,3 +6,4 @@
 **/.idea
 **/.vs
 **/__pycache__
+/.venv/

@@ -41,7 +41,7 @@
 - 横向 / 纵向歌词显示模式
 - 支持字体、颜色、阴影、窗口样式自定义
 - 支持全局快捷键
-- 支持 Windows 与 Linux 媒体会话
+- 支持 Windows、Linux 与 macOS（Spotify 桌面客户端）媒体会话
 
 ## 💡 为什么做这个项目
 
@@ -102,7 +102,21 @@ python main.py
 5. 在 Spotify 中开始播放音乐
 6. 享受悬浮歌词体验
 
+### macOS 媒体会话
+
+macOS 的 `MacMediaSession` 继承 `BaseMediaSession`，通过 MediaRemote 订阅系统 Now Playing 事件，将歌曲、播放状态和时间线变化转换为与 Windows/Linux 相同的回调；使用本地时钟推进歌词进度，无需定时查询 Spotify。当前仅识别 Spotify 桌面客户端。
+
+安装项目依赖即可，macOS 会自动安装固定版本的 [macos-mediaremote-python](https://pypi.org/project/macos-mediaremote-python/0.1.0a1/)：
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+该包要求 Python 3.11+，macOS wheel 已包含 Intel/Apple Silicon 原生组件，无需手工构建或安装 CMake。仅实际初始化 macOS 会话时才导入该包，Windows/Linux 不安装也不导入它；订阅运行在后台线程，通过 Qt 信号更新主线程。运行时仍使用系统 Perl，不使用 Spotify AppleScript 授权。MediaRemote 属于私有接口，且当前固定版本为 alpha；包缺失、辅助组件失败或当前播放器不是 Spotify 时，沿用 Spotify API 回退，因此仍需账号配置。控制前会重新核对 Spotify 应用标识及 PID，但无法原子锁定系统播放器。详见 [macOS 开发说明](docs/macos.md)。
+
 ## ⚙️ 配置说明
+
+macOS 歌词窗口使用原生面板策略：开启置顶时配置跨桌面及全屏辅助显示，切换应用不会自动隐藏；关闭置顶时恢复普通窗口层级。全屏应用及 Stage Manager 的实际覆盖效果需按系统环境验证。缺失的 Windows 字体会回退到苹方，字体下拉框包含本机字体。
 
 - 如果需要代理，可在 `SpotifyLyricWindow/resource/setting.toml` 中设置 `spotify_proxy_ip`
 - 如果需要依赖 `sp_dc` 的 Spotify 歌词能力，需要手动在配置文件中填写

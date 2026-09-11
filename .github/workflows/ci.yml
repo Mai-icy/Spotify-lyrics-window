@@ -5,11 +5,15 @@ on:
     branches:
       - main
       - project-refresh
+      - fix/macos-threading
   pull_request:
 
 jobs:
   test:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout repository
