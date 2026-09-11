@@ -15,7 +15,8 @@ def configure_overlay(win_id: int, always_on_top: bool):
     # A transparent native panel can cast a shadow around each opaque glyph,
     # and around the rectangular background when the mouse enters the panel.
     window.setHasShadow_(False)
-    window.setLevel_(AppKit.NSFloatingWindowLevel if always_on_top else AppKit.NSNormalWindowLevel)
+    # Match Qt's stay-on-top level; Qt lowers floating-level panels on deactivation.
+    window.setLevel_(AppKit.NSModalPanelWindowLevel if always_on_top else AppKit.NSNormalWindowLevel)
 
     # Qt normally chooses MoveToActiveSpace for panels. It is mutually
     # exclusive with CanJoinAllSpaces, which a global lyrics overlay needs.
