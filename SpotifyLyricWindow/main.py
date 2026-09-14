@@ -20,6 +20,9 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
+    if sys.platform == 'darwin' and app.platformName() == 'cocoa':
+        from common.mac_window import configure_accessory_app
+        configure_accessory_app()
     install_translations(app, Config.CommonConfig.language)
     myWin = LyricsWindow()
     myWin.show()

@@ -1,4 +1,21 @@
-"""AppKit policy for the Qt lyrics overlay (call on the GUI thread only)."""
+"""AppKit application/overlay policies (call on the GUI thread only)."""
+
+
+def configure_accessory_app():
+    """Keep windows and the status item usable without a Dock application tile."""
+    import AppKit
+
+    app = AppKit.NSApplication.sharedApplication()
+    if not app.setActivationPolicy_(AppKit.NSApplicationActivationPolicyAccessory):
+        import logging
+        logging.getLogger(__name__).warning('macOS refused accessory activation policy')
+
+
+def activate_application():
+    """Activate only on an explicit user request, such as opening settings."""
+    import AppKit
+
+    AppKit.NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
 
 
 def configure_overlay(win_id: int, always_on_top: bool):

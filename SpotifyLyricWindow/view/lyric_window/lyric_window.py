@@ -378,11 +378,20 @@ class LyricsWindow(LyricsWindowView):
 
     def _setting_window_show_event(self):
         """显示设置窗口事件，新建一个窗口对象"""
-        if self.setting_window is not None:
-            return
-        self.setting_window = SettingWindow(lyric_window=self)
-        self.setting_window.destroyed.connect(self._setting_window_destroyed_event)
-        self.setting_window.show()
+        if self.setting_window is None:
+            self.setting_window = SettingWindow(lyric_window=self)
+            self.setting_window.destroyed.connect(self._setting_window_destroyed_event)
+            self.setting_window.show()
+        if is_support_macos and QApplication.platformName() == 'cocoa':
+            # With no Dock entry, the tray must also recover an existing window.
+            # Do not call SettingWindow.show() again: it reloads in-progress edits.
+            from common.mac_window import activate_application
+            activate_application()
+            window = QApplication.activeModalWidget() or self.setting_window
+            if window.isMinimized():
+                window.showNormal()
+            window.raise_()
+            window.activateWindow()
 
     def set_trans_mode(self, mode: TransType):
         """
