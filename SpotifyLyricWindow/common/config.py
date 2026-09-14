@@ -13,6 +13,7 @@ class Config:
     class CommonConfig:
         is_quit_on_close: bool = False
         is_save_position: bool = True
+        is_auto_track_sync: bool = True
 
         api_offset: int = 0
 

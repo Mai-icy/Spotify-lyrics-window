@@ -237,6 +237,9 @@ class Ui_CommonPage:
         row(group, tr('关闭时退出程序'), control(self, 'quit_on_close_checkBox', QCheckBox(tr('启用'))),
             tr('关闭歌词窗口时退出，而不是隐藏到托盘。'))
         group = section(layout, tr('播放同步'))
+        row(group, tr('自动切歌同步修正'),
+            control(self, 'auto_track_sync_checkBox', QCheckBox(tr('启用'))),
+            tr('自动切歌后等待约 0.7 秒，将歌曲和歌词重新定位到开头。关闭后可能出现歌词时间偏差。'))
         offset = control(self, 'global_offset_doubleSpinBox', QDoubleSpinBox())
         offset.setRange(-30, 30)
         offset.setSingleStep(.5)

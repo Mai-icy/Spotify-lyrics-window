@@ -192,17 +192,21 @@ class LyricsWindow(LyricsWindowView):
             self.lrc_player.set_track(track_id, playback_info.duration)
             if not self._manual_skip_flag:
                 # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
-                time.sleep(0.7)
-                self.media_session.seek_to_position_media(0)
-                self.lrc_player.seek_to_position(0)
+                if Config.CommonConfig.is_auto_track_sync:
+                    time.sleep(0.7)
+                    self.media_session.seek_to_position_media(0)
+                    self.lrc_player.seek_to_position(0)
+                else:
+                    self.lrc_player.seek_to_position(playback_info.position)
                 self._manual_skip_flag = True
             self.lrc_player.set_pause(not (playback_info.playStatus == 4))
         else:
             if not self._manual_skip_flag:
                 # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
-                time.sleep(0.7)
-                self.media_session.seek_to_position_media(0)
-                self.lrc_player.seek_to_position(0)
+                if Config.CommonConfig.is_auto_track_sync:
+                    time.sleep(0.7)
+                    self.media_session.seek_to_position_media(0)
+                    self.lrc_player.seek_to_position(0)
                 self._manual_skip_flag = True
             else:
                 # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
