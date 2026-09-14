@@ -59,7 +59,8 @@ QListWidget::item:selected { background: #d5e8de; color: #183c32; }
 QListWidget::item:hover:!selected { background: #f0f6f2; }
 QPlainTextEdit:focus, QListWidget:focus { border-color: #398765; }
 QTableWidget { background: #ffffff; alternate-background-color: #f4f8f5; color: #283b39; border: 1px solid #dfe6e2; border-radius: 6px; selection-background-color: #d5e8de; selection-color: #183c32; }
-QHeaderView, QHeaderView::section { background: #edf2f0; color: #586c63; border: none; padding: 6px 4px; }
+QHeaderView { background: #edf2f0; border: none; }
+QHeaderView::section { background: #edf2f0; color: #586c63; border: none; padding: 6px 4px; }
 QLabel#settingsCover { background: #e9f0ec; border-radius: 8px; color: #74817d; font-size: 11px; }
 QSplitter::handle { background: #e1e7e4; width: 1px; margin: 8px 0; }
 QScrollBar:vertical { background: transparent; width: 10px; margin: 2px; }

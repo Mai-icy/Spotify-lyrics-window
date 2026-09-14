@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import *
 
 from common.api.user_api import SpotifyUserAuth
 from common.config import Config
+from common.i18n import supported_language
 from common.lyric import LyricFileManage
 from common.path import LRC_PATH, TEMP_PATH, ORI_LRC_PATH, ORI_TEMP_PATH
 from common.temp_manage import TempFileManage
@@ -61,10 +62,13 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.quit_on_close_checkBox.stateChanged.connect(self._quit_on_close_event)
         self.save_position_checkBox.stateChanged.connect(self._save_position_event)
         self.auto_track_sync_checkBox.toggled.connect(self._auto_track_sync_event)
+        self.language_comboBox.currentIndexChanged.connect(self._language_event)
 
     def load_config(self):
         """载入配置文件"""
         common_config = Config.CommonConfig
+        self.language_comboBox.setCurrentIndex(
+            self.language_comboBox.findData(supported_language(common_config.language)))
 
         client_id = common_config.ClientConfig.client_id
         client_secret = common_config.ClientConfig.client_secret
@@ -108,6 +112,8 @@ class CommonPage(QWidget, Ui_CommonPage):
     def set_default_event(self):
         """设置初始化按钮事件"""
         default_dict = Config.get_default_dict()["CommonConfig"]
+        self.language_comboBox.setCurrentIndex(
+            self.language_comboBox.findData(default_dict['language']))
 
         is_save_position = default_dict["is_save_position"]
         is_quit_on_close = default_dict["is_quit_on_close"]
@@ -171,6 +177,9 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def _auto_track_sync_event(self, enabled: bool):
         Config.CommonConfig.is_auto_track_sync = enabled
+
+    def _language_event(self):
+        Config.CommonConfig.language = self.language_comboBox.currentData()
 
     def path_change_tip_event(self, tip_label: QLabel):
         """修改路径事件"""

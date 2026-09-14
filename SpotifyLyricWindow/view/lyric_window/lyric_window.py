@@ -403,7 +403,7 @@ class LyricsWindow(LyricsWindowView):
         self.lrc_player.is_pause = True
         if isinstance(error, NoActiveUser):
             self._clear_player_state()
-        self.text_show_signal.emit(1, str(error), 0)
+        self.text_show_signal.emit(1, self.tr(str(error)), 0)
         self.text_show_signal.emit(2, self.tr("Σっ°Д°;)っ!"), 0)
         if isinstance(error, NoPermission):
             self.delay_calibration()
