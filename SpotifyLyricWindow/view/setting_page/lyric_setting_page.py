@@ -179,15 +179,17 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
 
     def custom_lyrics_color_event(self):
         """自定义歌词颜色事件"""
-        if self.color_comboBox.currentText() != "other":
-            self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
-
         lyric_rgb = Config.LyricConfig.lyric_color
         now_color = QColor(*lyric_rgb)
 
         self.setting_window.mask_.show()
         new_color = self.color_dialog.getColor(now_color)
         self.setting_window.mask_.hide()
+
+        if not new_color.isValid():
+            return
+        if self.color_comboBox.currentText() != "other":
+            self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
 
         color = (new_color.red(), new_color.green(), new_color.blue())
         self.lyric_window.set_lyrics_rgb(color)
@@ -197,15 +199,17 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
 
     def custom_shadow_color_event(self):
         """自定义阴影颜色事件"""
-        if self.color_comboBox.currentText() != "other":
-            self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
-
         shadow_color = Config.LyricConfig.shadow_color
         now_color = QColor(*shadow_color)
 
         self.setting_window.mask_.show()
         new_color = self.color_dialog.getColor(now_color)
         self.setting_window.mask_.hide()
+
+        if not new_color.isValid():
+            return
+        if self.color_comboBox.currentText() != "other":
+            self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
 
         color = (new_color.red(), new_color.green(), new_color.blue())
         self.lyric_window.set_shadow_rgb(color)
