@@ -16,9 +16,9 @@ class LyricsTrayIcon(QtWidgets.QSystemTrayIcon):
     def _createMenu(self):
         self.menu = QtWidgets.QMenu()
 
-        self.showAction = QtGui.QAction("Show(&S)", self, triggered=self.main_window.show)
-        self.settingsAction = QtGui.QAction("Settings(&P)", self, triggered=self.show_settings)
-        self.quitAction = QtGui.QAction("Quit(&X)", self, triggered=self.quit)
+        self.showAction = QtGui.QAction(self.tr("显示(&S)"), self, triggered=self.main_window.show)
+        self.settingsAction = QtGui.QAction(self.tr("设置(&P)"), self, triggered=self.show_settings)
+        self.quitAction = QtGui.QAction(self.tr("退出(&X)"), self, triggered=self.quit)
         self.menu.addAction(self.showAction)
         self.menu.addAction(self.settingsAction)
         self.menu.addSeparator()

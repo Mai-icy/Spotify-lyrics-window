@@ -9,6 +9,8 @@ from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
 
 from view.lyric_window.lyric_window import LyricsWindow
+from common.config import Config
+from common.i18n import install_translations
 import components.source
 
 
@@ -18,6 +20,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
+    install_translations(app, Config.CommonConfig.language)
     myWin = LyricsWindow()
     myWin.show()
     sys.exit(app.exec())

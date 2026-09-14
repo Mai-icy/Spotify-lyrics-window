@@ -5,6 +5,8 @@ overlay. Existing control names and value ordering are deliberately preserved.
 """
 from pathlib import Path
 
+from common.i18n import LANGUAGES
+
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QColor, QFontDatabase, QFontMetrics, QIcon, QPainter
 from PyQt6.QtWidgets import (
@@ -223,7 +225,7 @@ class Ui_SettingsWindow:
         self.page_stackedWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         body_layout.addWidget(self.page_stackedWidget, 1)
         body_layout.addSpacing(4)
-        body_layout.addWidget(label(tr('外观设置即时生效 · 路径变更需重启 · 关闭窗口保存配置'), 'footer'))
+        body_layout.addWidget(label(tr('外观设置即时生效 · 语言和路径变更需重启 · 关闭窗口保存配置'), 'footer'))
         root.addWidget(body, 1)
 
 
@@ -231,6 +233,11 @@ class Ui_CommonPage:
     def setupUi(self, page):
         tr = page.tr
         layout = page_layout(page)
+        group = section(layout, tr('界面语言'))
+        languages = combo(self, 'language_comboBox')
+        for code, name in LANGUAGES:
+            languages.addItem(name, code)
+        row(group, tr('语言 / Language'), languages, tr('重启程序后生效，不改变歌词内容或翻译模式。'))
         group = section(layout, tr('窗口行为'))
         row(group, tr('记住窗口位置'), control(self, 'save_position_checkBox', QCheckBox(tr('启用'))),
             tr('下次启动时恢复歌词窗口的位置。'))

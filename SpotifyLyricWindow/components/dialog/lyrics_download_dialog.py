@@ -45,6 +45,12 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         super(LyricsDownloadDialog, self).__init__(parent)
         self._request_id = 0
         self.setupUi(self)
+        # Generated forms cap buttons at 80 x 32, clipping longer translations.
+        for button in (self.download_button, self.cancel_button, self.search_button):
+            button.setMaximumSize(16777215, 16777215)
+            button.setMinimumSize(max(80, button.fontMetrics().horizontalAdvance(button.text()) + 32),
+                                  max(32, button.fontMetrics().height() + 18))
+            button.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Fixed)
         self._init_table_widget()
         self._init_signal()
         self._init_api()
@@ -91,7 +97,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         # 设置垂直表头的固定大小
         self.search_tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
         self.search_tableWidget.verticalHeader().setDefaultSectionSize(47)
-        self.search_tableWidget.horizontalHeader().setMinimumHeight(30)  # 表头高度
+        self.search_tableWidget.horizontalHeader().setMinimumHeight(36)  # 表头高度
 
         # 设置选择模式和行为
         self.search_tableWidget.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
@@ -108,8 +114,9 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
         self.search_tableWidget.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
         self.search_tableWidget.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
         # self.setColumnWidth(0, 380)  # 设置指定列宽
-        self.search_tableWidget.setColumnWidth(2, 55)
-        self.search_tableWidget.setColumnWidth(3, 55)
+        metrics = self.search_tableWidget.horizontalHeader().fontMetrics()
+        self.search_tableWidget.setColumnWidth(2, max(55, metrics.horizontalAdvance(self.tr('时长')) + 16))
+        self.search_tableWidget.setColumnWidth(3, max(55, metrics.horizontalAdvance(self.tr('来源')) + 16))
 
         self.setAcceptDrops(True)
         self.search_tableWidget.setAcceptDrops(True)  # 允许文件拖入
@@ -142,7 +149,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
                 results[name] = []
             except (NetworkError, UserError) as exc:
                 results[name] = []
-                errors.append(f"{name}: {exc}")
+                errors.append(f"{name}: {QCoreApplication.translate('Errors', str(exc))}")
         rows = []
         sources = ("kugou", "cloud", "spotify")
         for group in zip_longest(*(results[name] for name in sources)):
@@ -157,7 +164,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             return
         self._set_controls_enabled(True)
         if error is not None:
-            self._set_detail_label((self.tr("搜索失败"), error))
+            self._set_detail_label((self.tr("搜索失败"), self.tr(error)))
             return
         rows, errors = result
         self._load_result_table_widget(rows)
@@ -232,7 +239,7 @@ class LyricsDownloadDialog(QDialog, Ui_LyricsDownloadDialog):
             return
         self._set_controls_enabled(True)
         if error is not None:
-            self.warning_dialog.set_text(error)
+            self.warning_dialog.set_text(self.tr(error))
             self.warning_dialog.show()
             return
         self.download_lrc_signal.emit(lrc)
