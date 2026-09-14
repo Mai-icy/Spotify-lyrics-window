@@ -60,6 +60,7 @@ class CommonPage(QWidget, Ui_CommonPage):
 
         self.quit_on_close_checkBox.stateChanged.connect(self._quit_on_close_event)
         self.save_position_checkBox.stateChanged.connect(self._save_position_event)
+        self.auto_track_sync_checkBox.toggled.connect(self._auto_track_sync_event)
 
     def load_config(self):
         """载入配置文件"""
@@ -76,6 +77,7 @@ class CommonPage(QWidget, Ui_CommonPage):
 
         self.save_position_checkBox.setChecked(is_save_position)
         self.quit_on_close_checkBox.setChecked(is_quit_on_close)
+        self.auto_track_sync_checkBox.setChecked(common_config.is_auto_track_sync)
 
         self.id_lineEdit.setText(client_id)
         self.secret_lineEdit.setText(client_secret)
@@ -113,6 +115,7 @@ class CommonPage(QWidget, Ui_CommonPage):
 
         self.save_position_checkBox.setChecked(is_save_position)
         self.quit_on_close_checkBox.setChecked(is_quit_on_close)
+        self.auto_track_sync_checkBox.setChecked(default_dict["is_auto_track_sync"])
         self.cache_path_lineEdit.setText(str(ORI_TEMP_PATH))
         self.lyrics_path_lineEdit.setText(str(ORI_LRC_PATH))
         self.global_offset_doubleSpinBox.setValue(api_offset)
@@ -165,6 +168,9 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def _save_position_event(self):
         self.set_check_box_event(self.save_position_checkBox)
+
+    def _auto_track_sync_event(self, enabled: bool):
+        Config.CommonConfig.is_auto_track_sync = enabled
 
     def path_change_tip_event(self, tip_label: QLabel):
         """修改路径事件"""
