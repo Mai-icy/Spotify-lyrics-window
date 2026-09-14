@@ -17,7 +17,7 @@ from common.typing import TransType, LrcFile
 from common.temp_manage import TempFileManage
 from components.dialog.lyrics_download_dialog import LyricsDownloadDialog
 from components.work_thread import thread_drive
-from components.settings_ui import Ui_LyricsManage
+from components.settings_ui import Ui_LyricsManage, MISSING_LYRICS_ROLE
 
 logger = get_logger(__name__)
 
@@ -31,11 +31,10 @@ class FileListWidgetItem(QListWidgetItem):
         self.set_no_lyric(no_lyric)
 
     def set_no_lyric(self, flag: bool):
-        if flag:
-            self.setBackground(QColor(177, 177, 177))
-        else:
-            self.setBackground(Qt.GlobalColor.white)
         self.no_lyric = flag
+        self.setData(MISSING_LYRICS_ROLE, flag)
+        self.setData(Qt.ItemDataRole.AccessibleDescriptionRole,
+                     QCoreApplication.translate('LyricsStatusDelegate', '无歌词') if flag else '')
 
 
 class LyricsManagePage(QWidget, Ui_LyricsManage):
