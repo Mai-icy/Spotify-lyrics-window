@@ -10,7 +10,7 @@ from common.config import Config
 from common.lyric import LyricFileManage
 from common.path import LRC_PATH, TEMP_PATH, ORI_LRC_PATH, ORI_TEMP_PATH
 from common.temp_manage import TempFileManage
-from components.raw_ui import Ui_CommonPage
+from components.settings_ui import Ui_CommonPage
 
 
 class CommonPage(QWidget, Ui_CommonPage):

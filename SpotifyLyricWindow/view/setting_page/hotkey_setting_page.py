@@ -3,7 +3,7 @@
 from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 
-from components.raw_ui import Ui_HotkeysPage
+from components.settings_ui import Ui_HotkeysPage
 from components.line_edit.hotkeys_line_edit import HotkeyLineEdit
 
 from common.config import Config
