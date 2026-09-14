@@ -162,8 +162,7 @@ class LyricsWindow(LyricsWindowView):
 
     def player_done_event(self):
         """当前歌曲播放的事件"""
-        if not is_support_macos:
-            self._manual_skip_flag = False
+        self._manual_skip_flag = False
         if not self.media_session.is_connected():
             self.calibration_event()
 
@@ -181,10 +180,6 @@ class LyricsWindow(LyricsWindowView):
         return bool(self.lrc_player.track_id)
 
     def media_properties_changed(self, info: MediaPropertiesInfo):
-        if is_support_macos:
-            # The Mac snapshot already includes the new track's position. Do not
-            # rewind playback using the Windows/Linux track-transition workaround.
-            self._manual_skip_flag = True
         if not self._has_active_track():
             self.calibration_event(no_text_show=True)
             return
@@ -195,8 +190,6 @@ class LyricsWindow(LyricsWindowView):
         if track_id and not self.lyric_file_manage.get_not_found(track_id):  # 如果可以通过title直接获取id, 则不走api渠道
             playback_info = self.media_session.get_current_playback_info()
             self.lrc_player.set_track(track_id, playback_info.duration)
-            if is_support_macos:
-                self.lrc_player.seek_to_position(playback_info.position)
             if not self._manual_skip_flag:
                 # 自动切换到下一首歌 将会有将近700ms的歌曲准备时间导致时间定位不准确
                 time.sleep(0.7)
@@ -211,7 +204,7 @@ class LyricsWindow(LyricsWindowView):
                 self.media_session.seek_to_position_media(0)
                 self.lrc_player.seek_to_position(0)
                 self._manual_skip_flag = True
-            elif not is_support_macos:
+            else:
                 # 手动切换到下一首歌 可能会有延迟也可能没有，故不做处理
                 time.sleep(0.5)  # 等待api反应过来
             self.calibration_event()
