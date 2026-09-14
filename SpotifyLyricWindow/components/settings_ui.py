@@ -6,16 +6,69 @@ overlay. Existing control names and value ordering are deliberately preserved.
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QFontDatabase, QIcon
+from PyQt6.QtGui import QColor, QFontDatabase, QFontMetrics, QIcon, QPainter
 from PyQt6.QtWidgets import (
     QWidget, QFrame, QLabel, QPushButton, QCheckBox, QRadioButton, QComboBox,
     QLineEdit, QDoubleSpinBox, QPlainTextEdit, QListWidget, QListWidgetItem,
     QStackedWidget, QScrollArea, QSplitter, QVBoxLayout, QHBoxLayout, QGridLayout,
-    QSizePolicy, QAbstractItemView,
+    QSizePolicy, QAbstractItemView, QStyledItemDelegate, QStyleOptionViewItem, QStyle,
 )
 
 
 ASSET_PATH = Path(__file__).resolve().parents[1] / 'resource' / 'ui' / 'settings'
+MISSING_LYRICS_ROLE = Qt.ItemDataRole.UserRole + 1
+
+
+class LyricsStatusDelegate(QStyledItemDelegate):
+    """Decorate missing lyrics without changing titles used by search/export."""
+
+    def sizeHint(self, option, index):
+        size = super().sizeHint(option, index)
+        # Let the viewport set the width so long titles elide instead of scroll.
+        size.setWidth(0)
+        if index.data(MISSING_LYRICS_ROLE):
+            size.setHeight(max(size.height(), option.fontMetrics.height() * 2 + 24))
+        return size
+
+    def paint(self, painter, option, index):
+        if not index.data(MISSING_LYRICS_ROLE):
+            return super().paint(painter, option, index)
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        selected = bool(opt.state & QStyle.StateFlag.State_Selected)
+        hovered = bool(opt.state & QStyle.StateFlag.State_MouseOver)
+        background = '#d5e8de' if selected else ('#faedd8' if hovered else '#fff5e6')
+        rect = opt.rect.adjusted(0, 2, 0, -2)
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor(background))
+        painter.drawRoundedRect(rect, 4, 4)
+        if opt.state & QStyle.StateFlag.State_HasFocus:
+            painter.setPen(QColor('#398765'))
+            painter.setBrush(Qt.BrushStyle.NoBrush)
+            painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4)
+        title = rect.adjusted(6, 6, -6, 0)
+        title.setHeight(opt.fontMetrics.height())
+        painter.setFont(opt.font)
+        painter.setPen(QColor('#183c32' if selected else '#58482f'))
+        painter.drawText(title, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
+                         opt.fontMetrics.elidedText(opt.text, Qt.TextElideMode.ElideRight, title.width()))
+        font = opt.font
+        font.setPixelSize(11)
+        font.setBold(False)
+        painter.setFont(font)
+        metrics = QFontMetrics(font)
+        status = self.tr('无歌词')
+        badge = rect.adjusted(6, 0, 0, 0)
+        badge.setTop(title.bottom() + 5)
+        badge.setSize(QSize(metrics.horizontalAdvance(status) + 12, metrics.height() + 4))
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor('#bddbca' if selected else '#f7e5c5'))
+        painter.drawRoundedRect(badge, 4, 4)
+        painter.setPen(QColor('#236347' if selected else '#896027'))
+        painter.drawText(badge, Qt.AlignmentFlag.AlignCenter, status)
+        painter.restore()
 
 
 def label(text, role='body', parent=None):
@@ -316,7 +369,9 @@ class Ui_LyricsManage:
         search.setPlaceholderText(tr('搜索本地歌词…'))
         search.setClearButtonEnabled(True)
         left.addWidget(search)
-        left.addWidget(control(self, 'lyrics_listWidget', QListWidget()), 1)
+        files = control(self, 'lyrics_listWidget', QListWidget())
+        files.setItemDelegate(LyricsStatusDelegate(files))
+        left.addWidget(files, 1)
         splitter.addWidget(library)
         editor = QWidget()
         right = QVBoxLayout(editor)
