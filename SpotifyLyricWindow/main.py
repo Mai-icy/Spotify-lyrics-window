@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import *
 
 from view.lyric_window.lyric_window import LyricsWindow
 from common.config import Config
-from common.i18n import install_translations
+from common.ui.i18n import install_translations
 import components.source
 
 
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setQuitOnLastWindowClosed(False)
     if sys.platform == 'darwin' and app.platformName() == 'cocoa':
-        from common.mac_window import configure_accessory_app
+        from common.macos.window import configure_accessory_app
         configure_accessory_app()
     install_translations(app, Config.CommonConfig.language)
     myWin = LyricsWindow()

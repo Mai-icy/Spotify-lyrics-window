@@ -13,7 +13,7 @@ from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from common.typing import DisplayMode, Callable
 from common.config import Config
 from common.hotkeys import create_global_hotkeys
-from common.ui_fonts import resolve_font_family
+from common.ui.fonts import resolve_font_family
 
 
 class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWindow):
@@ -512,7 +512,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def _apply_mac_window_policy(self):
         if self.isVisible():
-            from common.mac_window import configure_overlay
+            from common.macos.window import configure_overlay
             # Use actual flags: the settings callback updates Config later.
             configure_overlay(self.winId(), bool(self.windowFlags() & Qt.WindowType.WindowStaysOnTopHint))
 

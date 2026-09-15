@@ -5,7 +5,7 @@ overlay. Existing control names and value ordering are deliberately preserved.
 """
 from pathlib import Path
 
-from common.i18n import LANGUAGES
+from common.ui.i18n import LANGUAGES
 
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QColor, QFontDatabase, QFontMetrics, QIcon, QPainter
