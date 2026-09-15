@@ -66,7 +66,7 @@ macOS testing does not replace Windows/Linux desktop regression testing.
 
 ### Lyrics overlay
 
-`common/mac_window.py` configures the Qt Cocoa panel using public AppKit APIs,
+`common/macos/window.py` configures the Qt Cocoa panel using public AppKit APIs,
 independently of the private MediaRemote helper. It disables hide-on-deactivate,
 sets a floating/normal level according to the topmost preference, and replaces
 Qt's `MoveToActiveSpace` behavior with `CanJoinAllSpaces | FullScreenAuxiliary`
@@ -84,7 +84,7 @@ coverage over every fullscreen application or system/security surface.
 
 ### Global hotkeys and settings close
 
-`common/mac_hotkeys.py` adapts the pinned pynput 1.8.1 Darwin listener. Its
+`common/macos/hotkeys.py` adapts the pinned pynput 1.8.1 Darwin listener. Its
 input-source/layout snapshot is taken by `start()` on the main thread; the worker
 only runs the existing event tap. Reading TIS/TSM properties on the worker can
 trigger a fatal dispatch-queue assertion on macOS 26 when closing settings

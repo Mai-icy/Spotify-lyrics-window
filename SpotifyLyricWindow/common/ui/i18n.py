@@ -7,7 +7,7 @@ from PyQt6.QtCore import QLibraryInfo, QTranslator
 
 
 LANGUAGES = (('zh_CN', '简体中文'), ('en_US', 'English'))
-TRANSLATIONS_PATH = Path(__file__).resolve().parents[1] / 'resource' / 'i18n'
+TRANSLATIONS_PATH = Path(__file__).resolve().parents[2] / 'resource' / 'i18n'
 logger = logging.getLogger(__name__)
 
 

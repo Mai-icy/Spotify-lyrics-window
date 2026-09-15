@@ -385,7 +385,7 @@ class LyricsWindow(LyricsWindowView):
         if is_support_macos and QApplication.platformName() == 'cocoa':
             # With no Dock entry, the tray must also recover an existing window.
             # Do not call SettingWindow.show() again: it reloads in-progress edits.
-            from common.mac_window import activate_application
+            from common.macos.window import activate_application
             activate_application()
             window = QApplication.activeModalWidget() or self.setting_window
             if window.isMinimized():

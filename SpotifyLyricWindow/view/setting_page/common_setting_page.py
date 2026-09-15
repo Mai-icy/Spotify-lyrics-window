@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import *
 
 from common.api.user_api import SpotifyUserAuth
 from common.config import Config
-from common.i18n import supported_language
+from common.ui.i18n import supported_language
 from common.lyric import LyricFileManage
 from common.path import LRC_PATH, TEMP_PATH, ORI_LRC_PATH, ORI_TEMP_PATH
 from common.temp_manage import TempFileManage
