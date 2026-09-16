@@ -7,3 +7,4 @@
 **/.vs
 **/__pycache__
 /.venv/
+.DS_Store
