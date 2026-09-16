@@ -2,7 +2,9 @@
 # -*- coding:utf-8 -*-
 import platform
 import sys
+import threading
 import time
+import unicodedata
 import webbrowser
 from functools import wraps
 from types import MethodType, SimpleNamespace
@@ -40,26 +42,41 @@ init_logging()
 logger = get_logger(__name__)
 
 
+def player_state_locked(func):
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        with self._calibration_lock:
+            return func(self, *args, **kwargs)
+    return wrapper
+
+
 class CatchError:
     def __init__(self, func):
         wraps(func)(self)
 
     def __call__(self, *args, **kwargs):
+        def show_error(error):
+            request_id = kwargs.get("_calibration_id")
+            if request_id is None:
+                args[0].error_msg_show_signal.emit(error)
+            else:
+                args[0].calibration_error_signal.emit(request_id, error)
+
         try:
             return self.__wrapped__(*args, **kwargs)
         except UserError as e:
-            args[0].error_msg_show_signal.emit(e)
+            show_error(e)
         except requests.RequestException as e:
             logger.exception("Requests error in %s", self.__wrapped__.__name__)
             new_err = Exception("Requests Error")
-            args[0].error_msg_show_signal.emit(new_err)
+            show_error(new_err)
         except NotImplementedError as e:
-            args[0].error_msg_show_signal.emit(str(e))
+            show_error(str(e))
         except NetworkError as e:
-            args[0].error_msg_show_signal.emit(str(e))
+            show_error(str(e))
         except Exception as e:
             logger.exception("Unhandled error in %s", self.__wrapped__.__name__)
-            args[0].error_msg_show_signal.emit("Unknown Error. Refer to log (resource/error.log)")
+            show_error("Unknown Error. Refer to log (resource/error.log)")
 
     def __get__(self, instance, cls):
         if instance is None:
@@ -74,6 +91,7 @@ class LyricsWindow(LyricsWindowView):
     pause_icon_signal = pyqtSignal(bool)
     account_enabled_signal = pyqtSignal(bool)
     delay_calibration_signal = pyqtSignal(int)
+    calibration_error_signal = pyqtSignal(int, object)
 
     def __init__(self, parent=None):
         super(LyricsWindow, self).__init__(parent)
@@ -120,6 +138,9 @@ class LyricsWindow(LyricsWindowView):
 
     def _init_common(self):
         """初始化其他辅助部件"""
+        self._calibration_lock = threading.RLock()
+        self._calibration_id = 0
+        self.calibration_error_signal.connect(self._calibration_error_event)
         self.lyric_file_manage = LyricFileManage()
         self.temp_manage = TempFileManage()
 
@@ -169,8 +190,10 @@ class LyricsWindow(LyricsWindowView):
     def _mac_media_session_disconnected(self):
         self.calibration_event(no_text_show=True, use_api_position=True)
 
+    @player_state_locked
     def _clear_player_state(self):
         """清空当前歌词上下文，避免旧歌词在无活跃用户时被重新唤起"""
+        self._calibration_id += 1
         self.lrc_player.set_pause(True)
         self.lrc_player.set_track("", 0)
         self.lrc_player.seek_to_position(0, is_show_last_lyric=False)
@@ -179,7 +202,10 @@ class LyricsWindow(LyricsWindowView):
     def _has_active_track(self) -> bool:
         return bool(self.lrc_player.track_id)
 
+    @player_state_locked
     def media_properties_changed(self, info: MediaPropertiesInfo):
+        # Even a cached track switch must invalidate pending API/download work.
+        self._calibration_id += 1
         if not self._has_active_track():
             self.calibration_event(no_text_show=True)
             return
@@ -213,6 +239,7 @@ class LyricsWindow(LyricsWindowView):
                 time.sleep(0.5)  # 等待api反应过来
             self.calibration_event()
 
+    @player_state_locked
     def playback_info_changed(self, info: MediaPlaybackInfo):
         if not self._has_active_track():
             return
@@ -222,6 +249,7 @@ class LyricsWindow(LyricsWindowView):
         self.set_pause_button_icon(is_playing)
         self.set_lyrics_rolling(is_playing)
 
+    @player_state_locked
     def timeline_properties_changed(self, info: MediaPlaybackInfo):
         if not self._manual_skip_flag or not self._has_active_track():
             return
@@ -231,53 +259,107 @@ class LyricsWindow(LyricsWindowView):
             return
         self.lrc_player.seek_to_position(info.position)
 
+    def calibration_event(self, *_, no_text_show: bool = False, use_api_position: bool = False):
+        # Allocate before starting the thread: request order, not completion
+        # order, determines which calibration may update the player.
+        with self._calibration_lock:
+            self._calibration_id += 1
+            request_id = self._calibration_id
+        self._run_calibration(no_text_show=no_text_show, use_api_position=use_api_position,
+                              _calibration_id=request_id)
+
+    @player_state_locked
+    def _calibration_error_event(self, request_id, error):
+        if request_id == self._calibration_id:
+            self._error_msg_show_event(error)
+
+    def _calibration_matches_session(self, user_current, properties):
+        """Never combine an API track ID with another session's track name."""
+        if not self.media_session.is_connected():
+            return properties is None
+        current = self.media_session.get_current_media_properties()
+        if properties is None or current != properties or not user_current.track_id:
+            return False
+        normalize = lambda title: unicodedata.normalize("NFKC", title or "").strip().casefold()
+        playback = self.media_session.get_current_playback_info()
+        return (normalize(user_current.track_name) == normalize(current.title) and
+                bool(user_current.duration and playback.duration) and
+                abs(user_current.duration - playback.duration) <= 2000)
+
     @thread_drive()
     @CatchError
-    def calibration_event(self, *_, no_text_show: bool = False, use_api_position: bool = False):
+    def _run_calibration(self, *, no_text_show=False, use_api_position=False, _calibration_id):
         """
         同步歌词
 
         :param no_text_show: 是否显示 ‘校准中！’ 的 正在校准提示
         :param use_api_position: 是否使用api的时间进行校准
         """
-        if not no_text_show:
-            self.text_show_signal.emit(1, self.tr("校准中！"), 0)
-            self.text_show_signal.emit(2, self.tr(" (o゜▽゜)o!"), 0)
+        with self._calibration_lock:
+            if _calibration_id != self._calibration_id:
+                return
+            properties = (self.media_session.get_current_media_properties()
+                          if self.media_session.is_connected() else None)
+            if not no_text_show:
+                self.text_show_signal.emit(1, self.tr("校准中！"), 0)
+                self.text_show_signal.emit(2, self.tr(" (o゜▽゜)o!"), 0)
 
-        self.lrc_player.set_pause(True)
-        user_current = self.spotify_auth.get_current_playing()
+        # Spotify's web API can lag behind the desktop notification. Retry a
+        # bounded number of times, without holding the player lock over I/O.
+        for attempt in range(3):
+            with self._calibration_lock:
+                if _calibration_id != self._calibration_id:
+                    return
+            user_current = self.spotify_auth.get_current_playing()
+            with self._calibration_lock:
+                if _calibration_id != self._calibration_id:
+                    return
+                if self._calibration_matches_session(user_current, properties):
+                    break
+            if attempt == 2:
+                logger.warning("Ignoring calibration: API and media session tracks do not match")
+                return
+            time.sleep(0.5)
 
-        if self.media_session.connect_spotify():
-            # 连接情况下使用calibration_event 代表 title 对应不到 id 此处做 对应
-            info = self.media_session.get_current_media_properties()
-            track_title = f"{info.title} - {info.artist}"
-            if self.lyric_file_manage.get_title(user_current.track_id) != track_title:
-                self.lyric_file_manage.set_track_id_map(user_current.track_id, track_title)
-
-        self.pause_icon_signal.emit(user_current.is_playing)
-        self.set_lyrics_rolling(user_current.is_playing)
-
-        if not user_current.track_id:  # 正在播放非音乐（track）
-            self.text_show_signal.emit(1, user_current.track_name + "!", 0)
-            self.text_show_signal.emit(2, self.tr("o(_ _)ozzZZ"), 0)
-            self._clear_player_state()
-            return
+        with self._calibration_lock:
+            if _calibration_id != self._calibration_id:
+                return
+            if not user_current.track_id:  # 正在播放非音乐（track）
+                self.text_show_signal.emit(1, user_current.track_name + "!", 0)
+                self.text_show_signal.emit(2, self.tr("o(_ _)ozzZZ"), 0)
+                self._clear_player_state()
+                return
+            track_id = user_current.track_id
 
         if not self.lyric_file_manage.is_lyric_exist(user_current.track_id):
-            user_current = self._download_lyric(user_current)
+            user_current = self._download_lyric(user_current, _calibration_id=_calibration_id)
             if user_current is None:
                 return
-        else:
+
+        with self._calibration_lock:
+            if _calibration_id != self._calibration_id:
+                return
+            if (user_current.track_id != track_id or
+                    not self._calibration_matches_session(user_current, properties)):
+                self.delay_calibration()
+                return
+            if properties is not None:
+                track_title = f"{properties.title} - {properties.artist}"
+                if self.lyric_file_manage.get_title(track_id) != track_title:
+                    self.lyric_file_manage.set_track_id_map(track_id, track_title)
             if self.lyric_file_manage.get_not_found(user_current.track_id):  # 歌词文件存在 但 被记录为不存在
-                self.lyric_file_manage.set_not_found(user_current.track_id, "")  # 将 不存在 记录撤去
+                if self.lyric_file_manage.is_lyric_exist(user_current.track_id):
+                    self.lyric_file_manage.set_not_found(user_current.track_id, "")
+            self.lrc_player.set_pause(True)
             user_current = self._refresh_player_track(user_current)
+            self.pause_icon_signal.emit(user_current.is_playing)
+            self.set_lyrics_rolling(user_current.is_playing)
+            self.lrc_player.set_pause(not user_current.is_playing)
 
-        self.lrc_player.set_pause(not user_current.is_playing)
-
-        if not self.media_session.is_connected() or use_api_position:
-            self.lrc_player.seek_to_position(user_current.progress_ms)
-        elif is_support_macos:
-            self.lrc_player.seek_to_position(self.media_session.get_current_playback_info().position)
+            if not self.media_session.is_connected() or use_api_position:
+                self.lrc_player.seek_to_position(user_current.progress_ms)
+            elif is_support_macos:
+                self.lrc_player.seek_to_position(self.media_session.get_current_playback_info().position)
 
     @thread_drive()
     @CatchError
@@ -436,33 +518,42 @@ class LyricsWindow(LyricsWindowView):
         return user_current
 
     @CatchError
-    def _download_lyric(self, user_current: UserCurrentPlaying) -> UserCurrentPlaying:
+    def _download_lyric(self, user_current: UserCurrentPlaying, *, _calibration_id=None) -> UserCurrentPlaying:
         """
         根据 用户播放信息 下载歌词
 
         :param user_current: 用户播放信息
         :return: 返回输入的用户播放信息
         """
-        found_data = self.lyric_file_manage.get_not_found(user_current.track_id)
-        if found_data and int(time.time()) - found_data["last_time"] < 24 * 3600:
+        with self._calibration_lock:
+            if _calibration_id is not None and _calibration_id != self._calibration_id:
+                return
+            found_data = self.lyric_file_manage.get_not_found(user_current.track_id)
+            recently_missing = found_data and int(time.time()) - found_data["last_time"] < 24 * 3600
+            if not recently_missing:
+                self.text_show_signal.emit(1, self.tr("查找歌词中！"), 0)
+                self.text_show_signal.emit(2, self.tr("(〃'▽'〃)"), 0)
+        if recently_missing:
             # 最近 24h 内自动下载过但是失败 将在 24h 后重试 24h 内将不重试
-            self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
-            self.text_show_signal.emit(2, self.tr("无歌词"), 0)
-            return self._refresh_player_track()
-
-        self.text_show_signal.emit(1, self.tr("查找歌词中！"), 0)
-        self.text_show_signal.emit(2, self.tr("(〃'▽'〃)"), 0)
-
-        is_success = download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id)
-        if not is_success:  # 没有成功下载
-            self.lyric_file_manage.set_not_found(user_current.track_id,
-                                                 f"{user_current.track_name} - {user_current.artist}")
-            self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
-            self.text_show_signal.emit(2, self.tr("无歌词"), 0)
-        self.delay_calibration()
-        return self._refresh_player_track()
+            is_success = False
+        else:
+            is_success = download_lrc(f"{user_current.track_name} - {user_current.artist}", user_current.track_id)
+        with self._calibration_lock:
+            if _calibration_id is not None and _calibration_id != self._calibration_id:
+                return
+            if not is_success:
+                if not recently_missing:
+                    self.lyric_file_manage.set_not_found(user_current.track_id,
+                                                         f"{user_current.track_name} - {user_current.artist}")
+                self.text_show_signal.emit(1, f"{user_current.track_name} - {user_current.artist}", 0)
+                self.text_show_signal.emit(2, self.tr("无歌词"), 0)
+            if not recently_missing:
+                self.delay_calibration()
+        return self.spotify_auth.get_current_playing()
 
     def closeEvent(self, event: QCloseEvent):
+        with self._calibration_lock:
+            self._calibration_id += 1
         if is_support_macos:
             self.media_session.close()
         self.delay_timer.stop()

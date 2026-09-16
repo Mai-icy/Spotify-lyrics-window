@@ -124,6 +124,9 @@ class LyricFileManage:
 
     def set_track_id_map(self, track_id: str, title: str):
         is_changed = track_id not in self.lyric_data_json["id2title"]
+        old_title = self.lyric_data_json["id2title"].get(track_id)
+        if old_title != title and self.lyric_data_json["title2id"].get(old_title) == track_id:
+            self.lyric_data_json["title2id"].pop(old_title)
         self.lyric_data_json["id2title"][track_id] = title
         self.lyric_data_json["title2id"][title] = track_id
         self.save_json()
