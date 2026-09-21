@@ -21,6 +21,12 @@ SongSearchInfo = collections.namedtuple(
     "SongSearchInfo", [
         "songName", "singer", "duration", "idOrMd5"])
 
+ArtistAliasInfo = collections.namedtuple(
+    "ArtistAliasInfo", ["id", "names"])
+
+SongAliasInfo = collections.namedtuple(
+    "SongAliasInfo", ["id", "songNames", "singerNames", "duration", "comment"])
+
 
 if __name__ == "__main__":
     pass
