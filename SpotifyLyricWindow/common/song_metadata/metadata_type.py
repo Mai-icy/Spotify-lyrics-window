@@ -12,7 +12,8 @@ SongInfo = collections.namedtuple("SongInfo",
                                    "duration",
                                    "genre",
                                    "picBuffer",
-                                   "artistNames"], defaults=[()])
+                                   "artistNames",
+                                   "isrc"], defaults=[(), None])
 
 SongElseInfo = collections.namedtuple(
     "SongElseInfo", [
@@ -28,7 +29,8 @@ ArtistAliasInfo = collections.namedtuple(
 
 # artistNames 按歌手分组保存别名，singerNames 仅用于生成完整署名搜索词。
 SongAliasInfo = collections.namedtuple(
-    "SongAliasInfo", ["id", "songNames", "singerNames", "duration", "comment", "artistNames"], defaults=[()])
+    "SongAliasInfo", ["id", "songNames", "singerNames", "duration", "comment", "artistNames", "isrcs"],
+    defaults=[(), ()])
 
 
 if __name__ == "__main__":
