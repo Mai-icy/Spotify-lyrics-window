@@ -29,6 +29,13 @@ def duration_seconds(duration: str) -> int:
         return 0
 
 
+def normalize_isrc(isrc: str) -> str:
+    if not isinstance(isrc, str):
+        return ''
+    isrc = (isrc or '').replace('-', '').strip().upper()
+    return isrc if re.fullmatch(r'[A-Z]{2}[A-Z0-9]{3}[0-9]{7}', isrc) else ''
+
+
 def _match_singers(song_info: SongInfo, song_alias: SongAliasInfo) -> bool:
     if not song_alias.artistNames:
         # 兼容旧数据；没有逐歌手信息时不猜测署名如何拆分。
@@ -72,7 +79,13 @@ def song_alias_mismatch(song_info: SongInfo, song_alias: SongAliasInfo) -> str:
     alias_duration = duration_seconds(song_alias.duration)
     if not duration or not alias_duration or abs(duration - alias_duration) > 3:
         return '时长缺失或相差超过3秒'
-    if normalize_name(song_info.songName) not in map(normalize_name, song_alias.songNames):
+    isrc = normalize_isrc(song_info.isrc)
+    isrcs = set(map(normalize_isrc, song_alias.isrcs)) - {''}
+    if isrc and isrcs and isrc not in isrcs:
+        return 'ISRC与录音不一致'
+    # 编号一致时允许跨语言歌名；没有编号的歌词源仍必须匹配歌名及完整署名。
+    if not (isrc and isrc in isrcs) and \
+            normalize_name(song_info.songName) not in map(normalize_name, song_alias.songNames):
         return '歌名不在录音别名中'
     if not _match_singers(song_info, song_alias):
         return '完整歌手署名不匹配'
@@ -97,8 +110,9 @@ def get_song_aliases(track_id: str, song_info: SongInfo) -> SongAliasInfo:
     from common.api.musicbrainz_api import MusicBrainzApi
     from common.temp_manage import TempFileManage
 
-    song_key = json.dumps(['song-v2', track_id, song_info.songName, song_info.singer, song_info.duration,
-                          song_info.artistNames],
+    isrc = normalize_isrc(song_info.isrc)
+    song_key = json.dumps(['song-v3', track_id, song_info.songName, song_info.singer, song_info.duration,
+                          song_info.artistNames, isrc],
                           ensure_ascii=False)
     artist_key = json.dumps(['artist-v1', normalize_name(song_info.singer)], ensure_ascii=False)
     with _lookup_lock:
@@ -117,6 +131,30 @@ def get_song_aliases(track_id: str, song_info: SongInfo) -> SongAliasInfo:
                 logger.debug('MusicBrainz 服务异常冷却中，跳过查询: %s', track_id)
                 return None
             api = MusicBrainzApi()
+            if isrc:
+                logger.debug('MusicBrainz 尝试ISRC匹配: %s, %s', track_id, isrc)
+                try:
+                    songs = api.search_song_isrc(isrc)
+                except NoneResultError as e:
+                    songs = []
+                    logger.debug('MusicBrainz ISRC未匹配，继续按歌名搜索: %s: %s', track_id, e)
+                aliases = {}
+                for alias in songs:
+                    if isrc not in map(normalize_isrc, alias.isrcs):
+                        logger.debug('MusicBrainz 排除ISRC候选，详情缺少对应编号: %s, %s', track_id, alias.id)
+                        continue
+                    reason = song_alias_mismatch(song_info, alias)
+                    if reason:
+                        logger.debug('MusicBrainz 排除ISRC候选: %s, %s: %s', track_id, alias.id, reason)
+                    else:
+                        aliases[alias.id] = alias
+                if len(aliases) == 1:
+                    alias = next(iter(aliases.values()))
+                    cache.save_musicbrainz_cache(song_key, alias._asdict())
+                    logger.debug('MusicBrainz 已通过ISRC确认录音: %s, %s -> %s', track_id, isrc, alias.id)
+                    return alias
+                if songs:
+                    logger.debug('MusicBrainz ISRC候选无法唯一确认，继续按歌名搜索: %s', track_id)
             artist_id = cache.get_musicbrainz_cache(artist_key)
             if len(song_info.artistNames) > 1:
                 artist_id = False

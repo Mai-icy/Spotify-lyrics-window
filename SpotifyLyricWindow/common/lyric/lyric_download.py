@@ -32,7 +32,7 @@ def _search_candidates(api, keyword, spotify_info, seen, song_alias=None):
 
     def rank_song(song):
         info = spotify_info._replace(songName=getattr(song, 'songName', ''), singer=getattr(song, 'singer', ''),
-                                     duration=getattr(song, 'duration', '0:00'), album=None, artistNames=())
+                                     duration=getattr(song, 'duration', '0:00'), album=None, artistNames=(), isrc=None)
         score = (compare_song_info(info, spotify_info, song_alias=song_alias) if song_alias else
                  compare_song_info(info, spotify_info))
         return score, -abs(duration_seconds(info.duration) - duration)
