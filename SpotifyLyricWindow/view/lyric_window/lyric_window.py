@@ -135,6 +135,7 @@ class LyricsWindow(LyricsWindowView):
     def _init_lrc_player(self):
         """初始化歌词播放器"""
         self.lrc_player = LrcPlayer(output_func=self.text_show_signal.emit)
+        self.lrc_player.set_trans_mode(self.user_trans)
 
     def _init_common(self):
         """初始化其他辅助部件"""
@@ -482,7 +483,7 @@ class LyricsWindow(LyricsWindowView):
         :param mode: 翻译的模式
         """
         self.lrc_player.set_trans_mode(mode)
-        self.user_trans = self.lrc_player.trans_mode
+        self.user_trans = mode
         Config.LyricConfig.trans_type = self.user_trans.value
 
     def _error_msg_show_event(self, error: Exception):

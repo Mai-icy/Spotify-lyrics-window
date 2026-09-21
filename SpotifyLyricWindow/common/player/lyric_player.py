@@ -21,6 +21,7 @@ class LrcPlayer:
         self.duration = float('inf')
         self.is_pause = False
         self.trans_mode = TransType.NON
+        self.preferred_trans_mode = TransType.NON  # 用户偏好，不随当前歌曲可用翻译变化
 
         # 歌词相关属性
         self.track_offset = 0
@@ -59,16 +60,16 @@ class LrcPlayer:
         else:
             self.lrc_file = LrcFile()
 
-        if self.trans_mode not in self.lrc_file.available_trans():
-            self.trans_mode = TransType.NON
+        self.trans_mode = (self.preferred_trans_mode if self.preferred_trans_mode in self.lrc_file.available_trans()
+                           else TransType.NON)
 
     def set_trans_mode(self, mode: TransType) -> bool:
-        """设置翻译模式"""
-        if self.lrc_file.empty(mode):
-            return False
-        self.trans_mode = mode
+        """记住翻译偏好，当前歌曲不支持时仅临时显示原文。"""
+        self.preferred_trans_mode = mode
+        available = not self.lrc_file.empty(mode)
+        self.trans_mode = mode if available else TransType.NON
         self._show_last_lyric()
-        return True
+        return available
 
     def _show_last_lyric(self):
         """显示上一句非空白的歌词"""
