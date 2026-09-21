@@ -29,22 +29,62 @@ def duration_seconds(duration: str) -> int:
         return 0
 
 
-def is_song_alias(song_info: SongInfo, song_alias: SongAliasInfo) -> bool:
-    if not song_info or not song_alias:
+def _match_singers(song_info: SongInfo, song_alias: SongAliasInfo) -> bool:
+    if not song_alias.artistNames:
+        # 兼容旧数据；没有逐歌手信息时不猜测署名如何拆分。
+        return normalize_name(song_info.singer) in map(normalize_name, song_alias.singerNames)
+    groups = tuple(frozenset(normalize_name(name) for name in names if normalize_name(name))
+                   for names in song_alias.artistNames)
+    if not groups or len(groups) > 8:
         return False
+    structured = bool(song_info.artistNames)
+    remaining = (tuple(map(normalize_name, song_info.artistNames)) if structured else
+                 normalize_name(song_info.singer))
+    if structured and len(remaining) != len(groups):
+        return False
+
+    def match(names, pending):
+        if not pending:
+            return not names
+        if not names:
+            return False
+        for index, aliases in enumerate(pending):
+            rest = pending[:index] + pending[index + 1:]
+            if structured:
+                if names[0] in aliases and match(names[1:], rest):
+                    return True
+            else:
+                # 仅按已知的完整歌手名消费文本，不把名字里的逗号直接拆开。
+                for alias in aliases:
+                    prefix = alias + ',' if rest else alias
+                    if names.startswith(prefix) and match(names[len(prefix):], rest):
+                        return True
+        return False
+
+    return match(remaining, groups)
+
+
+def song_alias_mismatch(song_info: SongInfo, song_alias: SongAliasInfo) -> str:
+    """返回别名确认失败的原因，空字符串表示确认成功。"""
+    if not song_info or not song_alias:
+        return '元数据缺失'
     duration = duration_seconds(song_info.duration)
     alias_duration = duration_seconds(song_alias.duration)
     if not duration or not alias_duration or abs(duration - alias_duration) > 3:
-        return False
+        return '时长缺失或相差超过3秒'
     if normalize_name(song_info.songName) not in map(normalize_name, song_alias.songNames):
-        return False
-    if normalize_name(song_info.singer) not in map(normalize_name, song_alias.singerNames):
-        return False
+        return '歌名不在录音别名中'
+    if not _match_singers(song_info, song_alias):
+        return '完整歌手署名不匹配'
     # 别名不能抹掉现场、伴奏等版本区别，即使录音时长接近也不能直接认定。
     version_pattern = r'\b(?:live|remix|instrumental|karaoke|rearrange)\b|现场|現場|伴奏|演唱会|カラオケ'
     source_versions = set(re.findall(version_pattern, song_info.songName.lower()))
     target_versions = set(re.findall(version_pattern, (song_alias.songNames[0] + ' ' + song_alias.comment).lower()))
-    return source_versions == target_versions
+    return '' if source_versions == target_versions else '现场、伴奏等录音版本不一致'
+
+
+def is_song_alias(song_info: SongInfo, song_alias: SongAliasInfo) -> bool:
+    return not song_alias_mismatch(song_info, song_alias)
 
 
 def get_song_aliases(track_id: str, song_info: SongInfo) -> SongAliasInfo:

@@ -109,11 +109,12 @@ class MusicBrainzApi:
             artist_names = []
             for credit in res_json['artist-credit']:
                 names = (credit['name'], *self._get_alias_names(credit['artist'], 'name'))
-                artist_names.append(tuple(dict.fromkeys(names))[:8])
+                artist_names.append(tuple(dict.fromkeys(names)))
             # 合作歌曲保留完整歌手组合，不把其中一个歌手当成整首歌的署名。
             singers = tuple(','.join(names) for names in itertools.islice(itertools.product(*artist_names), 32))
             return SongAliasInfo(res_json['id'], self._get_alias_names(res_json, 'title'), singers,
-                                 self._get_duration(res_json.get('length')), res_json.get('disambiguation', ''))
+                                 self._get_duration(res_json.get('length')), res_json.get('disambiguation', ''),
+                                 tuple(artist_names))
         except (AttributeError, KeyError, TypeError, ValueError) as e:
             raise NetworkError("MusicBrainz 歌曲别名数据异常") from e
 
