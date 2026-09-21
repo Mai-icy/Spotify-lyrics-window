@@ -84,16 +84,23 @@ class MusicBrainzApi:
             raise NoneResultError("该搜索词无对应歌手")
         return artists
 
-    def search_song_id(self, keyword: str, artist_id: str) -> List[SongSearchInfo]:
+    def search_song_id(self, keyword: str, artist_id: str = None) -> List[SongSearchInfo]:
         name = self._quote_keyword(keyword)
-        query = f'(recording:{name} OR alias:{name}) AND arid:{self._quote_keyword(artist_id)}'
-        res_json = self._request_json(self._SEARCH_SONG_ID_URL, {'query': query, 'limit': 5})
+        query = f'(recording:{name} OR alias:{name})'
+        if artist_id:
+            query += f' AND arid:{self._quote_keyword(artist_id)}'
+        # 无歌手条件时扩大候选范围；截断结果不能用来判定录音唯一。
+        limit = 5 if artist_id else 20
+        res_json = self._request_json(self._SEARCH_SONG_ID_URL, {'query': query, 'limit': limit})
         try:
+            count = int(res_json.get('count', 0))
             songs = [SongSearchInfo(data['title'], ','.join(artist['name'] for artist in data['artist-credit']),
                                    self._get_duration(data.get('length')), data['id'])
                      for data in res_json['recordings']]
         except (AttributeError, KeyError, TypeError, ValueError) as e:
             raise NetworkError("MusicBrainz 歌曲数据异常") from e
+        if count > limit:
+            raise NoneResultError("歌曲候选过多，无法确认唯一录音")
         if not songs:
             raise NoneResultError("该搜索词无对应歌曲")
         return songs

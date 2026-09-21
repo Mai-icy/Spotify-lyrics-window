@@ -20,8 +20,10 @@ def _search_candidates(api, keyword, spotify_info, seen, song_alias=None):
     try:
         songs = api.search_song_id(keyword)
     except NoneResultError:
+        logger.debug('歌词源无搜索结果: %s, %s', type(api).__name__, keyword)
         return [], True
-    except NetworkError:
+    except NetworkError as e:
+        logger.warning('歌词源搜索失败: %s, %s: %s', type(api).__name__, keyword, e)
         return [], False
 
     from common.song_metadata.metadata_alias import duration_seconds
@@ -46,9 +48,11 @@ def _search_candidates(api, keyword, spotify_info, seen, song_alias=None):
         except (NetworkError, NoneResultError):
             continue
         if song_alias:
-            from common.song_metadata.metadata_alias import is_song_alias
+            from common.song_metadata.metadata_alias import song_alias_mismatch
 
-            if not is_song_alias(song_info, song_alias):
+            reason = song_alias_mismatch(song_info, song_alias)
+            if reason:
+                logger.debug('别名搜索排除歌词候选: %s, %s: %s', type(api).__name__, song_id, reason)
                 continue
         score = (compare_song_info(song_info, spotify_info, song_alias=song_alias) if song_alias else
                  compare_song_info(song_info, spotify_info))
@@ -69,7 +73,9 @@ def _download_candidates(candidates, track_name, track_id, min_score, attempted)
                 lrc.save_to_mrc(str(LRC_PATH / f'{track_id}.mrc'))
                 LyricFileManage().set_track_id_map(track_id, track_name)
                 return True
-        except (NetworkError, NoneResultError):
+            logger.debug('歌词候选内容为空: %s, %s', type(api).__name__, song_id)
+        except (NetworkError, NoneResultError) as e:
+            logger.warning('歌词候选下载失败: %s, %s: %s', type(api).__name__, song_id, e)
             continue
     return False
 
@@ -113,6 +119,10 @@ def download_lrc(track_name: str, track_id: str, *, min_score=74) -> bool:
                 if _download_candidates(candidates, track_name, track_id, min_score, attempted):
                     logger.debug('使用 MusicBrainz 别名搜索歌词: %s -> %s', track_id, song_alias.id)
                     return True
+            logger.debug('MusicBrainz 已确认别名，但歌词源未找到可下载的匹配歌词: %s -> %s',
+                         track_id, song_alias.id)
+    else:
+        logger.debug('歌词源均不可用，跳过 MusicBrainz: %s', track_id)
 
     # spotify 歌词 API 暂不支持
     # try:
@@ -135,4 +145,3 @@ if __name__ == "__main__":
     # download_lrc("Void - DUSTCELL", "5QnnLbeNiTPQn68agY3i6D")
     # download_lrc("蜜蜂 - DUSTCELL", "6oDv2ylQf1fiqOMp7UWcV8")
     pass
-
