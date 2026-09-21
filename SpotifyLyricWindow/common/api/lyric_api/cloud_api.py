@@ -143,6 +143,7 @@ class CloudMusicWebApi(BaseMusicApi):
             "duration": f'{duration // 60}:{duration % 60 // 10}{duration % 10}',
             "genre": None,
             "picBuffer": pic_buffer,
+            "artistNames": tuple(artists_list),
         }
         return SongInfo(**song_info)
 

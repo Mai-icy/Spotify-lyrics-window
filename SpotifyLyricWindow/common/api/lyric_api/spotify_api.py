@@ -98,7 +98,8 @@ class SpotifyApi(BaseMusicApi):
             "trackNumber": (song_json["track_number"], None),
             "duration": f'{duration // 60}:{duration % 60 // 10}{duration % 10}',
             "genre": None,
-            "picBuffer": pic_buffer}
+            "picBuffer": pic_buffer,
+            "artistNames": tuple(info["name"] for info in song_json["artists"])}
         return SongInfo(**song_info)
 
     def fetch_song_lyric(self, song_id: str):
@@ -213,4 +214,3 @@ if __name__ == "__main__":
     print(test_api.search_song_info("5mJ8Sj9EqT9UgpWY1RnEi2", download_pic=True))
     print("\n----test----(fetch_song_lyric)")
     pprint(test_api.fetch_song_lyric("6CIQOFf01zQ9qJaqhD6rlH").trans_non_dict)
-
