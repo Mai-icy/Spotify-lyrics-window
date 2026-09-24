@@ -138,6 +138,9 @@ class LyricThread(threading.Thread):
         while self.is_running:
             if self.sleep.is_set() and self.is_running:
                 self.sleep.clear()
+            if self.player.is_pause and self.is_running:
+                self.sleep.wait()
+                continue
             position = self.player.get_time()
             lyric_order = self.player.lrc_file.get_order_position(position)
             next_stamp = self.player.lrc_file.get_time(lyric_order + 1)
@@ -164,10 +167,6 @@ class LyricThread(threading.Thread):
 
             if next_stamp != self.player.duration:  # 播放最后一句时不需要等待
                 self.sleep.wait(show_time / 1000)
-
-            if self.player.is_pause and self.is_running:
-                self.sleep.wait()
-                continue
 
     def terminate(self):
         self.is_running = False

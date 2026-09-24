@@ -226,6 +226,8 @@ class LyricsWindow(LyricsWindowView):
                 else:
                     self.lrc_player.seek_to_position(playback_info.position)
                 self._manual_skip_flag = True
+            else:
+                self.lrc_player.seek_to_position(playback_info.position)
             self.lrc_player.set_pause(not (playback_info.playStatus == 4))
         else:
             if not self._manual_skip_flag:
@@ -359,12 +361,12 @@ class LyricsWindow(LyricsWindowView):
             user_current = self._refresh_player_track(user_current)
             self.pause_icon_signal.emit(user_current.is_playing)
             self.set_lyrics_rolling(user_current.is_playing)
-            self.lrc_player.set_pause(not user_current.is_playing)
 
             if not self.media_session.is_connected() or use_api_position:
                 self.lrc_player.seek_to_position(user_current.progress_ms)
             elif is_support_macos:
                 self.lrc_player.seek_to_position(self.media_session.get_current_playback_info().position)
+            self.lrc_player.set_pause(not user_current.is_playing)
 
     @thread_drive()
     @CatchError
