@@ -116,6 +116,7 @@
     "歌词前进0.5s": "Advance lyrics by 0.5 s",
     "关闭桌面歌词": "Close desktop lyrics",
     "校准中！": "Syncing lyrics…",
+    "歌曲信息不一致，请稍后重新校准": "Track information does not match. Please sync again later.",
     "正在获取授权链接": "Getting authorization link…",
     "请根据页面完成授权": "Complete authorization in your browser",
     "端口8888被占用，请检查端口占用": "Port 8888 is in use. Free the port and try again.",

@@ -283,9 +283,11 @@ class LyricsWindow(LyricsWindowView):
             return False
         normalize = lambda title: unicodedata.normalize("NFKC", title or "").strip().casefold()
         playback = self.media_session.get_current_playback_info()
+        # macOS 与 Spotify API 的同曲时长存在小幅差异，实测「微熱魔」相差 2423ms。
+        duration_tolerance = 3000 if is_support_macos else 2000
         return (normalize(user_current.track_name) == normalize(current.title) and
                 bool(user_current.duration and playback.duration) and
-                abs(user_current.duration - playback.duration) <= 2000)
+                abs(user_current.duration - playback.duration) <= duration_tolerance)
 
     @thread_drive()
     @CatchError
@@ -319,6 +321,8 @@ class LyricsWindow(LyricsWindowView):
                     break
             if attempt == 2:
                 logger.warning("Ignoring calibration: API and media session tracks do not match")
+                if not no_text_show:
+                    self.calibration_error_signal.emit(_calibration_id, self.tr("歌曲信息不一致，请稍后重新校准"))
                 return
             time.sleep(0.5)
 
