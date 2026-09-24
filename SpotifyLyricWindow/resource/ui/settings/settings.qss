@@ -35,7 +35,8 @@ QLineEdit, QComboBox, QDoubleSpinBox { background: #ffffff; border: 1px solid #d
 QLineEdit:focus, QComboBox:focus, QDoubleSpinBox:focus { border-color: #398765; background: #fcfefc; }
 QLineEdit:disabled, QComboBox:disabled, QDoubleSpinBox:disabled { background: #f1f3f2; color: #9aa69f; border-color: #e3e8e5; }
 QLineEdit[readOnly="true"] { background: #f7f9f8; }
-QComboBox { padding-right: 28px; }
+/* Use a list popup: native menu padding can leave unpainted bands on macOS. */
+QComboBox { padding-right: 28px; combobox-popup: 0; }
 QComboBox::drop-down { border: none; width: 26px; }
 QComboBox::down-arrow { image: url("@assets/chevron.svg"); width: 12px; height: 12px; }
 QDoubleSpinBox { padding-right: 28px; }
