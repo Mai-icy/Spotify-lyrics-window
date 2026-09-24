@@ -6,7 +6,6 @@ QFrame, QLabel, QWidget[settingsPage="true"], QStackedWidget { background: trans
 QFrame#settingsSidebar { background: #edf2f0; border-right: 1px solid #dce5e1; }
 QWidget#settingsBody { background: #f7f8fa; }
 QLabel[role="brand"] { font-size: 16px; font-weight: 600; color: #183c32; }
-QLabel[role="brandMark"] { font-size: 28px; font-weight: 600; color: #16775f; }
 QLabel[role="eyebrow"] { font-size: 11px; color: #72827d; }
 QLabel[role="pageTitle"] { font-size: 26px; font-weight: 600; color: #183c32; }
 QLabel[role="section"] { font-size: 14px; font-weight: 600; color: #344d45; }
