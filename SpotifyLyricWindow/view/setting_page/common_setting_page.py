@@ -63,10 +63,12 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.save_position_checkBox.stateChanged.connect(self._save_position_event)
         self.auto_track_sync_checkBox.toggled.connect(self._auto_track_sync_event)
         self.language_comboBox.currentIndexChanged.connect(self._language_event)
+        self.theme_comboBox.currentIndexChanged.connect(self._theme_event)
 
     def load_config(self):
         """载入配置文件"""
         common_config = Config.CommonConfig
+        self.theme_comboBox.setCurrentIndex(max(0, self.theme_comboBox.findData(common_config.settings_theme)))
         self.language_comboBox.setCurrentIndex(
             self.language_comboBox.findData(supported_language(common_config.language)))
 
@@ -112,6 +114,7 @@ class CommonPage(QWidget, Ui_CommonPage):
     def set_default_event(self):
         """设置初始化按钮事件"""
         default_dict = Config.get_default_dict()["CommonConfig"]
+        self.theme_comboBox.setCurrentIndex(self.theme_comboBox.findData(default_dict['settings_theme']))
         self.language_comboBox.setCurrentIndex(
             self.language_comboBox.findData(default_dict['language']))
 
@@ -180,6 +183,11 @@ class CommonPage(QWidget, Ui_CommonPage):
 
     def _language_event(self):
         Config.CommonConfig.language = self.language_comboBox.currentData()
+
+    def _theme_event(self):
+        Config.CommonConfig.settings_theme = self.theme_comboBox.currentData()
+        if self.setting_window is not None:
+            self.setting_window._init_style_sheet()
 
     def path_change_tip_event(self, tip_label: QLabel):
         """修改路径事件"""

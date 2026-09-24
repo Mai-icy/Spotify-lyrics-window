@@ -8,7 +8,7 @@ from pathlib import Path
 from common.ui.i18n import LANGUAGES
 
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QColor, QFontDatabase, QFontMetrics, QIcon, QPainter
+from PyQt6.QtGui import QColor, QFontDatabase, QFontMetrics, QIcon, QPainter, QPalette
 from PyQt6.QtWidgets import (
     QWidget, QFrame, QLabel, QPushButton, QCheckBox, QRadioButton, QComboBox,
     QLineEdit, QDoubleSpinBox, QPlainTextEdit, QListWidget, QListWidgetItem,
@@ -39,7 +39,10 @@ class LyricsStatusDelegate(QStyledItemDelegate):
         self.initStyleOption(opt, index)
         selected = bool(opt.state & QStyle.StateFlag.State_Selected)
         hovered = bool(opt.state & QStyle.StateFlag.State_MouseOver)
+        dark = opt.palette.color(QPalette.ColorRole.Base).lightness() < 128
         background = '#d5e8de' if selected else ('#faedd8' if hovered else '#fff5e6')
+        if dark:
+            background = '#264f78' if selected else ('#40392d' if hovered else '#332e25')
         rect = opt.rect.adjusted(0, 2, 0, -2)
         painter.save()
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -47,13 +50,14 @@ class LyricsStatusDelegate(QStyledItemDelegate):
         painter.setBrush(QColor(background))
         painter.drawRoundedRect(rect, 4, 4)
         if opt.state & QStyle.StateFlag.State_HasFocus:
-            painter.setPen(QColor('#398765'))
+            painter.setPen(QColor('#007fd4' if dark else '#398765'))
             painter.setBrush(Qt.BrushStyle.NoBrush)
             painter.drawRoundedRect(rect.adjusted(1, 1, -1, -1), 4, 4)
         title = rect.adjusted(6, 6, -6, 0)
         title.setHeight(opt.fontMetrics.height())
         painter.setFont(opt.font)
-        painter.setPen(QColor('#183c32' if selected else '#58482f'))
+        title_color = ('#e4effa' if selected else '#ead7b4') if dark else ('#183c32' if selected else '#58482f')
+        painter.setPen(QColor(title_color))
         painter.drawText(title, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter,
                          opt.fontMetrics.elidedText(opt.text, Qt.TextElideMode.ElideRight, title.width()))
         font = opt.font
@@ -66,9 +70,11 @@ class LyricsStatusDelegate(QStyledItemDelegate):
         badge.setTop(title.bottom() + 5)
         badge.setSize(QSize(metrics.horizontalAdvance(status) + 12, metrics.height() + 4))
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(QColor('#bddbca' if selected else '#f7e5c5'))
+        badge_color = ('#305d84' if selected else '#51422a') if dark else ('#bddbca' if selected else '#f7e5c5')
+        painter.setBrush(QColor(badge_color))
         painter.drawRoundedRect(badge, 4, 4)
-        painter.setPen(QColor('#236347' if selected else '#896027'))
+        badge_text = ('#c7e1f5' if selected else '#edc885') if dark else ('#236347' if selected else '#896027')
+        painter.setPen(QColor(badge_text))
         painter.drawText(badge, Qt.AlignmentFlag.AlignCenter, status)
         painter.restore()
 
@@ -233,7 +239,11 @@ class Ui_CommonPage:
     def setupUi(self, page):
         tr = page.tr
         layout = page_layout(page)
-        group = section(layout, tr('界面语言'))
+        group = section(layout, tr('界面'))
+        themes = combo(self, 'theme_comboBox')
+        themes.addItem(tr('浅色'), 'light')
+        themes.addItem(tr('深色'), 'dark')
+        row(group, tr('界面主题'), themes, tr('仅调整设置界面，不改变桌面歌词配色。'))
         languages = combo(self, 'language_comboBox')
         for code, name in LANGUAGES:
             languages.addItem(name, code)

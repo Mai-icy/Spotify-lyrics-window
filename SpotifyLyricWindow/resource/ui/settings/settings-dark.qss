@@ -1,0 +1,50 @@
+/* Color overrides only; layout and interaction rules stay in settings.qss. */
+QWidget#SettingsWindow, QDialog, QWidget#settingsBody { background: #1e1e1e; }
+QWidget { color: #cccccc; }
+QFrame#settingsSidebar { background: #252526; border-right-color: #3c3c3c; }
+QLabel[role="brand"], QLabel[role="pageTitle"] { color: #f0f0f0; }
+QLabel[role="eyebrow"], QLabel[role="muted"] { color: #a0a0a0; }
+QLabel[role="section"] { color: #dddddd; }
+QLabel[role="footer"] { color: #909090; }
+QLabel[role="notice"] { color: #edc885; }
+QListWidget#settingsNavigation::item { color: #bbbbbb; }
+QListWidget#settingsNavigation::item:hover { background: #303030; }
+QListWidget#settingsNavigation::item:selected { background: #264f78; color: #c7e1f5; }
+QListWidget#settingsNavigation::item:selected:focus { border-color: #007fd4; }
+QScrollArea#settingsScroll, QScrollArea#settingsScroll > QWidget > QWidget { background: #1e1e1e; }
+QFrame[settingCard="true"] { background: #252526; border-color: #3c3c3c; }
+QFrame[settingRow="true"] { border-bottom-color: #353535; }
+QPushButton { background: #333333; color: #dddddd; border-color: #505050; }
+QPushButton:hover { background: #3c3c3c; border-color: #707070; }
+QPushButton:pressed { background: #454545; }
+QPushButton:focus { border-color: #007fd4; }
+QPushButton[role="primary"] { background: #0e639c; color: #ffffff; border-color: #0e639c; }
+QPushButton[role="primary"]:hover { background: #1177bb; border-color: #1177bb; }
+QPushButton[role="primary"]:pressed { background: #094771; }
+QPushButton[role="danger"] { color: #efa49a; }
+QPushButton[role="danger"]:hover { background: #49322e; border-color: #aa7469; }
+QPushButton:disabled, QPushButton[role="primary"]:disabled, QPushButton[role="danger"]:disabled { background: #2b2b2b; color: #777777; border-color: #3c3c3c; }
+QLineEdit, QComboBox, QDoubleSpinBox { background: #2b2b2b; color: #cccccc; border-color: #505050; selection-background-color: #264f78; selection-color: #e4effa; }
+QLineEdit:focus, QComboBox:focus, QDoubleSpinBox:focus { background: #303030; border-color: #007fd4; }
+QLineEdit:disabled, QComboBox:disabled, QDoubleSpinBox:disabled { background: #2b2b2b; color: #777777; border-color: #3c3c3c; }
+QLineEdit[readOnly="true"] { background: #292929; }
+QComboBox QAbstractItemView { background: #252526; color: #cccccc; border-color: #505050; selection-background-color: #264f78; selection-color: #e4effa; }
+QCheckBox::indicator, QRadioButton::indicator { background: #2b2b2b; border-color: #707070; }
+QCheckBox::indicator:checked { background: #0e639c; border-color: #007fd4; }
+QRadioButton::indicator:checked { background: #264f78; border-color: #007fd4; image: url("@assets/radio-dark.svg"); }
+QCheckBox::indicator:focus, QCheckBox::indicator:hover, QRadioButton::indicator:focus, QRadioButton::indicator:hover { border-color: #75beff; }
+QCheckBox::indicator:disabled, QRadioButton::indicator:disabled { background: #2b2b2b; border-color: #505050; }
+QCheckBox:disabled, QRadioButton:disabled { color: #777777; }
+QPlainTextEdit, QListWidget { background: #252526; color: #cccccc; border-color: #3c3c3c; selection-background-color: #264f78; selection-color: #e4effa; }
+QListWidget::item:selected { background: #264f78; color: #e4effa; }
+QListWidget::item:hover:!selected { background: #303030; }
+QPlainTextEdit:focus, QListWidget:focus { border-color: #007fd4; }
+QTableWidget { background: #252526; alternate-background-color: #2a2a2a; color: #cccccc; border-color: #3c3c3c; selection-background-color: #264f78; selection-color: #e4effa; }
+QHeaderView, QHeaderView::section { background: #252526; color: #bbbbbb; }
+QLabel#settingsCover { background: #303030; color: #a0a0a0; }
+QSplitter::handle { background: #3c3c3c; }
+QScrollBar::handle:vertical, QScrollBar::handle:horizontal { background: #535353; }
+QScrollBar::handle:vertical:hover { background: #707070; }
+QMenu { background: #252526; border-color: #505050; }
+QMenu::item:selected { background: #264f78; color: #e4effa; }
+QToolTip { background: #252526; color: #dddddd; border: 1px solid #505050; }

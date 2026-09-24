@@ -48,9 +48,34 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
         self.page_listWidget.currentRowChanged.connect(self.page_change_event)
 
     def _init_style_sheet(self):
+        dark = Config.CommonConfig.settings_theme == 'dark'
+        # 只设置当前窗口的调色板，子对话框继承；不影响桌面歌词或 QApplication。
+        palette = QPalette(QApplication.palette())
+        colors = {
+            QPalette.ColorRole.Window: ('#f7f8fa', '#1e1e1e'),
+            QPalette.ColorRole.Base: ('#ffffff', '#252526'),
+            QPalette.ColorRole.AlternateBase: ('#f4f8f5', '#2a2a2a'),
+            QPalette.ColorRole.Text: ('#283b39', '#cccccc'),
+            QPalette.ColorRole.WindowText: ('#283b39', '#cccccc'),
+            QPalette.ColorRole.Button: ('#ffffff', '#333333'),
+            QPalette.ColorRole.ButtonText: ('#41584e', '#dddddd'),
+            QPalette.ColorRole.Highlight: ('#d5e8de', '#264f78'),
+            QPalette.ColorRole.HighlightedText: ('#183c32', '#e4effa'),
+            QPalette.ColorRole.Link: ('#16775f', '#75beff'),
+            QPalette.ColorRole.PlaceholderText: ('#74817d', '#909090'),
+        }
+        for role, values in colors.items():
+            palette.setColor(role, QColor(values[int(dark)]))
+        for role in (QPalette.ColorRole.Text, QPalette.ColorRole.WindowText, QPalette.ColorRole.ButtonText):
+            palette.setColor(QPalette.ColorGroup.Disabled, role, QColor('#777777' if dark else '#9aa69f'))
         with (ASSET_PATH / 'settings.qss').open(encoding='utf-8') as f:
             style_sheet = f.read().replace('@assets', ASSET_PATH.as_posix())
+        if dark:
+            with (ASSET_PATH / 'settings-dark.qss').open(encoding='utf-8') as f:
+                style_sheet += '\n' + f.read().replace('@assets', ASSET_PATH.as_posix())
         self.setStyleSheet(style_sheet)
+        self.ensurePolished()
+        self.setPalette(palette)
 
     def page_change_event(self, index):
         if not 0 <= index < self.page_stackedWidget.count():
