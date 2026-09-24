@@ -102,12 +102,27 @@ class TempFileManage:
         self.json_save()
 
     @temp_file_locked
+    def get_cache_size(self) -> int:
+        """统计缓存索引和已登记封面的文件大小，不包含歌词或其他文件。"""
+        paths = [TEMP_DATA_FILE_PATH]
+        paths.extend(TEMP_IMAGE_PATH / (track_id + '.jpg') for track_id in self.temp_data_json['image'])
+        size = 0
+        for path in paths:
+            try:
+                size += path.lstat().st_size
+            except FileNotFoundError:
+                continue
+        return size
+
+    @temp_file_locked
     def clean_all_temp(self):
-        """清理掉所有的临时图片和元数据缓存"""
+        """清理临时图片和元数据缓存，返回清理前后的文件大小。"""
+        before = self.get_cache_size()
         for temp_id in list(self.temp_data_json["image"].keys()):
             self.delete_temp_image(temp_id)
         self.temp_data_json['musicbrainz'].clear()
         self.json_save()
+        return before, self.get_cache_size()
 
     @temp_file_locked
     def json_save(self):

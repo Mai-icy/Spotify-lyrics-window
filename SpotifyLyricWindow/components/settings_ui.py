@@ -278,8 +278,11 @@ class Ui_CommonPage:
             row(group, title, value, stacked=True)
             tip = control(self, f'{prefix}_tip_label', label('', 'notice'))
             group.addWidget(tip)
-        row(group, tr('清理缓存'), button(self, 'clear_cache_button', tr('清理缓存')),
+        cache_size = control(self, 'cache_size_label', label('', 'muted'))
+        cache_size.setWordWrap(False)
+        row(group, tr('清理缓存'), horizontal(cache_size, button(self, 'clear_cache_button', tr('清理缓存'))),
             tr('清除临时文件，保留已下载的歌词。'))
+        group.addWidget(control(self, 'clear_cache_tip_label', label('', 'notice')))
         group = section(layout, tr('Spotify 连接'))
         for name, title in [('id_lineEdit', 'Client ID'), ('secret_lineEdit', 'Client Secret')]:
             field = control(self, name, QLineEdit())

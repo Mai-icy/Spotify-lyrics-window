@@ -4,6 +4,7 @@ import weakref
 from urllib.parse import urlsplit
 
 from requests.exceptions import ProxyError
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import *
 
 from common.api.user_api import SpotifyUserAuth
@@ -55,7 +56,7 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.cache_path_lineEdit.textChanged.connect(self._cache_path_text_event)
         self.lyrics_path_lineEdit.textChanged.connect(self._lyrics_path_text_event)
 
-        self.clear_cache_button.clicked.connect(self.temp_file_manage.clean_all_temp)
+        self.clear_cache_button.clicked.connect(self._clear_cache_event)
         self.global_offset_doubleSpinBox.valueChanged.connect(self.set_api_offset_event)
         self.confirm_button.clicked.connect(self.confirm_client_event)
         self.default_button.clicked.connect(self.set_default_event)
@@ -165,6 +166,40 @@ class CommonPage(QWidget, Ui_CommonPage):
             getattr(self, f'{name}_proxy_lineEdit').setText(address)
         self.auth.load_proxy_config()
         self.proxy_tip_label.setText(self.tr('代理设置已应用，对后续请求生效；关闭设置窗口后保存。'))
+
+    @pyqtSlot()
+    def _clear_cache_event(self):
+        """隔离 clicked(bool) 参数，并在页面内处理清理失败。"""
+        try:
+            before, after = self.temp_file_manage.clean_all_temp()
+        except OSError:
+            self.clear_cache_tip_label.setText(self.tr('缓存清理未完成，请检查缓存目录的访问权限后重试。'))
+            self._refresh_cache_size()
+        else:
+            self.cache_size_label.setText(self.tr('当前缓存：{}').format(self._format_cache_size(after)))
+            cleared = self._format_cache_size(max(0, before - after))
+            self.clear_cache_tip_label.setText(self.tr('已清理 {} 缓存，已下载的歌词不受影响。').format(cleared))
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._refresh_cache_size()
+
+    def _refresh_cache_size(self):
+        try:
+            size = self.temp_file_manage.get_cache_size()
+        except OSError:
+            self.cache_size_label.setText(self.tr('当前缓存：无法读取'))
+        else:
+            self.cache_size_label.setText(self.tr('当前缓存：{}').format(self._format_cache_size(size)))
+
+    @staticmethod
+    def _format_cache_size(size):
+        if size < 1024:
+            return f'{size} B'
+        for unit in ('KiB', 'MiB', 'GiB', 'TiB'):
+            size /= 1024
+            if size < 1024 or unit == 'TiB':
+                return f'{size:.1f} {unit}'
 
     def set_path_event(self, line_edit: QLineEdit):
         """设置路径事件"""
