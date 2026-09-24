@@ -37,8 +37,7 @@ class SpotifyUserAuth:
             self.auth_code = None
             self.client_id = Config.CommonConfig.ClientConfig.client_id
             self.client_secret = Config.CommonConfig.ClientConfig.client_secret
-            self.proxy_ip = Config.CommonConfig.ClientConfig.spotify_proxy_ip
-            self.proxy = {"https": self.proxy_ip, "http": self.proxy_ip} if self.proxy_ip else {}
+            self.load_proxy_config()
             auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
             self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
             if TOKEN_PATH.exists():
@@ -50,8 +49,7 @@ class SpotifyUserAuth:
     def load_client_config(self):
         self.client_id = Config.CommonConfig.ClientConfig.client_id
         self.client_secret = Config.CommonConfig.ClientConfig.client_secret
-        self.proxy_ip = Config.CommonConfig.ClientConfig.spotify_proxy_ip
-        self.proxy = {"https": self.proxy_ip, "http": self.proxy_ip} if self.proxy_ip else {}
+        self.load_proxy_config()
 
         auth = base64.b64encode((self.client_id + ":" + self.client_secret).encode("ascii"))
         self.auth_client_header = {'Authorization': 'Basic ' + auth.decode("ascii")}
@@ -59,6 +57,11 @@ class SpotifyUserAuth:
             self._fetch_client_access_token()
         except NotImplementedError:
             raise NotImplementedError("请检查client_id以及client_secret是否正确")
+
+    def load_proxy_config(self):
+        """更新代理，不重新认证或发起网络请求。"""
+        self.proxy_ip = Config.CommonConfig.ClientConfig.spotify_proxy_ip
+        self.proxy = {"https": self.proxy_ip, "http": self.proxy_ip} if self.proxy_ip else {}
 
     @staticmethod
     def _generate_random_state():

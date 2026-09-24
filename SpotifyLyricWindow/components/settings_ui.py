@@ -293,6 +293,15 @@ class Ui_CommonPage:
         links_layout.addStretch()
         links_layout.addWidget(button(self, 'confirm_button', tr('应用连接配置'), 'primary'))
         group.addWidget(links)
+        group = section(layout, tr('网络代理'))
+        group.addWidget(label(tr('支持 HTTP/HTTPS 代理；留空不单独指定代理，仍可能使用系统或环境代理。'), 'muted'))
+        for prefix, title in [('spotify', 'Spotify API'), ('cloudmusic', tr('网易云音乐')), ('kugou', tr('酷狗音乐'))]:
+            field = control(self, f'{prefix}_proxy_lineEdit', QLineEdit())
+            field.setPlaceholderText('http://127.0.0.1:7890')
+            row(group, title, field, stacked=True)
+        row(group, tr('应用网络设置'), button(self, 'proxy_button', tr('应用代理设置'), 'primary'),
+            tr('对后续 API 请求生效，无需重启；不改变音乐客户端的网络设置。'))
+        group.addWidget(control(self, 'proxy_tip_label', label('', 'notice')))
         footer = QHBoxLayout()
         footer.addStretch()
         footer.addWidget(button(self, 'default_button', tr('恢复常规默认设置')))

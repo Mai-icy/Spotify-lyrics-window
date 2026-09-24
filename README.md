@@ -158,7 +158,7 @@ macOS 自动安装固定版本的 [macos-mediaremote-python](https://pypi.org/pr
 - **自动切歌同步修正**：默认开启；自动切歌后等待约 0.7 秒，再将歌曲和歌词重新定位到开头。关闭可避免这次回跳，但可能出现时间偏差；它不是每次手动切歌都执行的操作。
 - **外观与快捷键**：调整横竖排、置顶、原文 / 译文字体与颜色，配置全局快捷键。缺失的 Windows 字体在 macOS 上会回退到可用字体。
 - **歌词管理**：搜索、下载、编辑、导出、删除，以及单曲偏移。全局和单曲偏移使用秒，正值使歌词提前显示。
-- **独立代理**：在配置的 `[CommonConfig.ClientConfig]` 中分别设置 `spotify_proxy_ip`、`cloudmusic_proxy_ip`、`kugou_proxy_ip`，留空表示不为该服务显式指定代理。
+- **独立代理**：在「常规 → 网络代理」分别设置 Spotify API、网易云和酷狗的 HTTP/HTTPS 代理（例如 `http://127.0.0.1:7890`），点击「应用代理设置」后对后续请求生效，无需重启或填写 Spotify 应用凭据。留空表示不为该服务显式指定代理，仍可能使用系统或环境代理。对应配置项为 `[CommonConfig.ClientConfig]` 下的 `spotify_proxy_ip`、`cloudmusic_proxy_ip`、`kugou_proxy_ip`。
 - **Spotify 歌词凭据**：需要该歌词源时，在同一配置节填写 `sp_dc`；它与 `client_id` / `client_secret` 用途不同，可能过期。各歌词源的可用性取决于网络与上游接口，并非每首歌都有可下载歌词。
 
 不要公开 `client_secret`、`sp_dc` 或 `resource/token`、`resource/lyric_token` 中的登录信息。提交问题时可附上脱敏后的 `SpotifyLyricWindow/resource/error.log` 和系统 / Python 版本。

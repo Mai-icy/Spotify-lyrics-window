@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import weakref
+from urllib.parse import urlsplit
 
 from requests.exceptions import ProxyError
 from PyQt6.QtWidgets import *
@@ -64,6 +65,9 @@ class CommonPage(QWidget, Ui_CommonPage):
         self.auto_track_sync_checkBox.toggled.connect(self._auto_track_sync_event)
         self.language_comboBox.currentIndexChanged.connect(self._language_event)
         self.theme_comboBox.currentIndexChanged.connect(self._theme_event)
+        self.proxy_button.clicked.connect(self._proxy_event)
+        for name in ('spotify', 'cloudmusic', 'kugou'):
+            getattr(self, f'{name}_proxy_lineEdit').textEdited.connect(self.proxy_tip_label.clear)
 
     def load_config(self):
         """载入配置文件"""
@@ -87,6 +91,9 @@ class CommonPage(QWidget, Ui_CommonPage):
 
         self.id_lineEdit.setText(client_id)
         self.secret_lineEdit.setText(client_secret)
+        for name in ('spotify', 'cloudmusic', 'kugou'):
+            getattr(self, f'{name}_proxy_lineEdit').setText(getattr(common_config.ClientConfig, f'{name}_proxy_ip'))
+        self.proxy_tip_label.clear()
         self.cache_path_lineEdit.setText(temp_path)
         self.lyrics_path_lineEdit.setText(lyrics_path)
         self.global_offset_doubleSpinBox.setValue(api_offset)
@@ -104,7 +111,7 @@ class CommonPage(QWidget, Ui_CommonPage):
             self.lyric_window.error_msg_show_signal.emit(e)
             return
         except ProxyError:
-            error = ProxyError(self.tr("代理错误 请在配置文件检查代理并重启"))
+            error = ProxyError(self.tr("代理错误，请在常规设置中检查并应用代理设置。"))
             self.lyric_window.error_msg_show_signal.emit(error)
             return
         self.lyric_window.text_show_signal.emit(1, self.tr("成功设置client配置！"), 0)
@@ -131,6 +138,33 @@ class CommonPage(QWidget, Ui_CommonPage):
 
         Config.CommonConfig.PathConfig.lyrics_file_path = ""
         Config.CommonConfig.PathConfig.temp_file_path = ""
+        for name in ('spotify', 'cloudmusic', 'kugou'):
+            getattr(self, f'{name}_proxy_lineEdit').setText(default_dict['ClientConfig'][f'{name}_proxy_ip'])
+        self._proxy_event()
+
+    def _proxy_event(self):
+        """先校验全部地址，再更新代理，避免使用输入到一半的地址。"""
+        proxies = {}
+        for name in ('spotify', 'cloudmusic', 'kugou'):
+            field = getattr(self, f'{name}_proxy_lineEdit')
+            address = field.text().strip()
+            if address:
+                try:
+                    url = urlsplit(address)
+                    if (url.scheme not in ('http', 'https') or not url.hostname
+                            or any(char.isspace() for char in address)
+                            or url.port == 0 or url.path not in ('', '/') or url.query or url.fragment):
+                        raise ValueError
+                except ValueError:
+                    self.proxy_tip_label.setText(self.tr('代理地址无效，请填写完整的 HTTP/HTTPS 地址，例如 http://127.0.0.1:7890。'))
+                    field.setFocus()
+                    return
+            proxies[name] = address
+        for name, address in proxies.items():
+            setattr(Config.CommonConfig.ClientConfig, f'{name}_proxy_ip', address)
+            getattr(self, f'{name}_proxy_lineEdit').setText(address)
+        self.auth.load_proxy_config()
+        self.proxy_tip_label.setText(self.tr('代理设置已应用，对后续请求生效；关闭设置窗口后保存。'))
 
     def set_path_event(self, line_edit: QLineEdit):
         """设置路径事件"""
