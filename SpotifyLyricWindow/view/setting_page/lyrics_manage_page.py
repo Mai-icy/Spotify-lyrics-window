@@ -50,7 +50,6 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
         self._init_common()
         self._init_label()
-        self._init_dialog()
         self._init_list_widget()
         self._init_signal()
 
@@ -63,6 +62,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.spotify_api = SpotifyApi()
 
         self.lyrics_file_items = []
+        self.download_dialog = None  # 首次下载时再创建，关闭后复用。
         self._current_cover_track_id = ""
         self._is_destroyed = False
 
@@ -75,6 +75,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
     def _init_dialog(self):
         """初始化对话框"""
         self.download_dialog = LyricsDownloadDialog(self)
+        self.download_dialog.download_lrc_signal.connect(self.download_lyric_dialog_done_event)
+        self.download_dialog.finished.connect(self.download_lyric_dialog_done_event)
 
     def _init_signal(self):
         """初始化信号"""
@@ -84,8 +86,6 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.show_comboBox.currentIndexChanged.connect(self.lyric_show_trans_event)
         # 下载信号连接
         self.download_button.clicked.connect(self.download_lyric_dialog_show_event)
-        self.download_dialog.download_lrc_signal.connect(self.download_lyric_dialog_done_event)
-        self.download_dialog.finished.connect(self.download_lyric_dialog_done_event)
         # 按钮信号连接
         self.cancel_button.clicked.connect(self.cancel_modify_text_event)
         self.confirm_button.clicked.connect(self.confirm_modify_text_event)
@@ -258,6 +258,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
     def download_lyric_dialog_show_event(self):
         """下载对话框打开事件"""
+        if self.download_dialog is None:
+            self._init_dialog()
         self.setting_window.mask_.show()
         self.download_dialog.show()
 

@@ -21,7 +21,6 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
 
         self._init_radioButton()
         self._init_comboBox()
-        self._init_colorDialog()
         self._init_signal()
 
     def _init_comboBox(self):
@@ -67,9 +66,6 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         self.trans_button_group.addButton(self.non_trans_radioButton, id=0)
         self.trans_button_group.addButton(self.romaji_radioButton, id=1)
         self.trans_button_group.addButton(self.trans_radioButton, id=2)
-
-    def _init_colorDialog(self):
-        self.color_dialog = QColorDialog(self)
 
     def _init_signal(self):
         """初始化信号"""
@@ -183,7 +179,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         now_color = QColor(*lyric_rgb)
 
         self.setting_window.mask_.show()
-        new_color = self.color_dialog.getColor(now_color)
+        new_color = QColorDialog.getColor(now_color, self)
         self.setting_window.mask_.hide()
 
         if not new_color.isValid():
@@ -203,7 +199,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
         now_color = QColor(*shadow_color)
 
         self.setting_window.mask_.show()
-        new_color = self.color_dialog.getColor(now_color)
+        new_color = QColorDialog.getColor(now_color, self)
         self.setting_window.mask_.hide()
 
         if not new_color.isValid():
