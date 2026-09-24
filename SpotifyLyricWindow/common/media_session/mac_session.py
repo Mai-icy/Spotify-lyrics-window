@@ -16,6 +16,26 @@ from common.media_session.media_session_type import MediaPlaybackInfo, MediaProp
 logger = logging.getLogger("spotify_lyrics_window." + __name__)
 
 
+# 只读取 Spotify 自身的时间轴，避免系统会话在恢复窗口时错误归零。
+# 参数由 subprocess 独立传入，不把歌曲名拼进脚本。
+_SPOTIFY_POSITION_SCRIPT = '''
+on run argv
+    if application "Spotify" is not running then return "mismatch"
+    tell application "Spotify"
+        set currentSong to current track
+        set songID to id of currentSong
+        if name of currentSong is not (item 1 of argv) then return "mismatch"
+        if artist of currentSong is not (item 2 of argv) then return "mismatch"
+        if album of currentSong is not (item 3 of argv) then return "mismatch"
+        set songPosition to player position
+        set songState to player state as text
+        if id of current track is not songID then return "mismatch"
+        return (songPosition as text) & linefeed & songState
+    end tell
+end run
+'''
+
+
 class _MediaRemoteStream(threading.Thread):
     """Own the package's asyncio subscription without touching Qt widgets."""
 
@@ -28,6 +48,7 @@ class _MediaRemoteStream(threading.Thread):
         self._lock = threading.Lock()
         self._loop = None
         self._task = None
+        self._script_retry_at = 0
 
     def run(self):
         try:
@@ -49,13 +70,53 @@ class _MediaRemoteStream(threading.Thread):
                 async for state in events:
                     if self._stopping.is_set():
                         return
-                    self.received(dict(state.raw) if state else {},
-                                  time.monotonic(), time.time())
+                    data = await self._verify_position(dict(state.raw) if state else {})
+                    if self._stopping.is_set():
+                        return
+                    self.received(data, time.monotonic(), time.time())
             if not self._stopping.is_set():
                 raise RuntimeError("MediaRemote stream ended")
         finally:
             with self._lock:
                 self._loop = self._task = None
+
+    async def _verify_position(self, data):
+        """后台核验后再发出事件；失败回退 MediaRemote，不阻塞 Qt 或持续轮询。"""
+        if (data.get("bundleIdentifier") != MacMediaSession.TARGET_ID or
+                data.get("isAdvertisement") or not data.get("title") or
+                data.get("durationMicros") is None or time.monotonic() < self._script_retry_at):
+            return data
+        process = None
+        try:
+            process = await asyncio.create_subprocess_exec(
+                "/usr/bin/osascript", "-e", _SPOTIFY_POSITION_SCRIPT, "--",
+                data["title"], data.get("artist") or "", data.get("album") or "",
+                stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            output, error = await asyncio.wait_for(process.communicate(), timeout=2)
+            if process.returncode:
+                if b"-1743" in error:  # 用户拒绝自动化权限，本次运行不再尝试。
+                    self._script_retry_at = float("inf")
+                raise ValueError("Spotify AppleScript query failed")
+            if output.strip() == b"mismatch":
+                # 查询期间已切歌，暂时断开旧会话，等待新通知或 API 校准。
+                return {}
+            position, state = output.decode("utf-8").strip().splitlines()
+            position = float(position.replace(",", "."))
+            if not math.isfinite(position) or position < 0 or state not in ("playing", "paused", "stopped"):
+                raise ValueError("Invalid Spotify AppleScript position")
+            logger.debug("Spotify AppleScript progress: track=%s, position_ms=%s, state=%s",
+                         data["title"], round(position * 1000), state)
+            return dict(data, elapsedTimeMicros=round(position * 1000000),
+                        timestampEpochMicros=round(time.time() * 1000000),
+                        playing=state == "playing", playbackRate=1 if state == "playing" else 0)
+        except (OSError, ValueError, OverflowError, asyncio.TimeoutError):
+            self._script_retry_at = max(self._script_retry_at, time.monotonic() + 30)
+            logger.warning("Spotify AppleScript unavailable; using MediaRemote progress", exc_info=True)
+            return data
+        finally:
+            if process is not None and process.returncode is None:
+                process.kill()
+                await process.communicate()
 
     def stop(self):
         with self._lock:
