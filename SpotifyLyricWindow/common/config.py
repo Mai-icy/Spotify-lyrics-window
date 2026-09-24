@@ -15,7 +15,7 @@ class Config:
         is_save_position: bool = True
         is_auto_track_sync: bool = True
         language: str = 'zh_CN'
-        settings_theme: str = 'light'
+        settings_theme: str = 'system'
 
         api_offset: int = 0
 

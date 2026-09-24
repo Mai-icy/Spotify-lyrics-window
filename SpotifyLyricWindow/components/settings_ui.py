@@ -245,6 +245,7 @@ class Ui_CommonPage:
         layout = page_layout(page)
         group = section(layout, tr('界面'))
         themes = combo(self, 'theme_comboBox')
+        themes.addItem(tr('跟随系统'), 'system')
         themes.addItem(tr('浅色'), 'light')
         themes.addItem(tr('深色'), 'dark')
         row(group, tr('界面主题'), themes, tr('仅调整设置界面，不改变桌面歌词配色。'))

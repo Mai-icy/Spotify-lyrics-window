@@ -46,9 +46,19 @@ class SettingWindow(QWidget, Ui_SettingsWindow):
     def _init_signal(self):
         """初始化信号"""
         self.page_listWidget.currentRowChanged.connect(self.page_change_event)
+        # 等 Qt 更新系统调色板后再应用主题；窗口销毁时自动断开连接。
+        QApplication.styleHints().colorSchemeChanged.connect(
+            self._system_theme_event, Qt.ConnectionType.QueuedConnection)
+
+    @pyqtSlot()
+    def _system_theme_event(self):
+        if Config.CommonConfig.settings_theme == 'system':
+            self._init_style_sheet()
 
     def _init_style_sheet(self):
         dark = Config.CommonConfig.settings_theme == 'dark'
+        if Config.CommonConfig.settings_theme == 'system':
+            dark = QApplication.styleHints().colorScheme() == Qt.ColorScheme.Dark
         # 只设置当前窗口的调色板，子对话框继承；不影响桌面歌词或 QApplication。
         palette = QPalette(QApplication.palette())
         colors = {
