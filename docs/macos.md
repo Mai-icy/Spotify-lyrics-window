@@ -93,6 +93,16 @@ backend's internal `ListenerMixin` and `keycode_context`. Accessibility/input
 monitoring permission is still required for global shortcuts; this fix does not
 grant or bypass it.
 
+Global shortcuts now default to disabled with all bindings empty on every
+platform, including after restoring defaults. Existing saved bindings are kept.
+`common/hotkeys.py` checks `AXIsProcessTrusted` and
+`CGPreflightListenEventAccess` before enabling shortcuts or starting a listener.
+These checks do not prompt or import pynput. Only explicit authorization-button
+clicks request access and open the relevant System Settings pane. Users must
+enable shortcuts again after granting permission (and may need to restart the
+app). Existing enabled configurations are disabled at runtime if permission is
+missing; authorized, explicitly enabled configurations remain enabled.
+
 Local settings checks exercise repeated open/close cycles and disabling/
 re-enabling shortcuts with the native keyboard backend in an isolated
 configuration. They do not send keyboard events or control Spotify and are not

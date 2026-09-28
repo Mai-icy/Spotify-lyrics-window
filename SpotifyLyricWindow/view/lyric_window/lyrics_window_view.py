@@ -12,7 +12,7 @@ from components.scroll_area.text_scroll_area import TextScrollArea
 from components.system_tray_icon.lyric_tray_icon import LyricsTrayIcon
 from common.typing import DisplayMode, Callable
 from common.config import Config
-from common.hotkeys import create_global_hotkeys
+from common.hotkeys import create_global_hotkeys, has_hotkey_permission
 from common.ui.fonts import resolve_font_family
 
 
@@ -230,7 +230,10 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         if self.hotkeys_listener is not None:
             self.hotkeys_listener.stop()
             self.hotkeys_listener = None
-        if flag and Config.HotkeyConfig.is_enable:
+        if flag and Config.HotkeyConfig.is_enable and hotkey_record:
+            if not has_hotkey_permission():
+                Config.HotkeyConfig.is_enable = False
+                return
             self.hotkeys_listener = create_global_hotkeys(hotkey_record)
             self.hotkeys_listener.start()
 

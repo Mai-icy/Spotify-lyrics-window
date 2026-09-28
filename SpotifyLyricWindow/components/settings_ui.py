@@ -4,6 +4,7 @@ These hand-written layouts replace the generated settings forms, not the lyrics
 overlay. Existing control names and value ordering are deliberately preserved.
 """
 from pathlib import Path
+import sys
 
 from common.ui.i18n import LANGUAGES
 
@@ -353,7 +354,13 @@ class Ui_HotkeysPage:
         layout = page_layout(page)
         group = section(layout, tr('全局快捷键'))
         row(group, tr('启用快捷键'), control(self, 'enable_hotkeys_checkBox', QCheckBox(tr('启用'))),
-            tr('在其他应用中也能控制桌面歌词。'))
+            tr('默认关闭；启用后可在其他应用中控制桌面歌词，关闭设置窗口后生效。'))
+        if sys.platform == 'darwin':
+            group.addWidget(label(tr('macOS 需先授予辅助功能和输入监控权限。请在「系统设置 → 隐私与安全性」中允许本程序；从源码运行时，授权对象可能是终端、IDE 或 Python。授权后返回并重新勾选启用，必要时重启程序。'), 'muted'))
+            group.addWidget(horizontal(
+                button(self, 'accessibility_button', tr('辅助功能授权')),
+                button(self, 'input_monitoring_button', tr('输入监控授权'))))
+        group.addWidget(control(self, 'hotkeys_tip_label', label('', 'notice')))
         layout.addWidget(label(tr('点击右侧输入框，再按下组合键。重复的组合键会从原操作中移除。'), 'muted'))
         group = section(layout, tr('按键绑定'))
         columns = QWidget()

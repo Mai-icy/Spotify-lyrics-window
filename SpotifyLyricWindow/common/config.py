@@ -53,25 +53,24 @@ class Config:
         shadow_color: tuple = (190, 190, 190)
 
     class HotkeyConfig:
-        is_enable: bool = True
+        is_enable: bool = False
 
-        pause_button: list = ["alt", "p"]
-        last_button: list = ["alt", "left"]
-        next_button: list = ["alt", "right"]
-        lock_button: list = ["alt", "l"]
-        calibrate_button: list = ["alt", "r"]
-        translate_button: list = ["alt", "a"]
-        show_window: list = ["alt", "s"]
-        close_button: list = ["alt", "x"]
+        pause_button: list = []
+        last_button: list = []
+        next_button: list = []
+        lock_button: list = []
+        calibrate_button: list = []
+        translate_button: list = []
+        show_window: list = []
+        close_button: list = []
 
     @classmethod
     def read_config(cls):
         """读取toml配置文件配置，存储在Config类属性"""
+        cls._default_dict = cls.to_dict()
         if not SETTING_TOML_PATH.exists():
             cls.save_config()
             return
-
-        cls._default_dict = cls.to_dict()
 
         def _load_config(last_cls, dic):
             for key in dic.keys():

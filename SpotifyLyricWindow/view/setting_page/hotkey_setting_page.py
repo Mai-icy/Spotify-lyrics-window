@@ -1,12 +1,16 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import sys
+
 from PyQt6.QtCore import *
+from PyQt6.QtGui import QDesktopServices
 from PyQt6.QtWidgets import *
 
 from components.settings_ui import Ui_HotkeysPage
 from components.line_edit.hotkeys_line_edit import HotkeyLineEdit
 
 from common.config import Config
+from common.hotkeys import has_hotkey_permission, request_hotkey_permission
 
 
 class HotkeysPage(QWidget, Ui_HotkeysPage):
@@ -49,6 +53,9 @@ class HotkeysPage(QWidget, Ui_HotkeysPage):
         """初始化信号"""
         self.hotkeys_default_button.clicked.connect(self.set_default_event)
         self.enable_hotkeys_checkBox.stateChanged.connect(self.enable_hotkeys_event)
+        if sys.platform == 'darwin':
+            self.accessibility_button.clicked.connect(self._accessibility_event)
+            self.input_monitoring_button.clicked.connect(self._input_monitoring_event)
 
     def load_config(self):
         """载入配置"""
@@ -60,32 +67,48 @@ class HotkeysPage(QWidget, Ui_HotkeysPage):
             else:
                 line_edit.set_hotkey([])
 
-        self.enable_hotkeys_checkBox.setChecked(Config.HotkeyConfig.is_enable)
-
-        if not Config.HotkeyConfig.is_enable:
-            for line_edit in self.line_edit_dict.values():
-                line_edit.setEnabled(False)
+        with QSignalBlocker(self.enable_hotkeys_checkBox):
+            self.enable_hotkeys_checkBox.setChecked(Config.HotkeyConfig.is_enable)
+        self.enable_hotkeys_event()
 
     def set_default_event(self):
         """设置初始化按钮事件"""
         default_dict = Config.get_default_dict()["HotkeyConfig"]
         for line_edit in self.line_edit_dict.values():
             line_edit.set_hotkey(default_dict[line_edit.get_signal_key()])
+        with QSignalBlocker(self.enable_hotkeys_checkBox):
+            self.enable_hotkeys_checkBox.setChecked(default_dict['is_enable'])
+        self.enable_hotkeys_event()
 
     def hotkeys_conflict_event(self, conflict_signal_key):
-        """设置热键出现冲突 将冲突的旧热键 设置为 None"""
+        """设置热键出现冲突时，清空冲突的旧热键。"""
         conflict_line_edit = self.line_edit_dict[conflict_signal_key]
         conflict_line_edit.set_hotkey([])
 
     def enable_hotkeys_event(self):
         """开启关闭 快捷键勾选框 事件"""
-        if self.enable_hotkeys_checkBox.isChecked() and not self.pause_hotkey_lineEdit.isEnabled():
-            for line_edit in self.line_edit_dict.values():
-                line_edit.setEnabled(True)
-            Config.HotkeyConfig.is_enable = True
-        elif not self.enable_hotkeys_checkBox.isChecked() and self.pause_hotkey_lineEdit.isEnabled():
-            for line_edit in self.line_edit_dict.values():
-                line_edit.setEnabled(False)
-            Config.HotkeyConfig.is_enable = False
+        enabled = self.enable_hotkeys_checkBox.isChecked()
+        if enabled and not has_hotkey_permission():
+            enabled = False
+            with QSignalBlocker(self.enable_hotkeys_checkBox):
+                self.enable_hotkeys_checkBox.setChecked(False)
+            self.hotkeys_tip_label.setText(self.tr('尚未获得快捷键权限，已保持关闭。请先通过上方按钮完成授权。'))
         else:
-            return
+            self.hotkeys_tip_label.clear()
+        Config.HotkeyConfig.is_enable = enabled
+        for line_edit in self.line_edit_dict.values():
+            line_edit.setEnabled(enabled)
+
+    def _accessibility_event(self):
+        request_hotkey_permission('accessibility')
+        self._open_permission_settings('Privacy_Accessibility')
+
+    def _input_monitoring_event(self):
+        request_hotkey_permission('input_monitoring')
+        self._open_permission_settings('Privacy_ListenEvent')
+
+    def _open_permission_settings(self, pane):
+        if not QDesktopServices.openUrl(QUrl(f'x-apple.systempreferences:com.apple.preference.security?{pane}')):
+            self.hotkeys_tip_label.setText(self.tr('无法打开系统设置，请手动前往「隐私与安全性」完成授权。'))
+        else:
+            self.hotkeys_tip_label.setText(self.tr('授权后请返回并重新勾选启用；若仍未识别，请重启程序。'))

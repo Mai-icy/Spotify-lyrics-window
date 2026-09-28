@@ -22,6 +22,7 @@ class HotkeyLineEdit(QLineEdit):
         self.current_hot_keys = []
 
         self.setReadOnly(True)
+        self.setPlaceholderText(self.tr('未设置'))
 
     def get_signal_key(self) -> str:
         return self.signal_key
@@ -35,7 +36,7 @@ class HotkeyLineEdit(QLineEdit):
         # 判断是否冲突
         hotkeys_dict = Config.to_dict().get("HotkeyConfig", {})
         for signal_key in hotkeys_dict.keys():
-            if hotkeys_dict[signal_key] == hotkey:
+            if hotkey and signal_key != self.signal_key and hotkeys_dict[signal_key] == hotkey:
                 # signal_key 为冲突的热键信号名
                 self.hotkeys_conflict_signal.emit(signal_key)
                 # HotkeysPage 负责接收信号并进行处理
@@ -43,8 +44,8 @@ class HotkeyLineEdit(QLineEdit):
 
         self.current_hot_keys = hotkey
         if not hotkey:
-            self.setText("None")
-            setattr(Config.HotkeyConfig, self.signal_key, None)
+            self.clear()
+            setattr(Config.HotkeyConfig, self.signal_key, [])
             return
 
         forward_dict = {

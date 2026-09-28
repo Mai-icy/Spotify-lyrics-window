@@ -147,7 +147,7 @@ macOS 自动安装固定版本的 [macos-mediaremote-python](https://pypi.org/pr
 该依赖当前为 alpha，私有接口可能随系统更新失效；后端不可用时使用既有 Spotify API 回退，因此仍需配置账号。原生组件、线程与控制边界详见 [macOS 开发说明](./docs/macos.md)。
 
 - macOS 默认不显示 Dock 图标，可通过菜单栏图标显示歌词、打开设置或退出。置顶面板支持跨桌面和全屏辅助显示，但不能保证覆盖所有全屏应用或 Stage Manager 场景；macOS 下禁用歌词窗口阴影，以避免字形黑边。
-- 全局快捷键受系统限制：macOS 可能需要为启动程序的终端 / Python 应用授予辅助功能权限；Wayland 下的监听能力受 XWayland 限制。详见 [pynput 平台限制](https://pynput.readthedocs.io/en/latest/limitations.html)。
+- 所有平台的全局快捷键默认关闭，默认绑定全部为空，可在「快捷键」页面手动启用并录入；已有绑定不会自动覆盖，恢复默认时会清空。macOS 启用前会检查辅助功能和输入监控权限，未授权时保持关闭；通过页面中的授权按钮前往「系统设置 → 隐私与安全性」，允许本程序（源码运行时可能是终端、IDE 或 Python），然后返回重新勾选启用，必要时重启程序。Windows/Linux 无此授权步骤；Wayland 下的监听能力仍受 XWayland 限制。详见 [pynput 平台限制](https://pynput.readthedocs.io/en/latest/limitations.html)。
 - 竖排采用 Unicode 17.0 的默认方向与允许的回退规则，保留组合字符；尚未接入字体专用竖排字形替换，也不能补齐字体本身缺失的字形。
 
 ## ⚙️ 配置说明
