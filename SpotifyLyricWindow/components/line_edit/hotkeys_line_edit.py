@@ -33,6 +33,9 @@ class HotkeyLineEdit(QLineEdit):
 
         :param hotkey: 快捷键组合 例如： ["ctrl", "a"]
         """
+        self.unvalidated = False
+        self.start_record = False
+        hotkey = ['space' if key == ' ' else key for key in hotkey]
         # 判断是否冲突
         hotkeys_dict = Config.to_dict().get("HotkeyConfig", {})
         for signal_key in hotkeys_dict.keys():
@@ -66,10 +69,9 @@ class HotkeyLineEdit(QLineEdit):
 
     def focusOutEvent(self, event: QtGui.QFocusEvent) -> None:
         """防止焦点外放后 使输入停止 从而一直显示非法热键"""
+        self.start_record = False
         if self.unvalidated:
             self.set_hotkey([])
-            self.unvalidated = False
-            return
         super(HotkeyLineEdit, self).focusOutEvent(event)
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
@@ -78,6 +80,7 @@ class HotkeyLineEdit(QLineEdit):
         key_value = event.key()
 
         other_key_dict = {
+            Qt.Key.Key_Space: "space",
             Qt.Key.Key_Left: "left",
             Qt.Key.Key_Right: "right",
             Qt.Key.Key_Up: "up",
@@ -97,7 +100,7 @@ class HotkeyLineEdit(QLineEdit):
 
         key = modifiers = None
 
-        if 32 <= key_value <= 127:
+        if 33 <= key_value <= 127:
             key = chr(key_value).lower()
         elif key_value in other_key_dict:
             key = other_key_dict[key_value]
@@ -132,10 +135,8 @@ class HotkeyLineEdit(QLineEdit):
         if not self.start_record:
             return
 
+        self.start_record = False
         if self.unvalidated:
             self.set_hotkey([])
-            self.unvalidated = False
-            return
 
-        self.start_record = False
         super(HotkeyLineEdit, self).keyReleaseEvent(event)

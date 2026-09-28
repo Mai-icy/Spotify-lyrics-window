@@ -224,6 +224,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         for key in self.signal_dic.keys():
             hotkeys = getattr(Config.HotkeyConfig, key)
             if hotkeys and hotkeys != "null":
+                hotkeys = ['space' if _key == ' ' else _key for _key in hotkeys]
                 hotkey_text = "+".join(f"<{_key}>" if len(_key) != 1 else _key for _key in hotkeys)
                 hotkey_record[hotkey_text] = self.get_emit_func(self.signal_dic[key])
 
