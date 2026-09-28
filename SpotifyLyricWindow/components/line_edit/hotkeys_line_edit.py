@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
+import sys
+
 from PyQt6 import QtCore, QtGui, QtWidgets
 from PyQt6.QtGui import *
 from PyQt6.QtWidgets import *
@@ -101,6 +103,16 @@ class HotkeyLineEdit(QLineEdit):
 
         if event.modifiers() in modifier_dict:
             modifiers = modifier_dict[event.modifiers()]
+        if sys.platform == 'darwin':
+            # Qt 默认将 macOS 的 Command/Control 对调；pynput 使用物理键名。
+            # https://doc.qt.io/qt-6/macos-issues.html#special-keys
+            control, command = Qt.KeyboardModifier.MetaModifier, Qt.KeyboardModifier.ControlModifier
+            if QApplication.testAttribute(Qt.ApplicationAttribute.AA_MacDontSwapCtrlAndMeta):
+                control, command = command, control
+            modifiers = [name for flag, name in (
+                (control, 'ctrl'), (command, 'cmd'),
+                (Qt.KeyboardModifier.ShiftModifier, 'shift'), (Qt.KeyboardModifier.AltModifier, 'alt'))
+                if event.modifiers() & flag]
 
         if modifiers and not key:
             self.setText(" + ".join(modify.capitalize() for modify in modifiers))
