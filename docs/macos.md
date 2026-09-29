@@ -43,8 +43,12 @@ The former subscribe-before-snapshot patch is not applied by this integration.
 MediaRemote remains private API and may break after a macOS update. Spotify
 authentication/metadata lookup remain part of the application's fallback workflow.
 
-For desktop packaging, include the installed package's native data and licenses;
-a plain Python import alone is not sufficient to collect all helper resources.
+The local PyInstaller configuration in `build/macos/` collects the installed
+package's native framework, Perl script, metadata and licenses. Frozen macOS apps
+store settings, tokens, logs and default downloads under
+`~/Library/Application Support/Spotify Lyrics Window/`, outside the signed bundle.
+Source runs retain their existing paths. See the [packaging notes](../build/README.md)
+for building, OS/architecture requirements and the limits of ad-hoc signing.
 
 ## Verification
 

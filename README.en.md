@@ -165,6 +165,8 @@ Do not publish `client_secret`, `sp_dc`, or login data in `resource/token` and `
 
 ## 🧪 Development and Testing
 
+Local macOS `.app` build configuration is available in `build/macos/`. See the [packaging notes](./build/README.md) (Chinese) for build commands, user data paths, and signing limitations. Windows/Linux packaging configurations are planned.
+
 After installing runtime dependencies, run from the repository root:
 
 ```bash

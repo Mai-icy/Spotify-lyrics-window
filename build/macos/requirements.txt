@@ -1,0 +1,3 @@
+# Build-only dependencies; install the root requirements.txt first.
+pyinstaller==6.22.3
+pyinstaller-hooks-contrib==2026.7

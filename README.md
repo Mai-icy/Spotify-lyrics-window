@@ -165,6 +165,8 @@ macOS 自动安装固定版本的 [macos-mediaremote-python](https://pypi.org/pr
 
 ## 🧪 开发与测试
 
+macOS 本地 `.app` 打包配置已放在 `build/macos/`，构建命令、用户数据路径与签名限制见[打包说明](./build/README.md)。Windows / Linux 打包配置后续补充。
+
 安装运行依赖后，在仓库根目录执行：
 
 ```bash
