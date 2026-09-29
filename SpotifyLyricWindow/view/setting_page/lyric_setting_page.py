@@ -56,7 +56,10 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
                 Config.LyricConfig.font_family, Config.LyricConfig.translation_font_family,
                 defaults["font_family"], defaults["translation_font_family"],
             })
-        self.color_comboBox.addItems(self.color_list)
+        color_names = [self.tr('红色'), self.tr('蓝色'), self.tr('紫色'), self.tr('绿色'), self.tr('橙色'),
+                       self.tr('黄色'), self.tr('棕色'), self.tr('青色'), self.tr('粉色'), self.tr('自定义')]
+        for color, name in zip(self.color_list, color_names):
+            self.color_comboBox.addItem(name, color)
         self.font_comboBox.addItems(self.font_family_list)
         self.translation_font_comboBox.addItems(self.font_family_list)
 
@@ -149,7 +152,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
 
     def color_style_change_event(self):
         """修改歌词颜色方案事件"""
-        color_style = self.color_comboBox.currentText()
+        color_style = self.color_comboBox.currentData()
         if color_style == "other":
             lyrics_color = Config.LyricConfig.lyric_color
             shadow_color = Config.LyricConfig.shadow_color
@@ -184,7 +187,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
 
         if not new_color.isValid():
             return
-        if self.color_comboBox.currentText() != "other":
+        if self.color_comboBox.currentData() != "other":
             self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
 
         color = (new_color.red(), new_color.green(), new_color.blue())
@@ -204,7 +207,7 @@ class LyricPage(QWidget, Ui_LyricsSettingsPage):
 
         if not new_color.isValid():
             return
-        if self.color_comboBox.currentText() != "other":
+        if self.color_comboBox.currentData() != "other":
             self.color_comboBox.setCurrentIndex(self.color_list.index("other"))
 
         color = (new_color.red(), new_color.green(), new_color.blue())
