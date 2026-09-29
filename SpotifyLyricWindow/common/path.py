@@ -3,12 +3,10 @@
 import json
 from pathlib import Path
 
-from common.config import Config
+from common.config import Config, BASE_PATH, DATA_PATH, SETTING_TOML_PATH
 
-BASE_PATH = Path(__file__).parent.parent
-
-ORI_LRC_PATH = BASE_PATH / Path(r"download/lyrics")
-ORI_TEMP_PATH = BASE_PATH / Path(r"download/temp")
+ORI_LRC_PATH = DATA_PATH / Path(r"download/lyrics")
+ORI_TEMP_PATH = DATA_PATH / Path(r"download/temp")
 
 path_config = Config.CommonConfig.PathConfig
 if path_config.lyrics_file_path:
@@ -23,15 +21,13 @@ else:
 
 TEMP_IMAGE_PATH = TEMP_PATH / "image"
 
-TOKEN_PATH = BASE_PATH / Path(r"resource/token")
-LYRIC_TOKEN_PATH = BASE_PATH / Path(r"resource/lyric_token")
+TOKEN_PATH = DATA_PATH / Path(r"resource/token")
+LYRIC_TOKEN_PATH = DATA_PATH / Path(r"resource/lyric_token")
 
 LYRIC_DATA_FILE_PATH = LRC_PATH / "lyric.json"
 TEMP_DATA_FILE_PATH = TEMP_PATH / "temp.json"
 
-SETTING_TOML_PATH = BASE_PATH / Path(r"resource/setting.toml")
-
-ERROR_LOG_PATH = BASE_PATH / Path(r"resource/error.log")
+ERROR_LOG_PATH = DATA_PATH / Path(r"resource/error.log")
 
 RESOURCE_PATH = BASE_PATH / "resource"
 QSS_PATH = RESOURCE_PATH / Path(r"ui/lightstyle.qss")

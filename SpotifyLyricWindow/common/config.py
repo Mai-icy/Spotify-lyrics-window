@@ -1,10 +1,15 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 import rtoml
+import sys
 from pathlib import Path
 
 BASE_PATH = Path(__file__).parent.parent
-SETTING_TOML_PATH = BASE_PATH / Path(r"resource/setting.toml")
+DATA_PATH = BASE_PATH
+if sys.platform == "darwin" and getattr(sys, "frozen", False):
+    # 签名后的 .app 只读；用户数据独立保存，更新应用时不会丢失。
+    DATA_PATH = Path.home() / "Library/Application Support/Spotify Lyrics Window"
+SETTING_TOML_PATH = DATA_PATH / Path(r"resource/setting.toml")
 
 
 class Config:
@@ -69,6 +74,7 @@ class Config:
         """读取toml配置文件配置，存储在Config类属性"""
         cls._default_dict = cls.to_dict()
         if not SETTING_TOML_PATH.exists():
+            SETTING_TOML_PATH.parent.mkdir(parents=True, exist_ok=True)
             cls.save_config()
             return
 
