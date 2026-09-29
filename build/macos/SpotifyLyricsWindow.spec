@@ -6,6 +6,7 @@ import sys
 import sysconfig
 
 from PyInstaller.utils.hooks import collect_data_files, copy_metadata, get_package_paths
+from packaging.requirements import Requirement
 
 
 if sys.platform != 'darwin':
@@ -13,7 +14,7 @@ if sys.platform != 'darwin':
 
 root = Path(SPECPATH).resolve().parents[1]
 source = root / 'SpotifyLyricWindow'
-version = os.environ.get('SLW_BUNDLE_VERSION', '1.12.0')
+version = os.environ.get('SLW_BUNDLE_VERSION', '2.0.0')
 icon = os.environ['SLW_BUNDLE_ICON']
 # Qt 6.11 requires macOS 13+. Python may require a newer OS (e.g. Homebrew).
 # https://doc.qt.io/qt-6/supported-platforms.html
@@ -27,7 +28,14 @@ datas += [(str(source / 'resource/ui/lightstyle.qss'), 'resource/ui'),
           (str(root / 'LICENSE'), 'licenses'), (str(root / 'licenses'), 'licenses')]
 datas += collect_data_files('macos_mediaremote', includes=['_native/**'],
                             excludes=['**/_CodeSignature/**', '**/MediaRemoteAdapter.framework/**'])
-datas += copy_metadata('macos-mediaremote-python')
+# Keep dependency versions and their bundled license/notice files with the release.
+for line in (root / 'requirements.txt').read_text(encoding='utf-8').splitlines():
+    if line.strip() and not line.lstrip().startswith('#'):
+        requirement = Requirement(line)
+        if requirement.marker is None or requirement.marker.evaluate():
+            datas += copy_metadata(requirement.name, recursive=True)
+datas += copy_metadata('setuptools')
+datas += [(str(Path(sysconfig.get_path('stdlib')) / 'LICENSE.txt'), 'licenses/python')]
 native = Path(get_package_paths('macos_mediaremote')[1]) / '_native/MediaRemoteAdapter.framework'
 native_destination = 'macos_mediaremote/_native/MediaRemoteAdapter.framework'
 datas += [(str(native / 'Resources/Info.plist'), f'{native_destination}/Resources')]

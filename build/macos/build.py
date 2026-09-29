@@ -10,12 +10,12 @@ import sys
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version', default='1.12.0', help='Bundle version (default: 1.12.0)')
+    parser.add_argument('--version', default='2.0.0', help='Bundle version (default: 2.0.0)')
     args = parser.parse_args()
     if sys.platform != 'darwin':
         parser.error('macOS packaging must run on macOS')
     if not re.fullmatch(r'\d+\.\d+\.\d+', args.version):
-        parser.error('--version must use major.minor.patch, for example 1.12.0')
+        parser.error('--version must use major.minor.patch, for example 2.0.0')
 
     root = Path(__file__).resolve().parents[2]
     arch = platform.machine()

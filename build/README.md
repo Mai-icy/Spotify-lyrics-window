@@ -9,7 +9,7 @@
 
 ```sh
 python -m pip install -r requirements.txt -r build/macos/requirements.txt
-python build/macos/build.py --version 1.12.0
+python build/macos/build.py --version 2.0.0
 ```
 
 脚本使用当前 Python 环境及其架构，生成应用图标，调用 PyInstaller，再验证本地 ad-hoc 签名。
@@ -22,6 +22,7 @@ Intel 需在 x86_64 Python 和依赖环境下单独构建，产物在 `dist/maco
 ### 打包内容和系统要求
 
 - 采用 onedir `.app`，包含 Python、PyQt6、样式、翻译、静态数据、应用图标及项目许可证。
+- 附带 Python 许可证及当前平台运行依赖的元数据、许可证和 NOTICE；包中的依赖版本可由各 `.dist-info` 目录核对。
 - 收集 PyPI `macos-mediaremote-python` 的原生 framework、Perl 脚本、上游许可证和包元数据；不重新下载第三方仓库。
 - MediaRemote 仍按需导入，原生 helper 使用系统 `/usr/bin/perl`，进度辅助使用系统 `/usr/bin/osascript`。
 - 图标从现有 `LyricsIcon.png` 自动转换；应用默认隐藏 Dock 图标，通过菜单栏图标操作。
