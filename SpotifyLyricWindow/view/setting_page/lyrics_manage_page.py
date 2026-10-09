@@ -106,6 +106,10 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
 
         self.lyrics_listWidget.customContextMenuRequested.connect(self.menu_show_event)
 
+    def showEvent(self, event: QShowEvent):
+        super(LyricsManagePage, self).showEvent(event)
+        self.load_lyrics_file(keep_state=True)
+
     def load_lyrics_file(self, *, keep_state: bool = False):
         """导入已有的歌词文件，显示在左边"""
         current_item = self.lyrics_listWidget.currentItem()
