@@ -105,15 +105,12 @@ class LyricFileManage:
         if lrc_path.exists():
             lrc_path.unlink()
 
-        is_changed = False
         if not track_title:
             self.lyric_data_json["no_lyric"].pop(track_id)
         else:
-            is_changed = (track_id not in self.lyric_data_json["no_lyric"] and
-                          track_id not in self.lyric_data_json["id2title"])
             self.lyric_data_json["no_lyric"][track_id] = {"track_title": track_title, "last_time": int(time.time())}
         self.save_json()
-        if is_changed:
+        if track_title:
             self._notify_changed()
 
     def get_id(self, track_title: str):
