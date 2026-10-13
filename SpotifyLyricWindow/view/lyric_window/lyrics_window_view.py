@@ -499,13 +499,17 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
                             new_geometry_x,
                             self.height() - pos.y())
 
-            # 更改字体大小
-            if self.display_mode == DisplayMode.Horizontal:
-                self.set_font_size(int((self.height() - 30) / 3))
-            else:
-                self.set_font_size(int((self.width() - 45) / 3))
-
         event.accept()
+
+    def resizeEvent(self, event: QResizeEvent):
+        super(LyricsWindowView, self).resizeEvent(event)
+        if not hasattr(self, "lyric_font"):
+            return
+        # 同时处理自定义拖拽和系统原生边角缩放。
+        if self.display_mode == DisplayMode.Horizontal:
+            self.set_font_size(int((self.height() - 30) / 3))
+        else:
+            self.set_font_size(int((self.width() - 45) / 3))
 
     def showEvent(self, event):
         super().showEvent(event)
