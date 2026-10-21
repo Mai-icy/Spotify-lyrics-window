@@ -18,7 +18,7 @@ def activate_application():
     AppKit.NSApplication.sharedApplication().activateIgnoringOtherApps_(True)
 
 
-def configure_overlay(win_id: int, always_on_top: bool):
+def configure_overlay(win_id: int, always_on_top: bool, is_locked: bool = False):
     # Keep Cocoa imports local: Windows/Linux and Qt's offscreen tests do not
     # need PyObjC. QWidget.winId() on Cocoa is an NSView, not an NSWindow.
     import AppKit
@@ -27,6 +27,15 @@ def configure_overlay(win_id: int, always_on_top: bool):
     window = objc.objc_object(c_void_p=int(win_id)).window()
     if window is None:
         return
+
+    # Native edge resizing bypasses the QWidget mouse handlers.
+    style = int(window.styleMask())
+    if is_locked:
+        style &= ~AppKit.NSWindowStyleMaskResizable
+    else:
+        style |= AppKit.NSWindowStyleMaskResizable
+    window.setStyleMask_(style)
+    window.setMovable_(not is_locked)
 
     window.setHidesOnDeactivate_(False)
     # A transparent native panel can cast a shadow around each opaque glyph,
@@ -45,3 +54,12 @@ def configure_overlay(win_id: int, always_on_top: bool):
         behavior |= (AppKit.NSWindowCollectionBehaviorCanJoinAllSpaces
                      | AppKit.NSWindowCollectionBehaviorFullScreenAuxiliary)
     window.setCollectionBehavior_(behavior)
+
+
+def set_overlay_mouse_passthrough(win_id: int, passthrough: bool):
+    """Allow transparent overlay pixels to pass mouse input to other apps."""
+    import objc
+
+    window = objc.objc_object(c_void_p=int(win_id)).window()
+    if window is not None and window.ignoresMouseEvents() != passthrough:
+        window.setIgnoresMouseEvents_(passthrough)
