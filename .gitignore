@@ -1,12 +1,20 @@
+# 本地配置与运行数据
 /SpotifyLyricWindow/resource/setting.toml
 /SpotifyLyricWindow/resource/token
 /SpotifyLyricWindow/resource/lyric_token
 /SpotifyLyricWindow/resource/error.log
 /SpotifyLyricWindow/download/
+
+# 开发环境与系统文件
 **/.idea
 **/.vs
-**/__pycache__
 /.venv/
 .DS_Store
+
+# Python 与测试缓存
+**/__pycache__
+/.pytest_cache/
+
+# 打包产物（保留 build 下的配置与脚本）
 /build/.work/
 /dist/

@@ -96,7 +96,8 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.set_plain_text_signal.connect(self._set_plain_text_event)
         self.set_detail_label_signal.connect(self._set_detail_label_event)
         self.set_cover_pixmap_signal.connect(self._set_cover_pixmap_event)
-        self.lyrics_file_manage.notifier().changed.connect(self._lyrics_data_changed_event)
+        self.lyrics_file_manage.notifier().changed.connect(
+            self._lyrics_data_changed_event, Qt.ConnectionType.QueuedConnection)
 
     def _init_list_widget(self):
         """初始化歌词文件列 添加右键菜单栏"""
@@ -104,6 +105,10 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.lyrics_listWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
 
         self.lyrics_listWidget.customContextMenuRequested.connect(self.menu_show_event)
+
+    def showEvent(self, event: QShowEvent):
+        super(LyricsManagePage, self).showEvent(event)
+        self.load_lyrics_file(keep_state=True)
 
     def load_lyrics_file(self, *, keep_state: bool = False):
         """导入已有的歌词文件，显示在左边"""
@@ -121,7 +126,7 @@ class LyricsManagePage(QWidget, Ui_LyricsManage):
         self.lyrics_listWidget.clear()
         self.lyrics_file_items.clear()
 
-        for track_id in not_found_data:
+        for track_id in sorted(not_found_data, key=lambda key: not_found_data[key].get("last_time", 0), reverse=True):
             item = FileListWidgetItem(track_id=track_id, no_lyric=True)
             item.setText(not_found_data[track_id]["track_title"])
 

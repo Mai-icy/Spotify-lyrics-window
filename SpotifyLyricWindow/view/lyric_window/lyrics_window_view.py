@@ -163,6 +163,7 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self._is_locked = False
         self._time_count_out = 0
         self._time_count_in = 0
+        self._timer_requested = True
 
         self.timer = QTimer()
         self.timer.setInterval(self._time_step)
@@ -435,7 +436,8 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def leaveEvent(self, event: QEvent):
         """定义鼠标移出事件,隐藏按钮,设置背景透明"""
-        self._time_count_out = 0
+        if not self._use_mac_mouse_hit_test():
+            self._time_count_out = 0
         if not self._is_locked:
             self.set_transparent(True)
             event.accept()
@@ -453,6 +455,10 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
 
     def mouseMoveEvent(self, event: QMouseEvent):
         """关于 窗口拖动 以及 窗口拉伸"""
+        if self._use_mac_mouse_hit_test():
+            # Cocoa tracks the whole view; locked hover is sampled by the timer.
+            event.accept()
+            return
         self._time_count_in = 0
         pos = event.pos()  # QMouseEvent.pos()获取相对位置
 
@@ -499,13 +505,17 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
                             new_geometry_x,
                             self.height() - pos.y())
 
-            # 更改字体大小
-            if self.display_mode == DisplayMode.Horizontal:
-                self.set_font_size(int((self.height() - 30) / 3))
-            else:
-                self.set_font_size(int((self.width() - 45) / 3))
-
         event.accept()
+
+    def resizeEvent(self, event: QResizeEvent):
+        super(LyricsWindowView, self).resizeEvent(event)
+        if not hasattr(self, "lyric_font"):
+            return
+        # 同时处理自定义拖拽和系统原生边角缩放。
+        if self.display_mode == DisplayMode.Horizontal:
+            self.set_font_size(int((self.height() - 30) / 3))
+        else:
+            self.set_font_size(int((self.width() - 45) / 3))
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -515,10 +525,40 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             QTimer.singleShot(0, self._apply_mac_window_policy)
 
     def _apply_mac_window_policy(self):
-        if self.isVisible():
+        if sys.platform == "darwin" and QApplication.platformName() == "cocoa" and self.isVisible():
             from common.macos.window import configure_overlay
             # Use actual flags: the settings callback updates Config later.
-            configure_overlay(self.winId(), bool(self.windowFlags() & Qt.WindowType.WindowStaysOnTopHint))
+            configure_overlay(self.winId(), bool(self.windowFlags() & Qt.WindowType.WindowStaysOnTopHint),
+                              self._is_locked)
+            self._update_mac_mouse_input()
+
+    def _use_mac_mouse_hit_test(self):
+        return (sys.platform == "darwin" and QApplication.platformName() == "cocoa"
+                and self._is_locked)
+
+    def _update_mac_mouse_input(self):
+        """按可见像素更新锁定窗口的鼠标穿透和按钮计时。"""
+        from common.macos.window import set_overlay_mouse_passthrough
+
+        if not self._is_locked:
+            set_overlay_mouse_passthrough(self.winId(), False)
+            return
+
+        cursor_pos = QCursor.pos()
+        pos = self.mapFromGlobal(cursor_pos)
+        hit = False
+        if self.rect().contains(pos):
+            # Render only one logical pixel, including its Retina subpixels.
+            # This follows text, scrolling and button visibility without a mask cache.
+            image = self.grab(QRect(pos, QSize(1, 1))).toImage()
+            hit = any(image.pixelColor(x, y).alpha()
+                      for y in range(image.height()) for x in range(image.width()))
+        set_overlay_mouse_passthrough(self.winId(), not hit)
+        if hit:
+            self._time_count_in = 0
+        # 悬停也算命中；短暂跨过字间空隙时保留计时，方便移向解锁按钮。
+        elif self._time_count_in * self._time_step >= 500:
+            self._time_count_out = 0
 
     def show(self):
         """从隐藏状态到显示状态"""
@@ -547,6 +587,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             self.hide()
 
     def _set_timer_status_signal_event(self, flag):
+        self._timer_requested = flag
+        # Keep native hit testing alive while locked, including during playback pauses.
+        flag = flag or self._use_mac_mouse_hit_test()
         if self.timer.isActive() == flag:
             return
         if flag:
@@ -567,7 +610,9 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
         self._time_count_in += 1
         self._time_count_out += 1
         if self._is_locked:
-            if self._time_count_in * self._time_step >= 500:
+            if self._use_mac_mouse_hit_test() and self.isVisible():
+                self._update_mac_mouse_input()
+            if self._time_count_in * self._time_step >= 1500:
                 self.lock_button.setHidden(True)
                 self.calibrate_button.setHidden(True)
             elif self._time_count_out * self._time_step >= 1000:
@@ -609,10 +654,15 @@ class LyricsWindowView(QWidget, Ui_HorizontalLyricsWindow, Ui_VerticalLyricsWind
             self.set_transparent(False)
         else:
             self._is_locked = True
+            self._init_window_drag_flag()
+            self.set_cursor_icon(Qt.CursorShape.ArrowCursor)
             self.lock_button.setIcon(QtGui.QIcon(u":/pic/images/lockopen.png"))
             self.set_transparent(True)
             self.lock_button.setHidden(False)
             self.calibrate_button.setHidden(False)
+
+        self._apply_mac_window_policy()
+        self._set_timer_status_signal_event(self._timer_requested)
 
     @staticmethod
     def get_emit_func(signal) -> Callable[[], None]:
